@@ -114,7 +114,7 @@ router.post('/contact', (req, res) => {
 });
 
 // Chatbot proxy
-const SARVAM_API_KEY  = process.env.SARVAM_API_KEY || 'sk_mfn0ypuj_A39Nk3V7vukPkUyqmvKGLJp2';
+const SARVAM_API_KEY  = process.env.SARVAM_API_KEY;
 const SARVAM_ENDPOINT = 'https://api.sarvam.ai/v1/chat/completions';
 const MODEL           = 'sarvam-m';
 
