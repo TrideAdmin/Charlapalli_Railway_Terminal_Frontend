@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Navigate | Charlapalli Terminal</title>
+  <link rel="stylesheet" href="/css/style.css?v=30" />
+  <script>window.CT_API_BASE = 'https://charlapalli-railway-terminal-api.tride.live/api';</script>
+</head>
+<body>
+<script src="/js/layout.js"></script>
+
+
+<style>
+
+  .navigator-wrap {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 0;
+    min-height: 85vh;
+    background: var(--black-2, #0a0d12);
+  }
+
+  /* ── LEFT PANEL ── */
+  .nav-panel {
+    background: var(--charcoal, #141920);
+    padding: 1.5rem;
+    border-right: 1px solid rgba(255,255,255,0.06);
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+    overflow-y: auto;
+  }
+  .nav-panel h2 { font-size: 1rem; font-weight: 700; color: #1a2e4a; display: flex; align-items: center; gap: 0.4rem; }
+
+  .destination-select label { font-size: 0.8rem; font-weight: 600; color: var(--text-muted,#4a5568); text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 0.4rem; }
+  .destination-select select, .destination-select input {
+    width: 100%; padding: 0.65rem 0.9rem; border: 1.5px solid rgba(255,255,255,0.06); border-radius: 8px;
+    font-size: 0.9rem; background: #f9fafb; color: #1c1c1e;
+    appearance: none; cursor: pointer; transition: border-color 0.2s;
+  }
+  .destination-select select:focus, .destination-select input:focus { outline: none; border-color: #2563eb; background: var(--charcoal, #141920); }
+
+  .from-to { display: grid; gap: 0.75rem; }
+  .swap-btn {
+    width: 100%; padding: 0.7rem; background: #e05a1a; color: #fff; border: none;
+    border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 0.4rem;
+    transition: background 0.2s, transform 0.1s;
+  }
+  .swap-btn:hover { background: #c44d12; transform: translateY(-1px); }
+
+  .find-btn {
+    width: 100%; padding: 0.8rem; background: #1a3a6e; color: #fff; border: none;
+    border-radius: 8px; font-size: 0.95rem; font-weight: 700; cursor: pointer;
+    transition: background 0.2s, transform 0.1s; letter-spacing: 0.03em;
+  }
+  .find-btn:hover { background: #0d2a54; transform: translateY(-1px); }
+
+  /* Result panel */
+  .route-result { background: #f0f4ff; border: 1.5px solid #c7d5f5; border-radius: 10px; padding: 1.2rem; display: none; }
+  .route-result.visible { display: block; }
+  .route-result h3 { font-size: 0.85rem; font-weight: 700; color: #1a2e4a; margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+
+  .route-step {
+    display: flex; align-items: flex-start; gap: 0.75rem;
+    padding: 0.5rem 0; border-bottom: 1px solid #dde6f7;
+    font-size: 0.88rem; color: var(--text-secondary,#8a96a8);
+  }
+  .route-step:last-child { border-bottom: none; }
+  .step-icon { font-size: 1.1rem; margin-top: 0.1rem; flex-shrink: 0; }
+  .step-text strong { display: block; font-weight: 600; color: #1a2e4a; }
+
+  .eta-bar { display: flex; gap: 1rem; margin-top: 0.75rem; }
+  .eta-chip {
+    flex: 1; background: var(--charcoal, #141920); border-radius: 8px; padding: 0.5rem 0.75rem;
+    text-align: center; border: 1px solid #c7d5f5;
+  }
+  .eta-chip .ec-val { font-size: 1.3rem; font-weight: 700; color: #1a3a6e; }
+  .eta-chip .ec-lbl { font-size: 0.7rem; color: var(--text-muted,#4a5568); text-transform: uppercase; }
+
+  /* Platform list */
+  .platform-legend h2 { margin-bottom: 0.75rem; }
+  .pf-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+  .pf-chip {
+    display: flex; align-items: center; gap: 0.4rem; padding: 0.45rem 0.6rem;
+    border-radius: 7px; font-size: 0.78rem; font-weight: 600; cursor: pointer;
+    border: 1.5px solid transparent; transition: all 0.15s;
+    background: #f3f4f6; color: var(--text-secondary,#8a96a8);
+  }
+  .pf-chip:hover { background: #e0e7ff; border-color: #6366f1; color: #4338ca; }
+  .pf-chip.active { background: #1a3a6e; color: #fff; border-color: #1a3a6e; }
+  .pf-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+  /* ── MAP AREA ── */
+  .map-area {
+    position: relative;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+  }
+  .map-title { font-size: 0.85rem; font-weight: 600; color: var(--text-muted,#4a5568); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1.5rem; }
+
+  .station-map-svg { width: 100%; max-width: 820px; }
+
+  /* SVG platform highlights */
+  .platform-rect { transition: fill 0.25s, filter 0.25s; cursor: pointer; }
+  .platform-rect:hover { filter: brightness(1.1); }
+  .platform-rect.highlighted { fill: #f59e0b !important; filter: drop-shadow(0 0 8px rgba(245,158,11,0.8)); }
+  .platform-rect.on-path { fill: #3b82f6 !important; filter: drop-shadow(0 0 6px rgba(59,130,246,0.7)); }
+  .platform-rect.start-node { fill: #10b981 !important; filter: drop-shadow(0 0 8px rgba(16,185,129,0.8)); }
+  .platform-rect.end-node { fill: #ef4444 !important; filter: drop-shadow(0 0 8px rgba(239,68,68,0.8)); }
+
+  .map-legend {
+    display: flex; gap: 1.5rem; margin-top: 1.5rem; flex-wrap: wrap; justify-content: center;
+  }
+  .ml-item { display: flex; align-items: center; gap: 0.4rem; font-size: 0.8rem; color: var(--text-secondary,#8a96a8); }
+  .ml-dot { width: 12px; height: 12px; border-radius: 3px; }
+
+  @media (max-width: 768px) {
+    .navigator-wrap { grid-template-columns: 1fr; }
+    .map-area { padding: 1rem; }
+  }
+
+  /* amenity badges on map */
+  .map-badge { font-size: 10px; }
+</style>
+
+<section class="nav-hero">
+  <div class="container">
+    <h1><i data-lucide="map"></i> Station Navigation</h1>
+    <p>Interactive platform map · Find your way across all 9 platforms</p>
+  </div>
+</section>
+
+<div class="navigator-wrap">
+  <!-- LEFT PANEL -->
+  <aside class="nav-panel">
+    <div>
+      <h2><i data-lucide="compass"></i> Get Directions</h2>
+    </div>
+
+    <div class="from-to">
+      <div class="destination-select">
+        <label><i data-lucide="map-pin"></i> Starting From</label>
+        <select id="fromSelect">
+          <option value="">-- Select location --</option>
+          <optgroup label="Entrances">
+            <option value="main-gate">Main Entry Gate (North)</option>
+            <option value="south-gate">South Entry Gate</option>
+            <option value="parking">Parking Area</option>
+          </optgroup>
+          <optgroup label="Platforms">
+            <option value="pf1">Platform 1</option>
+            <option value="pf2">Platform 2</option>
+            <option value="pf3">Platform 3</option>
+            <option value="pf4">Platform 4</option>
+            <option value="pf5">Platform 5</option>
+            <option value="pf6">Platform 6</option>
+            <option value="pf7">Platform 7</option>
+            <option value="pf8">Platform 8</option>
+            <option value="pf9">Platform 9</option>
+          </optgroup>
+          <optgroup label="Facilities">
+            <option value="ticket">Ticket Counter</option>
+            <option value="waiting">Waiting Hall</option>
+            <option value="food">Food Court</option>
+            <option value="parking-2w">2-Wheeler Parking</option>
+          </optgroup>
+        </select>
+      </div>
+
+      <div class="destination-select">
+        <label><i data-lucide="target"></i> Destination</label>
+        <select id="toSelect">
+          <option value="">-- Select destination --</option>
+          <optgroup label="Platforms">
+            <option value="pf1">Platform 1</option>
+            <option value="pf2">Platform 2</option>
+            <option value="pf3">Platform 3</option>
+            <option value="pf4">Platform 4</option>
+            <option value="pf5">Platform 5</option>
+            <option value="pf6">Platform 6</option>
+            <option value="pf7">Platform 7</option>
+            <option value="pf8">Platform 8</option>
+            <option value="pf9">Platform 9</option>
+          </optgroup>
+          <optgroup label="Facilities">
+            <option value="ticket">Ticket Counter</option>
+            <option value="waiting">Waiting Hall</option>
+            <option value="food">Food Court</option>
+            <option value="lockers">Smart Lockers</option>
+            <option value="toilets">Toilets</option>
+            <option value="parking-2w">2-Wheeler Parking</option>
+            <option value="parking-4w">4-Wheeler Parking</option>
+          </optgroup>
+          <optgroup label="Exits">
+            <option value="main-gate">Main Gate (North)</option>
+            <option value="south-gate">South Gate</option>
+          </optgroup>
+        </select>
+      </div>
+    </div>
+
+    <button class="find-btn" onclick="findRoute()"><i data-lucide="search"></i> Show Route</button>
+
+    <!-- Result -->
+    <div class="route-result" id="routeResult">
+      <h3><i data-lucide="clipboard"></i> Route Instructions</h3>
+      <div id="routeSteps"></div>
+      <div class="eta-bar">
+        <div class="eta-chip"><div class="ec-val" id="etaWalk">–</div><div class="ec-lbl">Walk (min)</div></div>
+        <div class="eta-chip"><div class="ec-val" id="etaDist">–</div><div class="ec-lbl">Distance</div></div>
+      </div>
+    </div>
+
+    <!-- Platform legend -->
+    <div class="platform-legend">
+      <h2><i data-lucide="train-track"></i> Platforms</h2>
+      <div class="pf-grid" id="pfGrid"></div>
+    </div>
+  </aside>
+
+  <!-- MAP -->
+  <main class="map-area">
+    <div class="map-title">Charlapalli Terminal — Platform Layout (Top View)</div>
+    <svg class="station-map-svg" viewBox="0 0 820 560" xmlns="http://www.w3.org/2000/svg" id="stationSVG">
+      <defs>
+        <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+          <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="0.5"/>
+        </pattern>
+        <filter id="glow">
+          <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+          <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+
+      <!-- Background -->
+      <rect width="820" height="560" fill="#f8fafc"/>
+      <rect width="820" height="560" fill="url(#grid)"/>
+
+      <!-- Station boundary -->
+      <rect x="20" y="20" width="780" height="520" rx="12" fill="none" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="6,3"/>
+
+      <!-- ── CONCOURSE / BUILDING ── -->
+      <rect x="30" y="30" width="760" height="80" rx="8" fill="#dbeafe" stroke="#93c5fd" stroke-width="1.5"/>
+      <text x="410" y="46" text-anchor="middle" font-family="Inter,sans-serif" font-size="13" font-weight="700" fill="#1e3a5f">NEW TERMINAL BUILDING — CONCOURSE</text>
+      <text x="410" y="60" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#4b7cb8">Ticket Counters · Waiting Hall · Food Court · Smart Lockers · Toilets</text>
+
+      <!-- Main Gate North -->
+      <rect x="170" y="16" width="90" height="18" rx="4" fill="#1a3a6e"/>
+      <text x="215" y="28" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" font-weight="700" fill="#fff">MAIN GATE (N)</text>
+
+      <!-- South Gate -->
+      <rect x="560" y="16" width="90" height="18" rx="4" fill="#1a3a6e"/>
+      <text x="605" y="28" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" font-weight="700" fill="#fff">SOUTH GATE</text>
+
+      <!-- FOB (Foot Over Bridge) line -->
+      <line x1="30" y1="120" x2="790" y2="120" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="4,2"/>
+      <text x="50" y="118" font-family="Inter,sans-serif" font-size="8" fill="#94a3b8">── FOB / CONCOURSE LEVEL ──</text>
+
+      <!-- ══ PLATFORMS 1–9 ══ -->
+      <!-- Platform numbering: 1 at left, odd are main platforms, even are edges -->
+      <!-- Layout: Pf1 .. Pf9 arranged in pairs with tracks between them -->
+
+      <!-- TRACK LABELS -->
+      <g opacity="0.5">
+        <text x="122" y="200" text-anchor="middle" font-family="Inter,sans-serif" font-size="8" fill="#6b7280">Track 1</text>
+        <text x="198" y="200" text-anchor="middle" font-family="Inter,sans-serif" font-size="8" fill="#6b7280">Track 2</text>
+        <text x="282" y="200" text-anchor="middle" font-family="Inter,sans-serif" font-size="8" fill="#6b7280">Track 3</text>
+        <text x="358" y="200" text-anchor="middle" font-family="Inter,sans-serif" font-size="8" fill="#6b7280">Track 4</text>
+        <text x="442" y="200" text-anchor="middle" font-family="Inter,sans-serif" font-size="8" fill="#6b7280">Track 5</text>
+        <text x="518" y="200" text-anchor="middle" font-family="Inter,sans-serif" font-size="8" fill="#6b7280">Track 6</text>
+        <text x="602" y="200" text-anchor="middle" font-family="Inter,sans-serif" font-size="8" fill="#6b7280">Track 7</text>
+        <text x="678" y="200" text-anchor="middle" font-family="Inter,sans-serif" font-size="8" fill="#6b7280">Track 8</text>
+        <text x="750" y="200" text-anchor="middle" font-family="Inter,sans-serif" font-size="8" fill="#6b7280">Track 9</text>
+      </g>
+
+      <!-- Track lines (rails) -->
+      <g stroke="#94a3b8" stroke-width="2" opacity="0.5">
+        <line x1="122" y1="135" x2="122" y2="480"/>
+        <line x1="198" y1="135" x2="198" y2="480"/>
+        <line x1="282" y1="135" x2="282" y2="480"/>
+        <line x1="358" y1="135" x2="358" y2="480"/>
+        <line x1="442" y1="135" x2="442" y2="480"/>
+        <line x1="518" y1="135" x2="518" y2="480"/>
+        <line x1="602" y1="135" x2="602" y2="480"/>
+        <line x1="678" y1="135" x2="678" y2="480"/>
+        <line x1="750" y1="135" x2="750" y2="480"/>
+      </g>
+
+      <!-- PLATFORM 1 — leftmost wall platform -->
+      <rect id="pf1" class="platform-rect" x="38" y="135" width="68" height="320" rx="5" fill="#c7d2fe" stroke="#6366f1" stroke-width="1.5"
+        onclick="highlightPlatform('pf1')" data-tip="Platform 1 — Chennai/Mumbai trains"/>
+      <text x="72" y="250" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#312e81" transform="rotate(-90 72 250)">PLATFORM 1</text>
+      <text x="72" y="420" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#4338ca" transform="rotate(-90 72 420)">Pay Toilet · Drinking Water</text>
+
+      <!-- PLATFORM 2 -->
+      <rect id="pf2" class="platform-rect" x="145" y="135" width="68" height="320" rx="5" fill="#bfdbfe" stroke="#3b82f6" stroke-width="1.5"
+        onclick="highlightPlatform('pf2')" data-tip="Platform 2 — Long Distance Express"/>
+      <text x="179" y="250" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#1e3a5f" transform="rotate(-90 179 250)">PLATFORM 2</text>
+      <text x="179" y="420" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#2563eb" transform="rotate(-90 179 420)">Refreshment Stall</text>
+
+      <!-- PLATFORM 3 -->
+      <rect id="pf3" class="platform-rect" x="225" y="135" width="68" height="320" rx="5" fill="#bbf7d0" stroke="#22c55e" stroke-width="1.5"
+        onclick="highlightPlatform('pf3')" data-tip="Platform 3 — Hyderabad Locals"/>
+      <text x="259" y="250" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#14532d" transform="rotate(-90 259 250)">PLATFORM 3</text>
+      <text x="259" y="420" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#15803d" transform="rotate(-90 259 420)">Charging Points</text>
+
+      <!-- PLATFORM 4 -->
+      <rect id="pf4" class="platform-rect" x="305" y="135" width="68" height="320" rx="5" fill="#fef9c3" stroke="#eab308" stroke-width="1.5"
+        onclick="highlightPlatform('pf4')" data-tip="Platform 4 — MMTS / Local"/>
+      <text x="339" y="250" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#713f12" transform="rotate(-90 339 250)">PLATFORM 4</text>
+      <text x="339" y="420" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#a16207" transform="rotate(-90 339 420)">Water Vending</text>
+
+      <!-- PLATFORM 5 (center) -->
+      <rect id="pf5" class="platform-rect" x="385" y="135" width="68" height="320" rx="5" fill="#fce7f3" stroke="#ec4899" stroke-width="1.5"
+        onclick="highlightPlatform('pf5')" data-tip="Platform 5 — Intercity Express"/>
+      <text x="419" y="250" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#831843" transform="rotate(-90 419 250)">PLATFORM 5</text>
+      <text x="419" y="420" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#9d174d" transform="rotate(-90 419 420)">Lift Access · Escalator</text>
+
+      <!-- PLATFORM 6 -->
+      <rect id="pf6" class="platform-rect" x="465" y="135" width="68" height="320" rx="5" fill="#fed7aa" stroke="#f97316" stroke-width="1.5"
+        onclick="highlightPlatform('pf6')" data-tip="Platform 6 — Rajdhani / Premium"/>
+      <text x="499" y="250" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#7c2d12" transform="rotate(-90 499 250)">PLATFORM 6</text>
+      <text x="499" y="420" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#c2410c" transform="rotate(-90 499 420)">Premium Lounge</text>
+
+      <!-- PLATFORM 7 -->
+      <rect id="pf7" class="platform-rect" x="545" y="135" width="68" height="320" rx="5" fill="#e9d5ff" stroke="#a855f7" stroke-width="1.5"
+        onclick="highlightPlatform('pf7')" data-tip="Platform 7 — Goods / Shunting"/>
+      <text x="579" y="250" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#4a1d96" transform="rotate(-90 579 250)">PLATFORM 7</text>
+      <text x="579" y="420" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#6d28d9" transform="rotate(-90 579 420)">Seating Area</text>
+
+      <!-- PLATFORM 8 -->
+      <rect id="pf8" class="platform-rect" x="625" y="135" width="68" height="320" rx="5" fill="#fecdd3" stroke="#f43f5e" stroke-width="1.5"
+        onclick="highlightPlatform('pf8')" data-tip="Platform 8 — Special Trains"/>
+      <text x="659" y="250" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#881337" transform="rotate(-90 659 250)">PLATFORM 8</text>
+      <text x="659" y="420" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#be123c" transform="rotate(-90 659 420)">Help Desk</text>
+
+      <!-- PLATFORM 9 — rightmost wall platform -->
+      <rect id="pf9" class="platform-rect" x="705" y="135" width="82" height="320" rx="5" fill="#d1fae5" stroke="#10b981" stroke-width="1.5"
+        onclick="highlightPlatform('pf9')" data-tip="Platform 9 — Suburban / DEMU"/>
+      <text x="746" y="250" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#064e3b" transform="rotate(-90 746 250)">PLATFORM 9</text>
+      <text x="746" y="420" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#065f46" transform="rotate(-90 746 420)">Toilet · Stall</text>
+
+      <!-- FOB / WALKWAYS -->
+      <rect x="38" y="460" width="749" height="16" rx="4" fill="#e2e8f0" stroke="#94a3b8" stroke-width="1" opacity="0.8"/>
+      <text x="412" y="472" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#64748b" font-weight="600">SOUTH WALKWAY — FOOT OVER BRIDGE (FOB)</text>
+
+      <!-- Lift icons on concourse -->
+      <g>
+        <rect x="230" y="90" width="18" height="18" rx="3" fill="#2563eb"/>
+        <text x="239" y="103" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#fff">↕</text>
+        <rect x="390" y="90" width="18" height="18" rx="3" fill="#2563eb"/>
+        <text x="399" y="103" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#fff">↕</text>
+        <rect x="570" y="90" width="18" height="18" rx="3" fill="#2563eb"/>
+        <text x="579" y="103" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#fff">↕</text>
+      </g>
+
+      <!-- Escalator icons -->
+      <g>
+        <rect x="295" y="90" width="18" height="18" rx="3" fill="#7c3aed"/>
+        <text x="304" y="103" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#fff">↗</text>
+        <rect x="500" y="90" width="18" height="18" rx="3" fill="#7c3aed"/>
+        <text x="509" y="103" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#fff">↗</text>
+      </g>
+
+      <!-- Ticket counter marker -->
+      <rect x="50" y="68" width="80" height="20" rx="5" fill="#059669"/>
+      <text x="90" y="82" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" font-weight="700" fill="#fff">TICKET CTR</text>
+
+      <!-- Waiting hall marker -->
+      <rect x="310" y="68" width="90" height="20" rx="5" fill="#0891b2"/>
+      <text x="355" y="82" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" font-weight="700" fill="#fff">WAITING HALL</text>
+
+      <!-- Food court -->
+      <rect x="550" y="68" width="80" height="20" rx="5" fill="#d97706"/>
+      <text x="590" y="82" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" font-weight="700" fill="#fff">FOOD COURT</text>
+
+      <!-- Active path overlay (drawn by JS) -->
+      <g id="pathOverlay"></g>
+
+      <!-- Tooltip -->
+      <g id="pfTooltip" opacity="0" pointer-events="none">
+        <rect id="ttBg" x="0" y="0" width="160" height="36" rx="6" fill="#1a2e4a"/>
+        <text id="ttText" x="8" y="14" font-family="Inter,sans-serif" font-size="10" fill="#fff"></text>
+        <text id="ttText2" x="8" y="28" font-family="Inter,sans-serif" font-size="9" fill="#93c5fd"></text>
+      </g>
+
+      <!-- Scale bar -->
+      <line x1="40" y1="510" x2="120" y2="510" stroke="#64748b" stroke-width="2"/>
+      <line x1="40" y1="506" x2="40" y2="514" stroke="#64748b" stroke-width="2"/>
+      <line x1="120" y1="506" x2="120" y2="514" stroke="#64748b" stroke-width="2"/>
+      <text x="80" y="525" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#64748b">~200m (approx)</text>
+
+      <!-- Compass -->
+      <g transform="translate(775,480)">
+        <circle r="16" fill="#1a2e4a" opacity="0.8"/>
+        <text x="0" y="-4" text-anchor="middle" font-family="Inter,sans-serif" font-size="8" fill="#fff" font-weight="700">N</text>
+        <polygon points="0,-12 3,-4 0,-6 -3,-4" fill="#ef4444"/>
+        <polygon points="0,12 3,4 0,6 -3,4" fill="#fff" opacity="0.5"/>
+        <text x="0" y="18" text-anchor="middle" font-family="Inter,sans-serif" font-size="7" fill="#94a3b8">S</text>
+      </g>
+    </svg>
+
+    <div class="map-legend">
+      <div class="ml-item"><div class="ml-dot" style="background:#6366f1"></div>Platform 1</div>
+      <div class="ml-item"><div class="ml-dot" style="background:#3b82f6"></div>Platform 2</div>
+      <div class="ml-item"><div class="ml-dot" style="background:#22c55e"></div>Platform 3</div>
+      <div class="ml-item"><div class="ml-dot" style="background:#eab308"></div>Platform 4</div>
+      <div class="ml-item"><div class="ml-dot" style="background:#ec4899"></div>Platform 5</div>
+      <div class="ml-item"><div class="ml-dot" style="background:#f97316"></div>Platform 6</div>
+      <div class="ml-item"><div class="ml-dot" style="background:#a855f7"></div>Platform 7</div>
+      <div class="ml-item"><div class="ml-dot" style="background:#f43f5e"></div>Platform 8</div>
+      <div class="ml-item"><div class="ml-dot" style="background:#10b981"></div>Platform 9</div>
+      <div class="ml-item"><div class="ml-dot" style="background:#f59e0b"></div>Selected</div>
+      <div class="ml-item"><div class="ml-dot" style="background:#3b82f6; border: 2px solid var(--gold,#c9a84c)"></div>On Route</div>
+    </div>
+  </main>
+</div>
+
+<script>
+// ── PLATFORM DATA ──
+const PLATFORMS = {
+  pf1: { label: 'Platform 1', x: 72,  color: '#c7d2fe', amenities: ['Toilet', 'Drinking Water'], cx: 72 },
+  pf2: { label: 'Platform 2', x: 179, color: '#bfdbfe', amenities: ['Refreshment'], cx: 179 },
+  pf3: { label: 'Platform 3', x: 259, color: '#bbf7d0', amenities: ['Charging'], cx: 259 },
+  pf4: { label: 'Platform 4', x: 339, color: '#fef9c3', amenities: ['Water Vending'], cx: 339 },
+  pf5: { label: 'Platform 5', x: 419, color: '#fce7f3', amenities: ['Lift', 'Escalator'], cx: 419 },
+  pf6: { label: 'Platform 6', x: 499, color: '#fed7aa', amenities: ['Premium Lounge'], cx: 499 },
+  pf7: { label: 'Platform 7', x: 579, color: '#e9d5ff', amenities: ['Seating'], cx: 579 },
+  pf8: { label: 'Platform 8', x: 659, color: '#fecdd3', amenities: ['Help Desk'], cx: 659 },
+  pf9: { label: 'Platform 9', x: 746, color: '#d1fae5', amenities: ['Toilet', 'Stall'], cx: 746 },
+};
+
+// Location metadata
+const LOCATIONS = {
+  'main-gate': { label: 'Main Entry Gate (North)', cx: 215 },
+  'south-gate': { label: 'South Gate', cx: 605 },
+  'parking': { label: 'Parking Area', cx: 50 },
+  'ticket': { label: 'Ticket Counter', cx: 90 },
+  'waiting': { label: 'Waiting Hall', cx: 355 },
+  'food': { label: 'Food Court', cx: 590 },
+  'lockers': { label: 'Smart Lockers', cx: 450 },
+  'toilets': { label: 'Toilets', cx: 72 },
+  'parking-2w': { label: '2W Parking', cx: 50 },
+  'parking-4w': { label: '4W Parking', cx: 130 },
+  ...Object.fromEntries(Object.entries(PLATFORMS).map(([k,v])=>[k,{label:v.label,cx:v.cx}]))
+};
+
+// Simple route graph (direct routes via concourse or FOB)
+function getRoute(from, to) {
+  if (!from || !to) return null;
+  const fromLabel = LOCATIONS[from]?.label || from;
+  const toLabel = LOCATIONS[to]?.label || to;
+
+  const fromPf = from.startsWith('pf') ? parseInt(from.slice(2)) : null;
+  const toPf = to.startsWith('pf') ? parseInt(to.slice(2)) : null;
+
+  const steps = [];
+  let walkMin, dist;
+
+  if (fromPf && toPf) {
+    const diff = Math.abs(fromPf - toPf);
+    walkMin = Math.max(2, diff * 2);
+    dist = diff * 80 + 'm';
+
+    if (diff === 0) {
+      return { steps: [{ icon: '<i data-lucide="check-circle"></i>', text: 'You are already at the destination platform!', sub: '' }], walkMin: 0, dist: '0m' };
+    }
+
+    // Route via concourse
+    steps.push({ icon: '<i data-lucide="footprints"></i>', text: 'Walk to the end of ' + fromLabel, sub: 'Head towards the concourse stairs/lift' });
+    steps.push({ icon: '<i data-lucide="arrow-up-down"></i>', text: 'Take Lift or Escalator to Concourse Level', sub: 'Lifts at Platforms 3, 5 & 7' });
+    steps.push({ icon: '<i data-lucide="refresh-cw"></i>', text: 'Cross via Concourse / FOB', sub: `Walk ${diff > 3 ? 'across' : 'a few steps'} to reach ${toLabel} side` });
+    steps.push({ icon: '⬇️', text: 'Descend to ' + toLabel, sub: 'Use stairs, escalator or lift' });
+    steps.push({ icon: '<i data-lucide="check-circle"></i>', text: 'You have arrived at ' + toLabel, sub: `Board from the correct coach position` });
+  } else {
+    // Generic non-platform to facility or gate
+    walkMin = 3;
+    dist = '150m';
+    steps.push({ icon: '<i data-lucide="footprints"></i>', text: 'Head to the Main Concourse', sub: 'Follow signboards from your current location' });
+    steps.push({ icon: '<i data-lucide="search"></i>', text: `Look for signage to "${toLabel}"`, sub: 'Signs are available in English, Telugu & Hindi' });
+    steps.push({ icon: '<i data-lucide="check-circle"></i>', text: 'You have arrived at ' + toLabel, sub: '' });
+  }
+
+  return { steps, walkMin, dist };
+}
+
+function findRoute() {
+  const from = document.getElementById('fromSelect').value;
+  const to = document.getElementById('toSelect').value;
+
+  if (!from || !to) { alert('Please select both a starting point and destination.'); return; }
+
+  const result = getRoute(from, to);
+  if (!result) return;
+
+  // Show result panel
+  const panel = document.getElementById('routeResult');
+  panel.classList.add('visible');
+
+  document.getElementById('etaWalk').textContent = result.walkMin + ' min';
+  document.getElementById('etaDist').textContent = result.dist;
+
+  const stepsHtml = result.steps.map(s => `
+    <div class="route-step">
+      <div class="step-icon">${s.icon}</div>
+      <div class="step-text">
+        <strong>${s.text}</strong>
+        ${s.sub ? s.sub : ''}
+      </div>
+    </div>
+  `).join('');
+  document.getElementById('routeSteps').innerHTML = stepsHtml;
+
+  // Highlight platforms on SVG
+  clearHighlights();
+  if (from.startsWith('pf')) {
+    document.getElementById(from)?.classList.add('start-node');
+  }
+  if (to.startsWith('pf')) {
+    document.getElementById(to)?.classList.add('end-node');
+  }
+
+  // Draw path line on SVG
+  drawPath(from, to);
+}
+
+function drawPath(from, to) {
+  const overlay = document.getElementById('pathOverlay');
+  overlay.innerHTML = '';
+  const fromCx = LOCATIONS[from]?.cx;
+  const toCx = LOCATIONS[to]?.cx;
+  if (!fromCx || !toCx) return;
+
+  // Draw animated path
+  const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  const d = `M ${fromCx} 460 L ${fromCx} 115 L ${toCx} 115 L ${toCx} 460`;
+  path.setAttribute('d', d);
+  path.setAttribute('fill', 'none');
+  path.setAttribute('stroke', '#f59e0b');
+  path.setAttribute('stroke-width', '3');
+  path.setAttribute('stroke-dasharray', '8,4');
+  path.setAttribute('opacity', '0.85');
+
+  // Animate
+  const length = 1000;
+  path.setAttribute('stroke-dashoffset', length);
+  overlay.appendChild(path);
+
+  let offset = length;
+  const anim = () => {
+    offset -= 20;
+    path.setAttribute('stroke-dashoffset', offset);
+    if (offset > -length) requestAnimationFrame(anim);
+  };
+  requestAnimationFrame(anim);
+
+  // Start/end markers
+  const circle1 = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  circle1.setAttribute('cx', fromCx); circle1.setAttribute('cy', 460);
+  circle1.setAttribute('r', '7'); circle1.setAttribute('fill', '#10b981');
+  overlay.appendChild(circle1);
+
+  const circle2 = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  circle2.setAttribute('cx', toCx); circle2.setAttribute('cy', 460);
+  circle2.setAttribute('r', '7'); circle2.setAttribute('fill', '#ef4444');
+  overlay.appendChild(circle2);
+}
+
+function clearHighlights() {
+  document.querySelectorAll('.platform-rect').forEach(el => {
+    el.classList.remove('highlighted', 'on-path', 'start-node', 'end-node');
+  });
+  document.getElementById('pathOverlay').innerHTML = '';
+}
+
+function highlightPlatform(id) {
+  clearHighlights();
+  const el = document.getElementById(id);
+  if (el) {
+    el.classList.add('highlighted');
+    // Auto-fill destination
+    const toSel = document.getElementById('toSelect');
+    toSel.value = id;
+  }
+}
+
+// Build platform chips in sidebar
+function buildPlatformGrid() {
+  const grid = document.getElementById('pfGrid');
+  const colors = ['#6366f1','#3b82f6','#22c55e','#eab308','#ec4899','#f97316','#a855f7','#f43f5e','#10b981'];
+  grid.innerHTML = Object.entries(PLATFORMS).map(([id, p], i) => `
+    <div class="pf-chip" onclick="highlightPlatform('${id}')">
+      <div class="pf-dot" style="background:${colors[i]}"></div>
+      Pf ${i+1}
+    </div>
+  `).join('');
+}
+
+buildPlatformGrid();
+</script>
+
+
+<script src="/js/main.js"></script>  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>lucide.createIcons();</script>
+<script src="/js/chatbot.js"></script>
+</body></html>

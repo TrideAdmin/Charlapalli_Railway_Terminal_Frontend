@@ -1,0 +1,29 @@
+version: '3.9'
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: ch-rail-frontend
+    container_name: cherlapalli_railway
+    ports:
+      - "6018:3000"
+    restart: always
+    depends_on:
+      - backend
+    environment:
+      - VITE_API_URL=https://charlapalli-railway-terminal-api.tride.live
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: ch-rail-backend
+    container_name: cherlapalli_railway_backend
+    ports:
+      - "6019:3001"
+    restart: always
+    environment:
+      - PORT=3001
+      - FRONTEND_ORIGIN=https://charlapalli-railway-terminal.tride.live

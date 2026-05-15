@@ -1,0 +1,12 @@
+{
+  "name": "charlapalli-terminal-frontend",
+  "version": "3.0.0",
+  "description": "Charlapalli Railway Terminal — Static Frontend",
+  "main": "serve.js",
+  "scripts": {
+    "start": "node serve.js",
+    "dev":   "node serve.js"
+  },
+  "engines": { "node": ">=16" },
+  "license": "MIT"
+}

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lost & Found | Charlapalli Terminal</title>
+  <link rel="stylesheet" href="/css/style.css?v=30" />
+  <script>window.CT_API_BASE = 'https://charlapalli-railway-terminal-api.tride.live/api';</script>
+</head>
+<body>
+<script src="/js/layout.js"></script>
+
+<section class="page-hero">
+  <div class="container">
+    <p class="page-hero-kicker">Item Recovery Service</p>
+    <h1>Lost & Found</h1>
+    <p>Report lost items or check for found items at Charlapalli Terminal</p>
+  </div>
+</section>
+
+<!-- Station Photo -->
+<div style="height:220px;overflow:hidden;position:relative;">
+  <img src="/images/station/facility_helpdesk.jpg" alt="Charlapalli Terminal — Interior" style="width:100%;height:100%;object-fit:cover;display:block;filter:brightness(0.4) saturate(0.7);" loading="lazy">
+  <div style="position:absolute;inset:0;background:linear-gradient(to right,rgba(0,0,0,0.65) 0%,transparent 65%);display:flex;align-items:center;padding:0 3rem;">
+    <div>
+      <p style="font-family:var(--font-mono);font-size:0.68rem;letter-spacing:0.12em;color:rgba(201,168,76,0.9);text-transform:uppercase;margin-bottom:0.4rem;">RPF Office · Platform 01</p>
+      <h2 style="font-family:var(--font-display);font-size:clamp(1.5rem,3vw,2.2rem);font-weight:800;color:#fff;text-transform:uppercase;margin:0;">Found at the Station?<br>We'll Reunite It.</h2>
+    </div>
+  </div>
+</div>
+
+<div class="container page-content">
+  <div class="lf-layout">
+    <div class="lf-form-col">
+      <div class="form-card">
+        <h2>Report a Lost Item</h2>
+        <p class="form-sub">Fill in details below. You'll receive a tracking ticket number.</p>
+
+        <div id="lf-success" class="success-banner hidden"></div>
+        <div id="lf-error" class="error-banner hidden"></div>
+
+        <div class="form-group">
+          <label>Your Name *</label>
+          <input type="text" id="lf-name" placeholder="Full name" />
+        </div>
+        <div class="form-group">
+          <label>Contact Number *</label>
+          <input type="tel" id="lf-contact" placeholder="+91 XXXXX XXXXX" />
+        </div>
+        <div class="form-group">
+          <label>Item Description *</label>
+          <textarea id="lf-description" rows="3" placeholder="Describe the lost item (color, brand, contents…)"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Date & Time Lost</label>
+          <input type="datetime-local" id="lf-date" />
+        </div>
+        <div class="form-group">
+          <label>Last Known Location</label>
+          <select id="lf-location">
+            <option value="">Select area…</option>
+            <option>Platform 1</option><option>Platform 2</option><option>Platform 3</option>
+            <option>Platform 4</option><option>Platform 5</option><option>Platform 6–9</option>
+            <option>New Terminal Building</option><option>Foot Over Bridge</option>
+            <option>Parking Area</option><option>Waiting Hall</option>
+            <option>Food Court</option><option>Booking Counter</option>
+          </select>
+        </div>
+        <button class="btn btn-primary full-width" id="submitLFBtn">Submit Report</button>
+      </div>
+    </div>
+
+    <div class="lf-info-col">
+      <div class="lf-info-card" style="margin-bottom:1rem;border-color:var(--border-gold)">
+        <h3 style="color:var(--gold)"><i data-lucide="map-pin"></i> Lost & Found Desk</h3>
+        <div class="lf-tip">
+          <i class="lf-tip-icon" data-lucide="building-2"></i>
+          <p><strong style="color:var(--text-primary)">New Building Concourse Area</strong><br>Open: 6:00 AM – 10:00 PM<br>Contact: 040-27261100</p>
+        </div>
+      </div>
+      <div class="lf-info-card" style="margin-bottom:1rem">
+        <h3><i data-lucide="info"></i> Helpful Tips</h3>
+        <div class="lf-tip">
+          <i class="lf-tip-icon" data-lucide="clock"></i>
+          <p>Report as soon as possible — the sooner you report, the better the chance of recovery.</p>
+        </div>
+        <div class="lf-tip">
+          <i class="lf-tip-icon" data-lucide="file-text"></i>
+          <p>Keep your ticket number safe — you'll need it to track and claim your item.</p>
+        </div>
+        <div class="lf-tip">
+          <i class="lf-tip-icon" data-lucide="camera"></i>
+          <p>If you have a photo of the lost item, bring it when you visit the desk.</p>
+        </div>
+        <div class="lf-tip">
+          <i class="lf-tip-icon" data-lucide="id-card"></i>
+          <p>Valid ID required to claim found items at the Lost & Found desk.</p>
+        </div>
+      </div>
+      <div class="lf-info-card">
+        <h3><i data-lucide="heart-handshake"></i> Other Assistance</h3>
+        <div class="lf-tip">
+          <i class="lf-tip-icon" data-lucide="hospital"></i>
+          <p><strong style="color:var(--text-primary)">Medical Help:</strong> Emergency: 139</p>
+        </div>
+        <div class="lf-tip">
+          <i class="lf-tip-icon" data-lucide="baby"></i>
+          <p><strong style="color:var(--text-primary)">Child Help Desk:</strong> Trained staff for separated children.</p>
+        </div>
+        <div class="lf-tip">
+          <i class="lf-tip-icon" data-lucide="shield"></i>
+          <p><strong style="color:var(--text-primary)">RPF Assistance:</strong> 9771449927</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { api } from '/js/api.js';
+  document.getElementById('submitLFBtn').addEventListener('click', async () => {
+    const name        = document.getElementById('lf-name').value.trim();
+    const contact     = document.getElementById('lf-contact').value.trim();
+    const description = document.getElementById('lf-description').value.trim();
+    const date        = document.getElementById('lf-date').value;
+    const location    = document.getElementById('lf-location').value;
+    const ok  = document.getElementById('lf-success');
+    const err = document.getElementById('lf-error');
+    ok.classList.add('hidden'); err.classList.add('hidden');
+    try {
+      const json = await api.lostFound({ name, contact, description, date, location });
+      if (json.success) {
+        ok.innerHTML = `✓ Report submitted! Your ticket: <strong style="color:var(--gold)">${json.ticket}</strong>. ${json.message}`;
+        ok.classList.remove('hidden');
+        ['lf-name','lf-contact','lf-description','lf-date'].forEach(id => document.getElementById(id).value = '');
+        document.getElementById('lf-location').value = '';
+      } else {
+        err.textContent = json.message;
+        err.classList.remove('hidden');
+      }
+    } catch {
+      err.textContent = 'Could not connect to server. Please try again.';
+      err.classList.remove('hidden');
+    }
+  });
+</script>
+
+<script src="/js/main.js"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>lucide.createIcons();</script>
+<script src="/js/chatbot.js"></script>
+</body>
+</html>
