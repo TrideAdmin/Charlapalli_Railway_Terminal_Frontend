@@ -97,6 +97,9 @@
     <h2><i data-lucide="car-taxi-front"></i> Prepaid Taxis & Autos</h2>
     <div class="cards-grid">
       <div class="facility-card">
+        <div class="card-img-top">
+          <img src="/images/station/auto.jpeg" alt="Prepaid Auto" loading="lazy">
+        </div>
         <div class="card-icon"><i data-lucide="shield-check"></i></div>
         <h3>Why Choose Prepaid?</h3>
         <p>Fixed rates — no overcharging<br>Vetted & authorized drivers<br>Receipt with driver details<br>Available at both terminal entrances</p>
@@ -119,6 +122,9 @@ async function loadParking() {
     const { twoWheeler, fourWheeler } = json.data;
     document.getElementById('transportParkingGrid').innerHTML = `
     <div class="park-card">
+      <div style="height:200px; margin:-2rem -2rem 1.5rem; border-bottom:1px solid var(--border); overflow:hidden; border-radius: var(--radius-lg) var(--radius-lg) 0 0;">
+        <img src="/images/station/park1.JPG" style="width:100%; height:100%; object-fit:cover; display:block; transition:transform 0.4s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'" alt="Two-Wheeler Parking">
+      </div>
       <div class="pc-icon"><i data-lucide="bike"></i></div>
       <h3>Two-Wheeler</h3>
       <div class="pc-slots">${twoWheeler.available} <span>slots available</span></div>
@@ -126,6 +132,9 @@ async function loadParking() {
       <div class="pc-bar"><div class="pc-fill" style="width:${(twoWheeler.available/twoWheeler.total)*100}%"></div></div>
     </div>
     <div class="park-card">
+      <div style="height:200px; margin:-2rem -2rem 1.5rem; border-bottom:1px solid var(--border); overflow:hidden; border-radius: var(--radius-lg) var(--radius-lg) 0 0;">
+        <img src="/images/station/park2.JPG" style="width:100%; height:100%; object-fit:cover; display:block; transition:transform 0.4s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'" alt="Four-Wheeler Parking">
+      </div>
       <div class="pc-icon"><i data-lucide="car-front"></i></div>
       <h3>Four-Wheeler</h3>
       <div class="pc-slots">${fourWheeler.available} <span>slots available</span></div>

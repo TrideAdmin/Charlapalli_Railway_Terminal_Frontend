@@ -43,7 +43,6 @@ const NAV_HTML = `
       <a href="/pages/facilities.html" class="nav-link">Facilities</a>
       <a href="/pages/transport.html" class="nav-link">Transport</a>
       <a href="/pages/safety.html" class="nav-link">Safety</a>
-      <a href="/pages/lost-found.html" class="nav-link">Lost & Found</a>
       <a href="/pages/navigate.html" class="nav-link" style="background:var(--orange,#e85d26);color:#fff;padding:0.45rem 1rem;border-radius:8px;font-weight:700;box-shadow:0 0 18px rgba(232,93,38,0.3);">
         <i data-lucide="map" style="width:14px;height:14px;"></i> Navigate
       </a>
@@ -78,7 +77,6 @@ const FOOTER_HTML = `
     <div class="footer-col">
       <h4>Services</h4>
       <ul>
-        <li><a href="/pages/lost-found.html">Lost & Found</a></li>
         <li><a href="/pages/contact.html">Contact Us</a></li>
         <li><a href="/index.html#lockers-live">Smart Lockers</a></li>
         <li><a href="/index.html#parking">Parking</a></li>

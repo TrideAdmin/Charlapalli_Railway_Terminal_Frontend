@@ -547,22 +547,31 @@
     } catch { renderError('trainResults', 'Could not load train data.'); }
   };
   function renderTrains(trains) {
-    const el = document.getElementById('trainResults');
-    el.classList.remove('hidden');
-    if (!trains.length) { el.innerHTML = '<p class="no-data">No trains found.</p>'; return; }
-    el.innerHTML = `<div style="overflow-x:auto"><table class="train-table">
-    <thead><tr><th>Train No</th><th>Name</th><th>From → To</th><th>Arrives</th><th>Departs</th><th>Platform</th><th>Status</th></tr></thead>
-    <tbody>${trains.map(t => `<tr>
-        <td><strong style="color:var(--gold);font-family:var(--font-mono)">${t.number}</strong></td>
-        <td>${t.name}</td>
-        <td style="color:var(--text-secondary)">${t.from} → ${t.to}</td>
-        <td style="font-family:var(--font-mono)">${t.arrives}</td>
-        <td style="font-family:var(--font-mono)">${t.departs}</td>
-        <td style="font-family:var(--font-mono);color:var(--orange)">Pf ${t.platform}</td>
-        <td><span class="status-badge ${t.status==='On Time'?'ok':'delay'}">${t.status}</span></td>
-      </tr>`).join('')}
-    </tbody></table></div>`;
-  }
+  const el = document.getElementById('trainResults');
+  el.classList.remove('hidden');
+  if (!trains.length) { el.innerHTML = '<p class="no-data">No trains found.</p>'; return; }
+  el.innerHTML = `<div style="overflow-x:auto"><table class="train-table">
+  <thead><tr>
+    <th>Train No</th><th>Name</th><th>From → To</th>
+    <th>Arrives</th><th>Departs</th><th>Platform</th><th>Status</th><th>Action</th>
+  </tr></thead>
+  <tbody>${trains.map(t => `<tr>
+      <td><strong style="color:var(--gold);font-family:var(--font-mono)">${t.number}</strong></td>
+      <td>${t.name}</td>
+      <td style="color:var(--text-secondary)">${t.from} → ${t.to}</td>
+      <td style="font-family:var(--font-mono)">${t.arrives}</td>
+      <td style="font-family:var(--font-mono)">${t.departs}</td>
+      <td style="font-family:var(--font-mono);color:var(--orange)">Pf ${t.platform}</td>
+      <td><span class="status-badge ${t.status==='On Time'?'ok':'delay'}">${t.status}</span></td>
+      <td>
+        <button class="btn-find-coach"
+          onclick="window.CoachFinder.open(${JSON.stringify(t).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g,'\\u003c')})">
+          🚃 Find Coach
+        </button>
+      </td>
+    </tr>`).join('')}
+  </tbody></table></div>`;
+}
 
   async function loadWaitTimes() {
     try {
@@ -632,5 +641,6 @@
 <script src="https://unpkg.com/lucide@latest"></script>
 <script>lucide.createIcons();</script>
 <script src="/js/chatbot.js"></script>
+<script src="/js/js_coachFinder.js"></script>
 </body>
 </html>
