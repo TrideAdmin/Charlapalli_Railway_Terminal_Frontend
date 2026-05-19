@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -20,38 +21,65 @@
       position: relative;
       display: inline-block;
       -webkit-text-fill-color: transparent;
-      background: linear-gradient(
-        105deg,
-        #5a6b7d 0%,
-        #8fa0b2 15%,
-        #b8ccd8 28%,
-        #ffffff 38%,
-        #f0f6fb 44%,
-        #ffffff 50%,
-        #d0dde8 56%,
-        #9baab8 68%,
-        #6b7a8d 80%,
-        #9baab8 90%,
-        #d8e8f0 100%
-      );
+      background: linear-gradient(105deg,
+          #5a6b7d 0%,
+          #8fa0b2 15%,
+          #b8ccd8 28%,
+          #ffffff 38%,
+          #f0f6fb 44%,
+          #ffffff 50%,
+          #d0dde8 56%,
+          #9baab8 68%,
+          #6b7a8d 80%,
+          #9baab8 90%,
+          #d8e8f0 100%);
       background-size: 250% 100%;
       -webkit-background-clip: text;
       background-clip: text;
       animation: silver-sweep 3.5s linear infinite;
     }
+
     @keyframes silver-sweep {
-      0%   { background-position: 200% center; }
-      100% { background-position: -60% center; }
+      0% {
+        background-position: 200% center;
+      }
+
+      100% {
+        background-position: -60% center;
+      }
     }
 
     /* Hero content staggered reveal */
-    .hero-kicker       { opacity: 0; animation: fade-up 0.9s ease 0.2s forwards; }
-    .hero h1           { opacity: 0; animation: fade-up 1s ease 0.45s forwards, silver-sweep 3.5s linear 0.45s infinite; }
-    .hero-sub-group    { opacity: 0; animation: fade-up 0.8s ease 0.8s forwards; }
-    .hero-actions      { opacity: 0; animation: fade-up 0.8s ease 1.05s forwards; }
+    .hero-kicker {
+      opacity: 0;
+      animation: fade-up 0.9s ease 0.2s forwards;
+    }
+
+    .hero h1 {
+      opacity: 0;
+      animation: fade-up 1s ease 0.45s forwards, silver-sweep 3.5s linear 0.45s infinite;
+    }
+
+    .hero-sub-group {
+      opacity: 0;
+      animation: fade-up 0.8s ease 0.8s forwards;
+    }
+
+    .hero-actions {
+      opacity: 0;
+      animation: fade-up 0.8s ease 1.05s forwards;
+    }
+
     @keyframes fade-up {
-      from { opacity: 0; transform: translateY(28px); }
-      to   { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(28px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     /* Typewriter tagline */
@@ -60,8 +88,8 @@
       overflow: hidden;
       white-space: nowrap;
       border-right: 2px solid var(--gold);
-      animation: typing 2.6s steps(42,end) 1.5s both,
-                 blink-cursor 0.7s step-end 1.5s infinite;
+      animation: typing 2.6s steps(42, end) 1.5s both,
+        blink-cursor 0.7s step-end 1.5s infinite;
       width: 0;
       font-family: var(--font-mono);
       font-size: 0.72rem;
@@ -69,24 +97,60 @@
       letter-spacing: 0.05em;
       max-width: 100%;
     }
-    @keyframes typing      { from { width: 0; } to { width: 100%; } }
-    @keyframes blink-cursor{ 50%  { border-color: transparent; } }
+
+    @keyframes typing {
+      from {
+        width: 0;
+      }
+
+      to {
+        width: 100%;
+      }
+    }
+
+    @keyframes blink-cursor {
+      50% {
+        border-color: transparent;
+      }
+    }
 
     /* Floating gold particles */
-    .hero-particles { position:absolute; inset:0; pointer-events:none; z-index:2; overflow:hidden; }
+    .hero-particles {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 2;
+      overflow: hidden;
+    }
+
     .particle {
       position: absolute;
-      width: 2px; height: 2px;
+      width: 2px;
+      height: 2px;
       background: var(--gold);
       border-radius: 50%;
       opacity: 0;
       animation: particle-rise linear infinite;
     }
+
     @keyframes particle-rise {
-      0%   { transform: translateY(100vh) translateX(0px); opacity: 0; }
-      8%   { opacity: 0.7; }
-      92%  { opacity: 0.3; }
-      100% { transform: translateY(-10vh) translateX(20px); opacity: 0; }
+      0% {
+        transform: translateY(100vh) translateX(0px);
+        opacity: 0;
+      }
+
+      8% {
+        opacity: 0.7;
+      }
+
+      92% {
+        opacity: 0.3;
+      }
+
+      100% {
+        transform: translateY(-10vh) translateX(20px);
+        opacity: 0;
+      }
     }
 
     /* ══════════════════════════════════════════════
@@ -98,13 +162,15 @@
       overflow: hidden;
       position: relative;
     }
+
     .gallery-section::before {
       content: '';
       position: absolute;
       inset: 0;
-      background: radial-gradient(ellipse 70% 50% at 50% 100%, rgba(201,168,76,0.07), transparent 70%);
+      background: radial-gradient(ellipse 70% 50% at 50% 100%, rgba(201, 168, 76, 0.07), transparent 70%);
       pointer-events: none;
     }
+
     /* Fade edges */
     .gallery-section::after {
       content: '';
@@ -114,32 +180,78 @@
       pointer-events: none;
       z-index: 3;
     }
-    :root:not([data-theme="dark"]) .gallery-section { background: var(--black-2); }
-    :root:not([data-theme="dark"]) .gallery-section::after { background: linear-gradient(90deg, var(--black-2) 0%, transparent 8%, transparent 92%, var(--black-2) 100%); }
 
-    .gallery-marquee-wrap { display: flex; flex-direction: column; gap: 1.25rem; margin-top: 3rem; }
-    .marquee-track { display: flex; gap: 1.25rem; width: max-content; will-change: transform; }
-    .marquee-track.ltr { animation: mq-ltr 40s linear infinite; }
-    .marquee-track.rtl { animation: mq-rtl 48s linear infinite; }
-    @keyframes mq-ltr { 0% { transform: translateX(0); }    100% { transform: translateX(-50%); } }
-    @keyframes mq-rtl { 0% { transform: translateX(-50%); } 100% { transform: translateX(0); }    }
-    .marquee-track:hover { animation-play-state: paused; }
+    :root:not([data-theme="dark"]) .gallery-section {
+      background: var(--black-2);
+    }
+
+    :root:not([data-theme="dark"]) .gallery-section::after {
+      background: linear-gradient(90deg, var(--black-2) 0%, transparent 8%, transparent 92%, var(--black-2) 100%);
+    }
+
+    .gallery-marquee-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      margin-top: 3rem;
+    }
+
+    .marquee-track {
+      display: flex;
+      gap: 1.25rem;
+      width: max-content;
+      will-change: transform;
+    }
+
+    .marquee-track.ltr {
+      animation: mq-ltr 40s linear infinite;
+    }
+
+    .marquee-track.rtl {
+      animation: mq-rtl 48s linear infinite;
+    }
+
+    @keyframes mq-ltr {
+      0% {
+        transform: translateX(0);
+      }
+
+      100% {
+        transform: translateX(-50%);
+      }
+    }
+
+    @keyframes mq-rtl {
+      0% {
+        transform: translateX(-50%);
+      }
+
+      100% {
+        transform: translateX(0);
+      }
+    }
+
+    .marquee-track:hover {
+      animation-play-state: paused;
+    }
 
     .marquee-img {
-      width: 340px; height: 220px;
+      width: 340px;
+      height: 220px;
       object-fit: cover;
       border-radius: 14px;
       border: 1px solid var(--border);
       flex-shrink: 0;
-      transition: transform 0.45s cubic-bezier(0.34,1.56,0.64,1),
-                  border-color 0.3s ease, box-shadow 0.3s ease,
-                  filter 0.3s ease;
+      transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1),
+        border-color 0.3s ease, box-shadow 0.3s ease,
+        filter 0.3s ease;
       cursor: zoom-in;
     }
+
     .marquee-img:hover {
       transform: scale(1.07) translateY(-6px);
       border-color: var(--gold);
-      box-shadow: 0 16px 48px rgba(0,0,0,0.45), 0 0 0 1px rgba(201,168,76,0.4);
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(201, 168, 76, 0.4);
       z-index: 2;
       position: relative;
     }
@@ -152,6 +264,7 @@
       height: 400px;
       overflow: hidden;
     }
+
     .photo-banner-bg {
       position: absolute;
       inset: -15%;
@@ -161,16 +274,26 @@
       filter: brightness(0.42) saturate(0.65);
       transition: filter 0.7s ease, transform 8s ease;
     }
+
     .photo-banner:hover .photo-banner-bg {
       filter: brightness(0.56) saturate(0.9);
       transform: scale(1.03);
     }
+
     .photo-banner-overlay {
-      position: absolute; inset: 0;
-      background: linear-gradient(135deg, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.15) 100%);
-      display: flex; align-items: center; justify-content: center;
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(0, 0, 0, 0.65) 0%, rgba(0, 0, 0, 0.15) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-    .photo-banner-content { text-align: center; z-index: 1; }
+
+    .photo-banner-content {
+      text-align: center;
+      z-index: 1;
+    }
+
     .photo-banner-content h3 {
       font-family: var(--font-display);
       font-size: clamp(2rem, 5vw, 3.5rem);
@@ -185,372 +308,453 @@
       animation: silver-sweep 4s linear infinite;
       margin-bottom: 0.75rem;
     }
+
     .photo-banner-content p {
-      font-size: 0.82rem; color: rgba(255,255,255,0.65);
-      letter-spacing: 0.18em; text-transform: uppercase;
+      font-size: 0.82rem;
+      color: rgba(255, 255, 255, 0.65);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
       font-family: var(--font-mono);
     }
+
     /* Gold scan-line sweep */
     .photo-banner::after {
       content: '';
-      position: absolute; inset: 0; pointer-events: none;
-      background: linear-gradient(to bottom, transparent 0%, rgba(201,168,76,0.08) 50%, transparent 100%);
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(to bottom, transparent 0%, rgba(201, 168, 76, 0.08) 50%, transparent 100%);
       background-size: 100% 200%;
       animation: scan 5s ease-in-out infinite;
     }
+
     @keyframes scan {
-      0%,100% { background-position: 0% -100%; opacity: 0; }
-      30%     { opacity: 1; }
-      70%     { opacity: 1; }
-      50%     { background-position: 0% 100%; }
+
+      0%,
+      100% {
+        background-position: 0% -100%;
+        opacity: 0;
+      }
+
+      30% {
+        opacity: 1;
+      }
+
+      70% {
+        opacity: 1;
+      }
+
+      50% {
+        background-position: 0% 100%;
+      }
     }
 
     /* ══════════════════════════════════════════════
        LIGHTBOX
     ══════════════════════════════════════════════ */
     .lightbox {
-      display: none; position: fixed; inset: 0;
-      background: rgba(0,0,0,0.92); z-index: 9999;
-      align-items: center; justify-content: center;
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.92);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
       backdrop-filter: blur(16px);
     }
-    .lightbox.open { display: flex; animation: lb-fade 0.25s ease; }
-    @keyframes lb-fade { from { opacity: 0; } to { opacity: 1; } }
-    .lb-img {
-      max-width: 90vw; max-height: 88vh;
-      border-radius: 14px;
-      box-shadow: 0 30px 90px rgba(0,0,0,0.7);
-      animation: lb-pop 0.3s cubic-bezier(0.34,1.56,0.64,1);
+
+    .lightbox.open {
+      display: flex;
+      animation: lb-fade 0.25s ease;
     }
-    @keyframes lb-pop { from { transform: scale(0.85); } to { transform: scale(1); } }
+
+    @keyframes lb-fade {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    .lb-img {
+      max-width: 90vw;
+      max-height: 88vh;
+      border-radius: 14px;
+      box-shadow: 0 30px 90px rgba(0, 0, 0, 0.7);
+      animation: lb-pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes lb-pop {
+      from {
+        transform: scale(0.85);
+      }
+
+      to {
+        transform: scale(1);
+      }
+    }
+
     .lb-close {
-      position: absolute; top: 1.5rem; right: 1.5rem;
-      width: 46px; height: 46px;
-      border: 1.5px solid rgba(255,255,255,0.2);
-      border-radius: 50%; background: rgba(255,255,255,0.07);
-      color: #fff; cursor: pointer; font-size: 1.3rem;
-      display: flex; align-items: center; justify-content: center;
+      position: absolute;
+      top: 1.5rem;
+      right: 1.5rem;
+      width: 46px;
+      height: 46px;
+      border: 1.5px solid rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.07);
+      color: #fff;
+      cursor: pointer;
+      font-size: 1.3rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       transition: background 0.2s, transform 0.2s;
     }
-    .lb-close:hover { background: rgba(255,255,255,0.18); transform: rotate(90deg); }
+
+    .lb-close:hover {
+      background: rgba(255, 255, 255, 0.18);
+      transform: rotate(90deg);
+    }
   </style>
 </head>
+
 <body>
 
-<script src="/js/layout.js"></script>
+  <script src="/js/layout.js"></script>
 
-<!-- ═══ HERO ═══ -->
-<section class="hero">
-  <div class="hero-bg"></div>
-  <div class="hero-particles" id="heroParticles"></div>
-  <div class="hero-rails"></div>
-  <div class="hero-corner">
-    <span class="hero-corner-line">SCR · HYB DIVISION</span>
-    <span class="hero-corner-line">STATION CODE: CHZ</span>
-    <span class="hero-corner-badge">● OPERATIONAL</span>
-  </div>
-  <div class="hero-content">
-    <div class="hero-kicker">South Central Railway · Hyderabad Division</div>
-    <h1>Charlapalli<br>Railway<br>Terminal</h1>
-    <div class="hero-sub-group">
-      <p class="hero-eyebrow">Modern passenger amenities for a comfortable and safe journey</p>
-      <span class="hero-tagline">Smart infrastructure · 9 Platforms · 24/7 Operations</span>
+  <!-- ═══ HERO ═══ -->
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-particles" id="heroParticles"></div>
+    <div class="hero-rails"></div>
+    <div class="hero-corner">
+      <span class="hero-corner-line">SCR · HYB DIVISION</span>
+      <span class="hero-corner-line">STATION CODE: CHZ</span>
+      <span class="hero-corner-badge">● OPERATIONAL</span>
     </div>
-    <div class="hero-actions">
-      <a href="/pages/facilities.html" class="btn btn-primary">Explore Facilities</a>
-      <a href="/pages/navigate.html" class="btn btn-ghost"><i data-lucide="map"></i> Navigate Station</a>
-    </div>
-  </div>
-  <div class="hero-stats">
-    <div class="hero-stats-inner">
-      <div class="hs-item"><span class="hs-num">11</span><span class="hs-label">Entry Gates</span></div>
-      <div class="hs-item"><span class="hs-num">9</span><span class="hs-label">Platforms</span></div>
-      <div class="hs-item"><span class="hs-num">5</span><span class="hs-label">Lifts</span></div>
-      <div class="hs-item"><span class="hs-num">5</span><span class="hs-label">Escalators</span></div>
-      <div class="hs-item"><span class="hs-num">24/7</span><span class="hs-label">CCTV</span></div>
-      <div class="hs-item"><span class="hs-num">Free</span><span class="hs-label">Wi-Fi</span></div>
-    </div>
-  </div>
-</section>
-
-<!-- ═══ TRAIN SEARCH ═══ -->
-<section class="train-search-section">
-  <div class="container">
-    <div class="search-card">
-      <div class="search-tabs">
-        <button class="tab-btn active" data-type="arrivals">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          Arrivals
-        </button>
-        <button class="tab-btn" data-type="departures">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-          Departures
-        </button>
+    <div class="hero-content">
+      <div class="hero-kicker">South Central Railway · Hyderabad Division</div>
+      <h1>Charlapalli<br>Railway<br>Terminal</h1>
+      <div class="hero-sub-group">
+        <p class="hero-eyebrow">Modern passenger amenities for a comfortable and safe journey</p>
+        <span class="hero-tagline">Smart infrastructure · 9 Platforms · 24/7 Operations</span>
       </div>
-      <div class="search-row">
-        <div class="search-input-wrapper">
-          <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input type="text" id="trainSearch" placeholder="Search by Train No, Name, or City…" class="search-input" />
+      <div class="hero-actions">
+        <a href="/pages/facilities.html" class="btn btn-primary">Explore Facilities</a>
+        <a href="/pages/navigate.html" class="btn btn-ghost"><i data-lucide="map"></i> Navigate Station</a>
+      </div>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stats-inner">
+        <div class="hs-item"><span class="hs-num">11</span><span class="hs-label">Entry Gates</span></div>
+        <div class="hs-item"><span class="hs-num">9</span><span class="hs-label">Platforms</span></div>
+        <div class="hs-item"><span class="hs-num">5</span><span class="hs-label">Lifts</span></div>
+        <div class="hs-item"><span class="hs-num">5</span><span class="hs-label">Escalators</span></div>
+        <div class="hs-item"><span class="hs-num">24/7</span><span class="hs-label">CCTV</span></div>
+        <div class="hs-item"><span class="hs-num">Free</span><span class="hs-label">Wi-Fi</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ TRAIN SEARCH ═══ -->
+  <section class="train-search-section">
+    <div class="container">
+      <div class="search-card">
+        <div class="search-tabs">
+          <button class="tab-btn active" data-type="arrivals">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+            Arrivals
+          </button>
+          <button class="tab-btn" data-type="departures">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="17 8 12 3 7 8" />
+              <line x1="12" y1="3" x2="12" y2="15" />
+            </svg>
+            Departures
+          </button>
         </div>
-        <button class="btn btn-primary" onclick="searchTrains()">Find Trains</button>
+        <div class="search-row">
+          <div class="search-input-wrapper">
+            <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <input type="text" id="trainSearch" placeholder="Search by Train No, Name, or City…" class="search-input" />
+          </div>
+          <button class="btn btn-primary" onclick="searchTrains()">Find Trains</button>
+        </div>
+        <div id="trainResults" class="train-results hidden"></div>
       </div>
-      <div id="trainResults" class="train-results hidden"></div>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- ═══ FACILITY CARDS ═══ -->
-<section class="section" style="background:var(--black-2);">
-  <div class="container">
-    <div class="section-header">
-      <p class="page-hero-kicker" style="margin-bottom:0.75rem">What We Offer</p>
-      <h2 class="section-title">Passenger Facilities</h2>
-      <p class="section-sub">Everything you need for a comfortable journey at Charlapalli Terminal</p>
+  <!-- ═══ FACILITY CARDS ═══ -->
+  <section class="section" style="background:var(--black-2);">
+    <div class="container">
+      <div class="section-header">
+        <p class="page-hero-kicker" style="margin-bottom:0.75rem">What We Offer</p>
+        <h2 class="section-title">Passenger Facilities</h2>
+        <p class="section-sub">Everything you need for a comfortable journey at Charlapalli Terminal</p>
+      </div>
+      <div class="cards-grid">
+        <a href="/pages/facilities.html#accessibility" class="facility-card">
+          <div class="card-icon"><i data-lucide="accessibility"></i></div>
+          <h3>Accessibility</h3>
+          <p>Lifts, escalators, FOBs connecting all platforms. Divyangjan toilets and dedicated assistance.</p>
+        </a>
+        <a href="/pages/facilities.html#waiting" class="facility-card">
+          <div class="card-icon"><i data-lucide="armchair"></i></div>
+          <h3>Waiting Halls</h3>
+          <p>AC & Prepaid AC halls with recliner seating, charging points. ₹40/hr standard, ₹60/hr recliner.</p>
+        </a>
+        <a href="/pages/facilities.html#lockers" class="facility-card">
+          <div class="card-icon"><i data-lucide="lock"></i></div>
+          <h3>Smart Lockers</h3>
+          <p>Digital lockers in M, L & XL sizes. From ₹60/6hrs. Available at new terminal building.</p>
+        </a>
+        <a href="/pages/facilities.html#food" class="facility-card">
+          <div class="card-icon"><i data-lucide="utensils"></i></div>
+          <h3>Food Court</h3>
+          <p>Food plaza on first floor, multipurpose stalls on all platforms and FOBs. RO drinking water everywhere.</p>
+        </a>
+        <a href="/pages/facilities.html#digital" class="facility-card">
+          <div class="card-icon"><i data-lucide="signal-high"></i></div>
+          <h3>Smart & Digital</h3>
+          <p>High-speed free Wi-Fi, LED train info displays, mobile charging stations, multilingual PA system.</p>
+        </a>
+        <a href="/pages/facilities.html#pods" class="facility-card">
+          <div class="card-icon"><i data-lucide="bed"></i></div>
+          <h3>Sleeping Pods</h3>
+          <p>Separate ladies and gents pods on first floor of new terminal building.</p>
+        </a>
+        <a href="/pages/facilities.html#toilets" class="facility-card">
+          <div class="card-icon"><i data-lucide="users"></i></div>
+          <h3>Hygiene & Comfort</h3>
+          <p>Pay & use and Divyangjan toilets at Platform 01 and new terminal first floor.</p>
+        </a>
+        <a href="/pages/transport.html" class="facility-card">
+          <div class="card-icon"><i data-lucide="bus-front"></i></div>
+          <h3>Connectivity</h3>
+          <p>TSRTC buses, prepaid autos & taxis, 2/4-wheeler parking with CCTV surveillance.</p>
+        </a>
+        <a href="/pages/safety.html" class="facility-card">
+          <div class="card-icon"><i data-lucide="shield-check"></i></div>
+          <h3>Safety</h3>
+          <p>HD CCTV across all areas, 24/7 RPF monitoring, advanced baggage X-ray scanners.</p>
+        </a>
+        <a href="/pages/navigate.html" class="facility-card"
+          style="border-color:rgba(232,93,38,0.3);background:rgba(232,93,38,0.05);">
+          <div class="card-icon" style="color:var(--orange)"><i data-lucide="map"></i></div>
+          <h3 style="color:var(--orange-light)">Station Navigator</h3>
+          <p>Interactive map with 9 platforms. Point-to-point navigation — find your platform in seconds.</p>
+        </a>
+      </div>
     </div>
-    <div class="cards-grid">
-      <a href="/pages/facilities.html#accessibility" class="facility-card">
-        <div class="card-icon"><i data-lucide="accessibility"></i></div>
-        <h3>Accessibility</h3>
-        <p>Lifts, escalators, FOBs connecting all platforms. Divyangjan toilets and dedicated assistance.</p>
-      </a>
-      <a href="/pages/facilities.html#waiting" class="facility-card">
-        <div class="card-icon"><i data-lucide="armchair"></i></div>
-        <h3>Waiting Halls</h3>
-        <p>AC & Prepaid AC halls with recliner seating, charging points. ₹40/hr standard, ₹60/hr recliner.</p>
-      </a>
-      <a href="/pages/facilities.html#lockers" class="facility-card">
-        <div class="card-icon"><i data-lucide="lock"></i></div>
-        <h3>Smart Lockers</h3>
-        <p>Digital lockers in M, L & XL sizes. From ₹60/6hrs. Available at new terminal building.</p>
-      </a>
-      <a href="/pages/facilities.html#food" class="facility-card">
-        <div class="card-icon"><i data-lucide="utensils"></i></div>
-        <h3>Food Court</h3>
-        <p>Food plaza on first floor, multipurpose stalls on all platforms and FOBs. RO drinking water everywhere.</p>
-      </a>
-      <a href="/pages/facilities.html#digital" class="facility-card">
-        <div class="card-icon"><i data-lucide="signal-high"></i></div>
-        <h3>Smart & Digital</h3>
-        <p>High-speed free Wi-Fi, LED train info displays, mobile charging stations, multilingual PA system.</p>
-      </a>
-      <a href="/pages/facilities.html#pods" class="facility-card">
-        <div class="card-icon"><i data-lucide="bed"></i></div>
-        <h3>Sleeping Pods</h3>
-        <p>Separate ladies and gents pods on first floor of new terminal building.</p>
-      </a>
-      <a href="/pages/facilities.html#toilets" class="facility-card">
-        <div class="card-icon"><i data-lucide="users"></i></div>
-        <h3>Hygiene & Comfort</h3>
-        <p>Pay & use and Divyangjan toilets at Platform 01 and new terminal first floor.</p>
-      </a>
-      <a href="/pages/transport.html" class="facility-card">
-        <div class="card-icon"><i data-lucide="bus-front"></i></div>
-        <h3>Connectivity</h3>
-        <p>TSRTC buses, prepaid autos & taxis, 2/4-wheeler parking with CCTV surveillance.</p>
-      </a>
-      <a href="/pages/safety.html" class="facility-card">
-        <div class="card-icon"><i data-lucide="shield-check"></i></div>
-        <h3>Safety</h3>
-        <p>HD CCTV across all areas, 24/7 RPF monitoring, advanced baggage X-ray scanners.</p>
-      </a>
-      <a href="/pages/navigate.html" class="facility-card" style="border-color:rgba(232,93,38,0.3);background:rgba(232,93,38,0.05);">
-        <div class="card-icon" style="color:var(--orange)"><i data-lucide="map"></i></div>
-        <h3 style="color:var(--orange-light)">Station Navigator</h3>
-        <p>Interactive map with 9 platforms. Point-to-point navigation — find your platform in seconds.</p>
-      </a>
-    </div>
-  </div>
-</section>
+  </section>
 
-<!-- ═══ PHOTO GALLERY ═══ -->
-<section class="gallery-section">
-  <div class="container">
-    <div class="section-header">
-      <p class="page-hero-kicker" style="margin-bottom:0.75rem">CHZ · Charlapalli</p>
-      <h2 class="section-title">Our Station</h2>
-      <p class="section-sub">A glimpse of the modern infrastructure and facilities at Charlapalli Terminal</p>
+  <!-- ═══ PHOTO GALLERY ═══ -->
+  <section class="gallery-section">
+    <div class="container">
+      <div class="section-header">
+        <p class="page-hero-kicker" style="margin-bottom:0.75rem">CHZ · Charlapalli</p>
+        <h2 class="section-title">Our Station</h2>
+        <p class="section-sub">A glimpse of the modern infrastructure and facilities at Charlapalli Terminal</p>
+      </div>
     </div>
-  </div>
-  <div class="gallery-marquee-wrap" id="galleryMarquee">
-    <div style="text-align:center;color:var(--text-muted);font-family:var(--font-mono);font-size:0.75rem;padding:3rem 0;">
-      Loading gallery…
+    <div class="gallery-marquee-wrap" id="galleryMarquee">
+      <div
+        style="text-align:center;color:var(--text-muted);font-family:var(--font-mono);font-size:0.75rem;padding:3rem 0;">
+        Loading gallery…
+      </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- ═══ CINEMATIC PHOTO BANNER ═══ -->
-<div class="photo-banner">
-  <div class="photo-banner-bg" id="bannerBg" style="background-image:url('/images/station/main_bg.jpg');"></div>
-  <div class="photo-banner-overlay">
-    <div class="photo-banner-content">
-      <h3>Experience Charlapalli</h3>
-      <p>South Central Railway · Hyderabad · Platforms 1–9</p>
-    </div>
-  </div>
-</div>
-
-<!-- ═══ LIVE WAIT TIMES ═══ -->
-<section class="section live-strip">
-  <div class="container">
-    <div class="strip-header">
-      <h2>Live Wait Times</h2>
-      <span class="live-badge">● LIVE</span>
-    </div>
-    <div id="waitTimeGrid" class="wait-grid">
-      <div class="loading-pulse">Loading wait times…</div>
-    </div>
-    <p class="strip-note">Auto-refreshes every 60 seconds</p>
-  </div>
-</section>
-
-<!-- ═══ LOCKERS ═══ -->
-<section class="section" style="background:var(--black);" id="lockers-live">
-  <div class="container">
-    <div class="section-header">
-      <p class="page-hero-kicker" style="margin-bottom:0.75rem">Real-Time Availability</p>
-      <h2 class="section-title">Smart Locker Availability</h2>
-      <p class="section-sub">Secure digital lockers at the New Terminal Building</p>
-    </div>
-    <div id="lockerGrid" class="locker-grid">
-      <div class="loading-pulse">Loading locker data…</div>
-    </div>
-  </div>
-</section>
-
-<!-- ═══ PARKING ═══ -->
-<section class="section" style="background:var(--black-2);" id="parking">
-  <div class="container">
-    <div class="section-header">
-      <p class="page-hero-kicker" style="margin-bottom:0.75rem">Live Status</p>
-      <h2 class="section-title">Parking Availability</h2>
-      <p class="section-sub">CCTV-monitored parking zones near the terminal</p>
-    </div>
-    <div id="parkingGrid" class="parking-grid">
-      <div class="loading-pulse">Loading parking data…</div>
-    </div>
-  </div>
-</section>
-
-<!-- ═══ ANNOUNCEMENT ═══ -->
-<section class="announce-section">
-  <div class="container">
-    <div class="announce-card">
-      <div class="announce-icon"><i data-lucide="megaphone"></i></div>
-      <div>
-        <h3>Terminal Announcement</h3>
-        <p>Passengers are advised to arrive at least 30 minutes before scheduled departure. Battery-operated vehicles are available for senior citizens and differently-abled passengers. For medical emergencies, contact the Help Desk at the new building concourse.</p>
+  <!-- ═══ CINEMATIC PHOTO BANNER ═══ -->
+  <div class="photo-banner">
+    <div class="photo-banner-bg" id="bannerBg" style="background-image:url('/images/station/main_bg.jpg');"></div>
+    <div class="photo-banner-overlay">
+      <div class="photo-banner-content">
+        <h3>Experience Charlapalli</h3>
+        <p>South Central Railway · Hyderabad · Platforms 1–9</p>
       </div>
     </div>
   </div>
-</section>
 
-<!-- ═══ LIGHTBOX ═══ -->
-<div class="lightbox" id="lightbox">
-  <button class="lb-close" id="lbClose">✕</button>
-  <img class="lb-img" id="lbImg" src="" alt="Station photo" />
-</div>
+  <!-- ═══ LIVE WAIT TIMES ═══ -->
+  <section class="section live-strip">
+    <div class="container">
+      <div class="strip-header">
+        <h2>Live Wait Times</h2>
+        <span class="live-badge">● LIVE</span>
+      </div>
+      <div id="waitTimeGrid" class="wait-grid">
+        <div class="loading-pulse">Loading wait times…</div>
+      </div>
+      <p class="strip-note">Auto-refreshes every 60 seconds</p>
+    </div>
+  </section>
 
-<script type="module">
-  import { api } from '/js/api.js';
+  <!-- ═══ LOCKERS ═══ -->
+  <section class="section" style="background:var(--black);" id="lockers-live">
+    <div class="container">
+      <div class="section-header">
+        <p class="page-hero-kicker" style="margin-bottom:0.75rem">Real-Time Availability</p>
+        <h2 class="section-title">Smart Locker Availability</h2>
+        <p class="section-sub">Secure digital lockers at the New Terminal Building</p>
+      </div>
+      <div id="lockerGrid" class="locker-grid">
+        <div class="loading-pulse">Loading locker data…</div>
+      </div>
+    </div>
+  </section>
 
-  /* ── HERO PARTICLES ── */
-  (() => {
-    const c = document.getElementById('heroParticles');
-    if (!c) return;
-    for (let i = 0; i < 20; i++) {
-      const p = document.createElement('div');
-      p.className = 'particle';
-      p.style.cssText = `left:${Math.random()*100}%;width:${Math.random()>0.5?2:3}px;height:${Math.random()>0.5?2:3}px;animation-duration:${7+Math.random()*12}s;animation-delay:${Math.random()*9}s;`;
-      c.appendChild(p);
+  <!-- ═══ PARKING ═══ -->
+  <section class="section" style="background:var(--black-2);" id="parking">
+    <div class="container">
+      <div class="section-header">
+        <p class="page-hero-kicker" style="margin-bottom:0.75rem">Live Status</p>
+        <h2 class="section-title">Parking Availability</h2>
+        <p class="section-sub">CCTV-monitored parking zones near the terminal</p>
+      </div>
+      <div id="parkingGrid" class="parking-grid">
+        <div class="loading-pulse">Loading parking data…</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ ANNOUNCEMENT ═══ -->
+  <section class="announce-section">
+    <div class="container">
+      <div class="announce-card">
+        <div class="announce-icon"><i data-lucide="megaphone"></i></div>
+        <div>
+          <h3>Terminal Announcement</h3>
+          <p>Passengers are advised to arrive at least 30 minutes before scheduled departure. Battery-operated vehicles
+            are available for senior citizens and differently-abled passengers. For medical emergencies, contact the
+            Help Desk at the new building concourse.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ LIGHTBOX ═══ -->
+  <div class="lightbox" id="lightbox">
+    <button class="lb-close" id="lbClose">✕</button>
+    <img class="lb-img" id="lbImg" src="" alt="Station photo" />
+  </div>
+
+  <script type="module">
+    import { api } from '/js/api.js';
+
+    /* ── HERO PARTICLES ── */
+    (() => {
+      const c = document.getElementById('heroParticles');
+      if (!c) return;
+      for (let i = 0; i < 20; i++) {
+        const p = document.createElement('div');
+        p.className = 'particle';
+        p.style.cssText = `left:${Math.random() * 100}%;width:${Math.random() > 0.5 ? 2 : 3}px;height:${Math.random() > 0.5 ? 2 : 3}px;animation-duration:${7 + Math.random() * 12}s;animation-delay:${Math.random() * 9}s;`;
+        c.appendChild(p);
+      }
+    })();
+
+    /* ── PHOTO GALLERY ──
+       Real photos from Charlapalli Terminal Drive folder.  */
+
+    // Landing page gallery — 6 photos from Google Drive
+    const GALLERY_PHOTOS = [
+      { src: '/images/station/landing_1.jpg', label: 'Charlapalli Terminal' },
+      { src: '/images/station/landing_2.jpg', label: 'Station Exterior' },
+      { src: '/images/station/landing_3.jpg', label: 'Station Aerial' },
+      { src: '/images/station/landing_4.jpg', label: 'Terminal View' },
+      { src: '/images/station/landing_5.jpg', label: 'Aerial Drone View' },
+      { src: '/images/station/landing_6.jpg', label: 'Station Front' },
+    ];
+
+    async function loadGallery() {
+      const wrap = document.getElementById('galleryMarquee');
+      buildMarquee(wrap, GALLERY_PHOTOS);
     }
-  })();
 
-  /* ── PHOTO GALLERY ──
-     Real photos from Charlapalli Terminal Drive folder.  */
+    function buildMarquee(wrap, images) {
+      wrap.innerHTML = '';
+      // Need at least 8 items for seamless loop; duplicate as needed
+      while (images.length < 8) images = [...images, ...images];
+      const doubled = [...images, ...images];
 
-  // Landing page gallery — 6 photos from Google Drive
-  const GALLERY_PHOTOS = [
-    { src: '/images/station/landing_1.jpg', label: 'Charlapalli Terminal' },
-    { src: '/images/station/landing_2.jpg', label: 'Station Exterior' },
-    { src: '/images/station/landing_3.jpg', label: 'Station Aerial' },
-    { src: '/images/station/landing_4.jpg', label: 'Terminal View' },
-    { src: '/images/station/landing_5.jpg', label: 'Aerial Drone View' },
-    { src: '/images/station/landing_6.jpg', label: 'Station Front' },
-  ];
-
-  async function loadGallery() {
-    const wrap = document.getElementById('galleryMarquee');
-    buildMarquee(wrap, GALLERY_PHOTOS);
-  }
-
-  function buildMarquee(wrap, images) {
-    wrap.innerHTML = '';
-    // Need at least 8 items for seamless loop; duplicate as needed
-    while (images.length < 8) images = [...images, ...images];
-    const doubled = [...images, ...images];
-
-    ['ltr','rtl'].forEach((dir, ri) => {
-      const track = document.createElement('div');
-      track.className = `marquee-track ${dir}`;
-      // offset second row for visual variety
-      const slice = ri === 0 ? doubled : [...doubled.slice(4), ...doubled.slice(0, 4)];
-      slice.forEach(img => {
-        const el = document.createElement('img');
-        el.className = 'marquee-img';
-        el.src = img.src;
-        el.alt = img.label || 'CHZ';
-        el.title = img.label || '';
-        if (img.filter) el.style.filter = img.filter;
-        el.loading = 'lazy';
-        el.addEventListener('click', () => openLightbox(img.src, img.filter));
-        track.appendChild(el);
+      ['ltr', 'rtl'].forEach((dir, ri) => {
+        const track = document.createElement('div');
+        track.className = `marquee-track ${dir}`;
+        // offset second row for visual variety
+        const slice = ri === 0 ? doubled : [...doubled.slice(4), ...doubled.slice(0, 4)];
+        slice.forEach(img => {
+          const el = document.createElement('img');
+          el.className = 'marquee-img';
+          el.src = img.src;
+          el.alt = img.label || 'CHZ';
+          el.title = img.label || '';
+          if (img.filter) el.style.filter = img.filter;
+          el.loading = 'lazy';
+          el.addEventListener('click', () => openLightbox(img.src, img.filter));
+          track.appendChild(el);
+        });
+        wrap.appendChild(track);
       });
-      wrap.appendChild(track);
-    });
-  }
+    }
 
-  /* ── LIGHTBOX ── */
-  function openLightbox(src, filter) {
-    const lb  = document.getElementById('lightbox');
-    const img = document.getElementById('lbImg');
-    img.src = src;
-    img.style.filter = filter || '';
-    lb.classList.add('open');
-    document.body.style.overflow = 'hidden';
-  }
-  document.getElementById('lbClose').onclick = closeLb;
-  document.getElementById('lightbox').addEventListener('click', e => { if (e.target === e.currentTarget) closeLb(); });
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLb(); });
-  function closeLb() {
-    document.getElementById('lightbox').classList.remove('open');
-    document.body.style.overflow = '';
-  }
+    /* ── LIGHTBOX ── */
+    function openLightbox(src, filter) {
+      const lb = document.getElementById('lightbox');
+      const img = document.getElementById('lbImg');
+      img.src = src;
+      img.style.filter = filter || '';
+      lb.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    document.getElementById('lbClose').onclick = closeLb;
+    document.getElementById('lightbox').addEventListener('click', e => { if (e.target === e.currentTarget) closeLb(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLb(); });
+    function closeLb() {
+      document.getElementById('lightbox').classList.remove('open');
+      document.body.style.overflow = '';
+    }
 
-  /* ── TRAIN SEARCH ── */
-  let currentType = 'arrivals';
-  document.querySelectorAll('.tab-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      currentType = btn.dataset.type;
-      searchTrains();
+    /* ── TRAIN SEARCH ── */
+    let currentType = 'arrivals';
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentType = btn.dataset.type;
+        searchTrains();
+      });
     });
-  });
-  document.getElementById('trainSearch').addEventListener('keypress', e => {
-    if (e.key === 'Enter') searchTrains();
-  });
-  window.searchTrains = async function () {
-    const q = document.getElementById('trainSearch').value.trim();
-    try {
-      const json = await api.trains({ type: currentType, q });
-      renderTrains(json.data);
-    } catch { renderError('trainResults', 'Could not load train data.'); }
-  };
-  function renderTrains(trains) {
-  const el = document.getElementById('trainResults');
-  el.classList.remove('hidden');
-  if (!trains.length) { el.innerHTML = '<p class="no-data">No trains found.</p>'; return; }
-  el.innerHTML = `<div style="overflow-x:auto"><table class="train-table">
+    document.getElementById('trainSearch').addEventListener('keypress', e => {
+      if (e.key === 'Enter') searchTrains();
+    });
+    window.searchTrains = async function () {
+      const q = document.getElementById('trainSearch').value.trim();
+      try {
+        const json = await api.trains({ type: currentType, q });
+        renderTrains(json.data);
+      } catch { renderError('trainResults', 'Could not load train data.'); }
+    };
+    function renderTrains(trains) {
+      const el = document.getElementById('trainResults');
+      el.classList.remove('hidden');
+      if (!trains.length) { el.innerHTML = '<p class="no-data">No trains found.</p>'; return; }
+      el.innerHTML = `<div style="overflow-x:auto"><table class="train-table">
   <thead><tr>
     <th>Train No</th><th>Name</th><th>From → To</th>
     <th>Arrives</th><th>Departs</th><th>Platform</th><th>Status</th><th>Action</th>
@@ -562,33 +766,33 @@
       <td style="font-family:var(--font-mono)">${t.arrives}</td>
       <td style="font-family:var(--font-mono)">${t.departs}</td>
       <td style="font-family:var(--font-mono);color:var(--orange)">Pf ${t.platform}</td>
-      <td><span class="status-badge ${t.status==='On Time'?'ok':'delay'}">${t.status}</span></td>
+      <td><span class="status-badge ${t.status === 'On Time' ? 'ok' : 'delay'}">${t.status}</span></td>
       <td>
         <button class="btn-find-coach"
-          onclick="window.CoachFinder.open(${JSON.stringify(t).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g,'\\u003c')})">
+          onclick="window.CoachFinder.open(${JSON.stringify(t).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '\\u003c')})">
           🚃 Find Coach
         </button>
       </td>
     </tr>`).join('')}
   </tbody></table></div>`;
-}
+    }
 
-  async function loadWaitTimes() {
-    try {
-      const json = await api.waitTimes();
-      document.getElementById('waitTimeGrid').innerHTML = json.data.map(g => `
-      <div class="wait-card ${g.status==='closed'?'closed':''}">
+    async function loadWaitTimes() {
+      try {
+        const json = await api.waitTimes();
+        document.getElementById('waitTimeGrid').innerHTML = json.data.map(g => `
+      <div class="wait-card ${g.status === 'closed' ? 'closed' : ''}">
         <div class="wc-top"><span class="wc-name">${g.name}</span><span class="wc-type">${g.type}</span></div>
-        <div class="wc-time">${g.status==='closed'?'—':g.waitTime}</div>
-        <div class="wc-status ${g.status}">${g.status==='open'?'● Open':'● Closed'}</div>
+        <div class="wc-time">${g.status === 'closed' ? '—' : g.waitTime}</div>
+        <div class="wc-status ${g.status}">${g.status === 'open' ? '● Open' : '● Closed'}</div>
       </div>`).join('');
-    } catch { renderError('waitTimeGrid','Could not load wait times.'); }
-  }
+      } catch { renderError('waitTimeGrid', 'Could not load wait times.'); }
+    }
 
-  async function loadLockers() {
-    try {
-      const json = await api.lockers();
-      document.getElementById('lockerGrid').innerHTML = json.data.map(l => `
+    async function loadLockers() {
+      try {
+        const json = await api.lockers();
+        document.getElementById('lockerGrid').innerHTML = json.data.map(l => `
       <div class="locker-card">
         <div class="lc-size">${l.size}</div>
         <div class="lc-avail">${l.available} <span>available</span></div>
@@ -596,51 +800,52 @@
           <span>Up to 6hrs: <strong>₹${l.price6h}</strong></span>
           <span>Up to 24hrs: <strong>₹${l.price24h}</strong></span>
         </div>
-        <div class="lc-bar"><div class="lc-fill" style="width:${(l.available/l.total)*100}%"></div></div>
+        <div class="lc-bar"><div class="lc-fill" style="width:${(l.available / l.total) * 100}%"></div></div>
       </div>`).join('');
-    } catch { renderError('lockerGrid','Could not load locker data.'); }
-  }
+      } catch { renderError('lockerGrid', 'Could not load locker data.'); }
+    }
 
-  async function loadParking() {
-    try {
-      const json = await api.parking();
-      const { twoWheeler, fourWheeler } = json.data;
-      document.getElementById('parkingGrid').innerHTML = `
+    async function loadParking() {
+      try {
+        const json = await api.parking();
+        const { twoWheeler, fourWheeler } = json.data;
+        document.getElementById('parkingGrid').innerHTML = `
       <div class="park-card">
         <div class="pc-icon"><i data-lucide="bike"></i></div>
         <h3>Two-Wheeler</h3>
         <div class="pc-slots">${twoWheeler.available} <span>slots available</span></div>
         <div class="pc-rate">${twoWheeler.rate}</div>
-        <div class="pc-bar"><div class="pc-fill" style="width:${(twoWheeler.available/twoWheeler.total)*100}%"></div></div>
+        <div class="pc-bar"><div class="pc-fill" style="width:${(twoWheeler.available / twoWheeler.total) * 100}%"></div></div>
       </div>
       <div class="park-card">
         <div class="pc-icon"><i data-lucide="car-front"></i></div>
         <h3>Four-Wheeler</h3>
         <div class="pc-slots">${fourWheeler.available} <span>slots available</span></div>
         <div class="pc-rate">${fourWheeler.rate}</div>
-        <div class="pc-bar"><div class="pc-fill" style="width:${(fourWheeler.available/fourWheeler.total)*100}%"></div></div>
+        <div class="pc-bar"><div class="pc-fill" style="width:${(fourWheeler.available / fourWheeler.total) * 100}%"></div></div>
       </div>`;
-      if (window.lucide) lucide.createIcons();
-    } catch { renderError('parkingGrid','Could not load parking data.'); }
-  }
+        if (window.lucide) lucide.createIcons();
+      } catch { renderError('parkingGrid', 'Could not load parking data.'); }
+    }
 
-  function renderError(id, msg) {
-    const el = document.getElementById(id);
-    if (el) el.innerHTML = `<p class="no-data" style="color:#f87171;">⚠ ${msg}</p>`;
-  }
+    function renderError(id, msg) {
+      const el = document.getElementById(id);
+      if (el) el.innerHTML = `<p class="no-data" style="color:#f87171;">⚠ ${msg}</p>`;
+    }
 
-  loadGallery();
-  searchTrains();
-  loadWaitTimes();
-  loadLockers();
-  loadParking();
-  setInterval(loadWaitTimes, 60000);
-</script>
+    loadGallery();
+    searchTrains();
+    loadWaitTimes();
+    loadLockers();
+    loadParking();
+    setInterval(loadWaitTimes, 60000);
+  </script>
 
-<script src="/js/main.js"></script>
-<script src="https://unpkg.com/lucide@latest"></script>
-<script>lucide.createIcons();</script>
-<script src="/js/chatbot.js"></script>
-<script src="/js/js_coachFinder.js"></script>
+  <script src="/js/main.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>lucide.createIcons();</script>
+  <script src="/js/chatbot.js"></script>
+  <script src="/js/js_coachFinder.js"></script>
 </body>
+
 </html>

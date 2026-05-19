@@ -14,7 +14,9 @@ app.use(cors({
 app.use(express.json());
 
 // Rate limiting
-const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100 });
+// Enable if you're behind a reverse proxy (Heroku, Render, Nginx, etc)
+app.set('trust proxy', 1); 
+const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 500 });
 app.use(limiter);
 
 // ── Routes ────────────────────────────────────────────────────────────────────
