@@ -4,7 +4,11 @@
   <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Lost & Found | Charlapalli Terminal</title>
   <link rel="stylesheet" href="/css/style.css?v=30" />
-  <script>window.CT_API_BASE = 'https://charlapalli-railway-terminal-api.tride.live/api';</script>
+  <script>
+    window.CT_API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:'
+      ? 'http://localhost:3001/api'
+      : 'https://charlapalli-railway-terminal-api.tride.live/api';
+  </script>
 </head>
 <body>
 <script src="/js/layout.js"></script>

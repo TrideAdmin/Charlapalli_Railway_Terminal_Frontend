@@ -28,6 +28,7 @@ export const api = {
   health:    ()       => apiFetch('/health'),
   waitTimes: ()       => apiFetch('/wait-times'),
   trains:    (params) => apiFetch('/trains' + (params ? '?' + new URLSearchParams(params) : '')),
+  trainInfo: (no)     => apiFetch(`/train-info?train=${no}`),
   lockers:   ()       => apiFetch('/lockers'),
   parking:   ()       => apiFetch('/parking'),
   pods:      ()       => apiFetch('/pods'),

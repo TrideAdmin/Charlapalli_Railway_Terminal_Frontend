@@ -6,7 +6,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Home | Charlapalli Terminal</title>
   <link rel="stylesheet" href="/css/style.css?v=31" />
-  <script>window.CT_API_BASE = 'https://charlapalli-railway-terminal-api.tride.live/api';</script>
+  <script>
+    window.CT_API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:'
+      ? 'http://localhost:3001/api'
+      : 'https://charlapalli-railway-terminal-api.tride.live/api';
+  </script>
   <style>
     /* ══════════════════════════════════════════════
        SILVER SHIMMER HERO TITLE — left→right sweep
@@ -418,6 +422,36 @@
       background: rgba(255, 255, 255, 0.18);
       transform: rotate(90deg);
     }
+
+    /* Skeleton Loader */
+    .skeleton-bar {
+      height: 16px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 4px;
+      position: relative;
+      overflow: hidden;
+      display: inline-block;
+    }
+
+    .skeleton-bar::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      transform: translateX(-100%);
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.08) 50%,
+        transparent
+      );
+      animation: shimmer 1.5s infinite;
+    }
+
+    @keyframes shimmer {
+      100% {
+        transform: translateX(100%);
+      }
+    }
   </style>
 </head>
 
@@ -494,7 +528,50 @@
           </div>
           <button class="btn btn-primary" onclick="searchTrains()">Find Trains</button>
         </div>
-        <div id="trainResults" class="train-results hidden"></div>
+        <div id="trainResults" class="train-results">
+          <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.75rem;font-size:0.75rem;color:var(--text-muted);font-family:var(--font-mono)">
+            <span class="loading-pulse">⏳ Fetching live train data from IRCTC…</span>
+          </div>
+          <div style="overflow-x:auto">
+            <table class="train-table">
+              <thead>
+                <tr>
+                  <th>Train No</th><th>Name</th><th>From &rarr; To</th>
+                  <th>Arrives</th><th>Departs</th><th>Status</th><th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><div class="skeleton-bar" style="width: 50px;"></div></td>
+                  <td><div class="skeleton-bar" style="width: 140px;"></div></td>
+                  <td><div class="skeleton-bar" style="width: 160px;"></div></td>
+                  <td><div class="skeleton-bar" style="width: 60px;"></div></td>
+                  <td><div class="skeleton-bar" style="width: 60px;"></div></td>
+                  <td><div class="skeleton-bar" style="width: 80px;"></div></td>
+                  <td><div class="skeleton-bar" style="width: 90px;"></div></td>
+                </tr>
+                <tr>
+                  <td><div class="skeleton-bar" style="width: 50px;"></div></td>
+                  <td><div class="skeleton-bar" style="width: 140px;"></div></td>
+                  <td><div class="skeleton-bar" style="width: 160px;"></div></td>
+                  <td><div class="skeleton-bar" style="width: 60px;"></div></td>
+                  <td><div class="skeleton-bar" style="width: 60px;"></div></td>
+                  <td><div class="skeleton-bar" style="width: 80px;"></div></td>
+                  <td><div class="skeleton-bar" style="width: 90px;"></div></td>
+                </tr>
+                <tr>
+                  <td><div class="skeleton-bar" style="width: 50px;"></div></td>
+                  <td><div class="skeleton-bar" style="width: 140px;"></div></td>
+                  <td><div class="skeleton-bar" style="width: 160px;"></div></td>
+                  <td><div class="skeleton-bar" style="width: 60px;"></div></td>
+                  <td><div class="skeleton-bar" style="width: 60px;"></div></td>
+                  <td><div class="skeleton-bar" style="width: 80px;"></div></td>
+                  <td><div class="skeleton-bar" style="width: 90px;"></div></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -730,8 +807,10 @@
       document.body.style.overflow = '';
     }
 
-    /* ── TRAIN SEARCH ── */
+    /* ── TRAIN SEARCH (Live – IRCTC CHZ) ── */
     let currentType = 'arrivals';
+    let trainAutoRefresh = null;
+
     document.querySelectorAll('.tab-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -743,39 +822,185 @@
     document.getElementById('trainSearch').addEventListener('keypress', e => {
       if (e.key === 'Enter') searchTrains();
     });
+
     window.searchTrains = async function () {
       const q = document.getElementById('trainSearch').value.trim();
-      try {
-        const json = await api.trains({ type: currentType, q });
-        renderTrains(json.data);
-      } catch { renderError('trainResults', 'Could not load train data.'); }
-    };
-    function renderTrains(trains) {
       const el = document.getElementById('trainResults');
       el.classList.remove('hidden');
-      if (!trains.length) { el.innerHTML = '<p class="no-data">No trains found.</p>'; return; }
-      el.innerHTML = `<div style="overflow-x:auto"><table class="train-table">
+
+      // If it is a 5-digit number, execute a direct trainInfo lookup
+      if (/^\d{5}$/.test(q)) {
+        el.innerHTML = `
+          <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.75rem;font-size:0.75rem;color:var(--text-muted);font-family:var(--font-mono)">
+            <span class="loading-pulse">⏳ Querying train ${q} details from IRCTC…</span>
+          </div>
+          <div style="overflow-x:auto">
+            <table class="train-table">
+              <thead>
+                <tr>
+                  <th>Train No</th><th>Name</th><th>From &rarr; To</th>
+                  <th>Arrives</th><th>Departs</th><th>Status</th><th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><div class="skeleton-bar" style="width: 50px;"></div></td>
+                  <td><div class="skeleton-bar" style="width: 140px;"></div></td>
+                  <td><div class="skeleton-bar" style="width: 160px;"></div></td>
+                  <td><div class="skeleton-bar" style="width: 60px;"></div></td>
+                  <td><div class="skeleton-bar" style="width: 60px;"></div></td>
+                  <td><div class="skeleton-bar" style="width: 80px;"></div></td>
+                  <td><div class="skeleton-bar" style="width: 90px;"></div></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        `;
+        try {
+          const json = await api.trainInfo(q);
+          const outer = json.data || json;
+          const trainData = outer.trainInfo || outer;
+          const route = outer.route || outer.stations || [];
+
+          if (trainData && trainData.train_no) {
+            // Find if this train stops at CHZ
+            const chzStop = route.find(s => {
+              const name = (s.stnName || s.stationName || '').toUpperCase();
+              const code = (s.stnCode || s.stationCode || '').toUpperCase();
+              return ['CHZ', 'CHARLAPALLI', 'CHARLAPALLY'].some(x => name.includes(x) || code.includes(x));
+            });
+
+            if (chzStop) {
+              const arrives = chzStop.arrival || chzStop.arrivalTime || '—';
+              const departs = chzStop.departure || chzStop.departureTime || '—';
+              const isFirstStop = route.indexOf(chzStop) === 0;
+              const isLastStop = route.indexOf(chzStop) === route.length - 1;
+
+              const trainObj = {
+                number:      String(trainData.train_no || q),
+                name:        trainData.train_name || 'Unknown',
+                from:        trainData.from_stn_name || '—',
+                to:          trainData.to_stn_name || '—',
+                arrives:     isFirstStop ? '—' : arrives,
+                departs:     isLastStop ? '—' : departs,
+                status:      'On Time',
+                platform:    chzStop.platform || '—',
+                type:        trainData.type || 'EXPRESS',
+                coachInfo:   {},
+                journeyDate: '',
+              };
+              renderTrains([trainObj], new Date().toISOString(), 'irctc-connect', 'CHZ – Charlapalli');
+            } else {
+              el.innerHTML = `
+                <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.75rem;font-size:0.75rem;color:var(--text-muted);font-family:var(--font-mono)">
+                  CHZ · Charlapalli &nbsp;|&nbsp; Search Result
+                </div>
+                <p class="no-data">Train <strong>${q}</strong> (${trainData.train_name || ''}) does not stop at Charlapalli Terminal.</p>
+              `;
+            }
+          } else {
+            el.innerHTML = `<p class="no-data">Train number <strong>${q}</strong> was not found in the database.</p>`;
+          }
+        } catch (err) {
+          console.error(err);
+          renderError('trainResults', 'Failed to retrieve train details.');
+        }
+        return;
+      }
+
+      el.innerHTML = `
+        <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.75rem;font-size:0.75rem;color:var(--text-muted);font-family:var(--font-mono)">
+          <span class="loading-pulse">⏳ Fetching live train data from IRCTC…</span>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="train-table">
+            <thead>
+              <tr>
+                <th>Train No</th><th>Name</th><th>From &rarr; To</th>
+                <th>Arrives</th><th>Departs</th><th>Status</th><th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${Array(3).fill().map(() => `
+                <tr>
+                  <td><div class="skeleton-bar" style="width: 50px;"></div></td>
+                  <td><div class="skeleton-bar" style="width: 140px;"></div></td>
+                  <td><div class="skeleton-bar" style="width: 160px;"></div></td>
+                  <td><div class="skeleton-bar" style="width: 60px;"></div></td>
+                  <td><div class="skeleton-bar" style="width: 60px;"></div></td>
+                  <td><div class="skeleton-bar" style="width: 80px;"></div></td>
+                  <td><div class="skeleton-bar" style="width: 90px;"></div></td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+      try {
+        const json = await api.trains({ type: currentType, q, station: 'CHZ' });
+        renderTrains(json.data, json.updatedAt, json.source, json.station);
+      } catch { renderError('trainResults', 'Could not load live train data. Check connection.'); }
+    };
+
+    function renderTrains(trains, updatedAt, source, station) {
+      const el = document.getElementById('trainResults');
+      const isLive = source && source.includes('irctc-connect');
+      const updatedStr = updatedAt
+        ? new Date(updatedAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })
+        : '';
+      const liveHeader = isLive
+        ? `<div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.75rem;font-size:0.75rem;color:var(--text-muted);font-family:var(--font-mono)">
+            <span class="live-badge" style="font-size:0.65rem;padding:2px 8px">● LIVE</span>
+            ${station || 'CHZ · Charlapalli'} &nbsp;|&nbsp; Updated ${updatedStr} &nbsp;|&nbsp; Auto-refreshes every 20 mins
+          </div>`
+        : '';
+      if (!trains || !trains.length) {
+        el.innerHTML = liveHeader + '<p class="no-data">No trains found for this time window.</p>';
+        return;
+      }
+      el.innerHTML = liveHeader + `<div style="overflow-x:auto"><table class="train-table">
   <thead><tr>
-    <th>Train No</th><th>Name</th><th>From → To</th>
-    <th>Arrives</th><th>Departs</th><th>Platform</th><th>Status</th><th>Action</th>
+    <th>Train No</th><th>Name</th><th>From &rarr; To</th>
+    <th>Arrives</th><th>Departs</th><th>Status</th><th>Action</th>
   </tr></thead>
-  <tbody>${trains.map(t => `<tr>
+  <tbody>${trains.map(t => {
+    const isDelay = t.status && t.status !== 'On Time';
+    let tagClass = 'tag-blue';
+    const trainType = (t.type || '').toUpperCase();
+    if (trainType.includes('SUPERFAST') || trainType.includes('SF')) {
+      tagClass = 'tag-amber';
+    } else if (trainType.includes('PASSENGER') || trainType.includes('ORD')) {
+      tagClass = 'tag-green';
+    } else if (trainType.includes('EXPRESS') || trainType.includes('EXP')) {
+      tagClass = 'tag-blue';
+    } else if (trainType.includes('MAIL')) {
+      tagClass = 'tag-red';
+    }
+    const typeBadge = t.type ? `<span class="tag ${tagClass}" style="font-size:0.55rem;margin-left:0.5rem;padding:0.1rem 0.4rem;vertical-align:middle;border-radius:4px;font-family:var(--font-mono);font-weight:700;">${t.type}</span>` : '';
+    return `<tr>
       <td><strong style="color:var(--gold);font-family:var(--font-mono)">${t.number}</strong></td>
-      <td>${t.name}</td>
-      <td style="color:var(--text-secondary)">${t.from} → ${t.to}</td>
+      <td>${t.name}${typeBadge}</td>
+      <td style="color:var(--text-secondary)">${t.from} &rarr; ${t.to}</td>
       <td style="font-family:var(--font-mono)">${t.arrives}</td>
       <td style="font-family:var(--font-mono)">${t.departs}</td>
-      <td style="font-family:var(--font-mono);color:var(--orange)">Pf ${t.platform}</td>
-      <td><span class="status-badge ${t.status === 'On Time' ? 'ok' : 'delay'}">${t.status}</span></td>
+      <td><span class="status-badge ${isDelay ? 'delay' : 'ok'}">${t.status}</span></td>
       <td>
         <button class="btn-find-coach"
           onclick="window.CoachFinder.open(${JSON.stringify(t).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '\\u003c')})">
           🚃 Find Coach
         </button>
       </td>
-    </tr>`).join('')}
+    </tr>`;
+  }).join('')}
   </tbody></table></div>`;
     }
+
+    // Auto-refresh train board every 20 minutes (only when no active search)
+    trainAutoRefresh = setInterval(() => {
+      if (!document.getElementById('trainSearch').value.trim()) {
+        searchTrains();
+      }
+    }, 1200000);
 
     async function loadWaitTimes() {
       try {

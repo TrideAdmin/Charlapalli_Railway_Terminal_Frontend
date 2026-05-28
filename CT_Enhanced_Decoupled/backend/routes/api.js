@@ -28,35 +28,100 @@ router.get('/wait-times', (req, res) => {
   res.json({ success: true, data, updatedAt: new Date().toISOString() });
 });
 
-// Train schedules (mock)
-const trains = [
-  { number: '12723', name: 'Telangana Express', from: 'Hyderabad', to: 'New Delhi', arrives: '06:15', departs: '06:30', platform: '1', status: 'On Time' },
-  { number: '17643', name: 'Circar Express', from: 'Secunderabad', to: 'Kakinada', arrives: '07:45', departs: '08:00', platform: '3', status: 'On Time' },
-  { number: '22693', name: 'Rajdhani Express', from: 'Bangalore', to: 'New Delhi', arrives: '09:20', departs: '09:25', platform: '2', status: 'Delayed 10 min' },
-  { number: '12728', name: 'Godavari Express', from: 'Visakhapatnam', to: 'Hyderabad', arrives: '10:05', departs: '10:15', platform: '5', status: 'On Time' },
-  { number: '17031', name: 'Mumbai Express', from: 'Hyderabad', to: 'Mumbai', arrives: '11:30', departs: '11:45', platform: '4', status: 'On Time' },
-  { number: '57477', name: 'Passenger Special', from: 'Kazipet', to: 'Secunderabad', arrives: '12:00', departs: '12:10', platform: '7', status: 'On Time' },
-  { number: '18519', name: 'Visakha Express', from: 'Visakhapatnam', to: 'LTT Mumbai', arrives: '13:50', departs: '14:00', platform: '6', status: 'On Time' },
-  { number: '12703', name: 'Falaknuma Express', from: 'Secunderabad', to: 'Chennai', arrives: '15:20', departs: '15:30', platform: '2', status: 'Delayed 5 min' },
-];
+// ── irctc-connect Train Board for Charlapalli (CHZ) ──────────────────────────
+// Directly integrates the irctc-connect package.
+// We configure it using the API key from .env.
+const { configure, liveAtStation, getTrainInfo } = require('irctc-connect');
 
-router.get('/trains', (req, res) => {
+const apiKey = process.env.IRCTC_API_KEY;
+if (apiKey) {
+  configure(apiKey);
+} else {
+  console.error("❌ Error: IRCTC_API_KEY is not defined in your backend .env file!");
+}
+
+router.get('/trains', async (req, res) => {
   const { type = 'arrivals', q = '' } = req.query;
-  let result = trains;
-  if (type === 'arrivals') {
-    result = trains.filter(t => !['Hyderabad', 'Secunderabad'].includes(t.from));
-  } else if (type === 'departures') {
-    result = trains.filter(t => !['Hyderabad', 'Secunderabad'].includes(t.to));
-  }
 
-  if (q) {
-    const query = q.toLowerCase();
-    result = result.filter(t =>
-      t.number.includes(query) || t.name.toLowerCase().includes(query) ||
-      t.from.toLowerCase().includes(query) || t.to.toLowerCase().includes(query)
-    );
+  try {
+    // Single call — get all trains at CHZ right now
+    const json = await liveAtStation('CHZ');
+
+    // irctc-connect liveAtStation returns { success, data: [...] }
+    // Each item: { i, trainno, trainname, source, dest, timeat }
+    if (!json.success) throw new Error(json.error || 'liveAtStation failed');
+
+    const raw = Array.isArray(json.data) ? json.data : [];
+
+    // Normalise each train into a consistent shape
+    let result = raw.map(t => {
+      const timeat = t.timeat || t.time || '—';
+      const isArr = t.type === 'A' || !t.type; // irctc-connect marks type 'A'/'D'
+      const isEnd = t.dest && (t.dest.toUpperCase().includes('CHZ') || t.dest.toUpperCase().includes('CHARLAPALLI'));
+      const isStart = t.source && (t.source.toUpperCase().includes('CHZ') || t.source.toUpperCase().includes('CHARLAPALLI'));
+
+      return {
+        number: String(t.trainno || t.number || ''),
+        name: t.trainname || t.name || 'Unknown',
+        from: t.source || t.from || '—',
+        to: t.dest || t.to || '—',
+        arrives: (!isStart) ? timeat : '—',
+        departs: (!isEnd) ? timeat : '—',
+        status: t.status || 'On Time',
+        platform: t.platform || t.pf || '—',
+        type: t.trainType || t.type_desc || 'EXPRESS',
+        coachInfo: {},
+        journeyDate: '',
+      };
+    });
+
+    // Tab filter — arrivals have a real arrival time; departures have a real departure time
+    if (type === 'arrivals') {
+      result = result.filter(t => t.arrives && t.arrives !== '—');
+      result.sort((a, b) => (a.arrives > b.arrives ? 1 : -1));
+    } else {
+      result = result.filter(t => t.departs && t.departs !== '—');
+      result.sort((a, b) => (a.departs > b.departs ? 1 : -1));
+    }
+
+    // Search filter — works on number, name, from, to
+    if (q) {
+      const query = q.toLowerCase().trim();
+      result = result.filter(t =>
+        t.number.includes(query) ||
+        t.name.toLowerCase().includes(query) ||
+        t.from.toLowerCase().includes(query) ||
+        t.to.toLowerCase().includes(query)
+      );
+    }
+
+    res.json({
+      success: true,
+      data: result,
+      type,
+      source: 'irctc-connect',
+      station: 'CHZ – Charlapalli',
+      updatedAt: new Date().toISOString(),
+    });
+  } catch (err) {
+    console.error('[Trains API Error]', err);
+    res.status(500).json({ success: false, message: 'Failed to fetch live trains data' });
   }
-  res.json({ success: true, data: result, type, updatedAt: new Date().toISOString() });
+});
+
+// Proxy train info route
+router.get('/train-info', async (req, res) => {
+  const { train } = req.query;
+  if (!train) {
+    return res.status(400).json({ success: false, message: 'Train parameter is required' });
+  }
+  try {
+    const json = await getTrainInfo(train);
+    res.json(json);
+  } catch (err) {
+    console.error('[Train Info API Error]', err);
+    res.status(500).json({ success: false, message: 'Failed to fetch train details from IRCTC' });
+  }
 });
 
 // Locker availability
@@ -100,7 +165,6 @@ router.post('/lost-found', (req, res) => {
   if (!name || !contact || !description) {
     return res.status(400).json({ success: false, message: 'Required fields missing' });
   }
-  // In production, save to DB
   const ticket = `LF${Date.now().toString().slice(-6)}`;
   res.json({ success: true, ticket, message: 'Your report has been registered. Keep your ticket number for reference.' });
 });
@@ -114,9 +178,9 @@ router.post('/contact', (req, res) => {
 });
 
 // Chatbot proxy
-const SARVAM_API_KEY  = process.env.SARVAM_API_KEY;
+const SARVAM_API_KEY = process.env.SARVAM_API_KEY;
 const SARVAM_ENDPOINT = 'https://api.sarvam.ai/v1/chat/completions';
-const MODEL           = 'sarvam-m';
+const MODEL = 'sarvam-m';
 
 router.post('/chat', async (req, res) => {
   try {
@@ -145,8 +209,7 @@ router.post('/chat', async (req, res) => {
     const data = await response.json();
     let reply = data?.choices?.[0]?.message?.content?.trim()
       || "I'm sorry, I couldn't process that. Please try again.";
-    
-    // Strip <think> blocks generated by reasoning models
+
     reply = reply.replace(/<think>[\s\S]*?(?:<\/think>|$)/g, '').trim();
 
     res.json({ success: true, reply });
