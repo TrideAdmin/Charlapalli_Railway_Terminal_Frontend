@@ -13,7 +13,7 @@ services:
     depends_on:
       - backend
     environment:
-      - VITE_API_URL=https://charlapalli-railway-terminal-api.tride.live
+      - BACKEND_URL=https://charlapalli-railway-terminal-api.tride.live
 
   backend:
     build:
@@ -24,6 +24,10 @@ services:
     ports:
       - "6019:3001"
     restart: always
+    env_file:
+      - ./backend/.env          # loads SARVAM_API_KEY, RAPIDAPI_KEY, RAPIDAPI_HOST
     environment:
       - PORT=3001
+      - NODE_ENV=production
+      # Comma-separated list of allowed frontend origins
       - FRONTEND_ORIGIN=https://charlapalli-railway-terminal.tride.live

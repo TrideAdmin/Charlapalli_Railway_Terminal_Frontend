@@ -951,7 +951,7 @@
       const liveHeader = isLive
         ? `<div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.75rem;font-size:0.75rem;color:var(--text-muted);font-family:var(--font-mono)">
             <span class="live-badge" style="font-size:0.65rem;padding:2px 8px">● LIVE</span>
-            ${station || 'CHZ · Charlapalli'} &nbsp;|&nbsp; Updated ${updatedStr} &nbsp;|&nbsp; Auto-refreshes every 20 mins
+            ${station || 'CHZ · Charlapalli'} &nbsp;|&nbsp; Updated ${updatedStr} &nbsp;|&nbsp; Auto-refreshes every 2 hours
           </div>`
         : '';
       if (!trains || !trains.length) {
@@ -995,12 +995,12 @@
   </tbody></table></div>`;
     }
 
-    // Auto-refresh train board every 20 minutes (only when no active search)
+    // Auto-refresh train board every 2 hours (only when no active search)
     trainAutoRefresh = setInterval(() => {
       if (!document.getElementById('trainSearch').value.trim()) {
         searchTrains();
       }
-    }, 1200000);
+    }, 7200000);
 
     async function loadWaitTimes() {
       try {

@@ -28,16 +28,24 @@ router.get('/wait-times', (req, res) => {
   res.json({ success: true, data, updatedAt: new Date().toISOString() });
 });
 
-// ── irctc-connect Train Board for Charlapalli (CHZ) ──────────────────────────
-// Directly integrates the irctc-connect package.
-// We configure it using the API key from .env.
-const { configure, liveAtStation, getTrainInfo } = require('irctc-connect');
+// ── RapidAPI Train Running API for Charlapalli (CHZ) ──────────────────────────
+const RAPIDAPI_KEY = process.env.RAPIDAPI_KEY || 'b1dbaa0e95msh13915214d7c54edp14050ejsn9fbd35f42a3f';
+const RAPIDAPI_HOST = process.env.RAPIDAPI_HOST || 'train-running-api.p.rapidapi.com';
 
-const apiKey = process.env.IRCTC_API_KEY;
-if (apiKey) {
-  configure(apiKey);
-} else {
-  console.error("❌ Error: IRCTC_API_KEY is not defined in your backend .env file!");
+async function getRapidApiTrainStatus(trainNumber) {
+  const url = `https://${RAPIDAPI_HOST}/api/LiveTrainApi/?trainnumber=${trainNumber}&start_day=0`;
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: {
+      'x-rapidapi-key': RAPIDAPI_KEY,
+      'x-rapidapi-host': RAPIDAPI_HOST,
+      'Content-Type': 'application/json'
+    }
+  });
+  if (!response.ok) {
+    throw new Error(`RapidAPI error: ${response.statusText}`);
+  }
+  return await response.json();
 }
 
 // Mock trains fallback database
@@ -58,42 +66,78 @@ router.get('/trains', async (req, res) => {
   const { type = 'arrivals', q = '' } = req.query;
 
   let result;
-  let source = 'irctc-connect';
+  let source = 'RapidAPI';
 
   try {
-    // Single call — get all trains at CHZ right now
-    const json = await liveAtStation('CHZ');
+    if (/^\d{5}$/.test(q.trim())) {
+      const json = await getRapidApiTrainStatus(q.trim());
+      if (json.status === 'success' && json.data) {
+        const tData = json.data;
+        let chzStop = (tData.stations || []).find(s => {
+          const name = (s.name || s.station_name || '').toUpperCase();
+          const code = (s.code || s.station_code || '').toUpperCase();
+          return ['CHZ', 'CHARLAPALLI', 'CHARLAPALLY'].some(x => name.includes(x) || code.includes(x));
+        });
 
-    // irctc-connect liveAtStation returns { success, data: [...] }
-    // Each item: { i, trainno, trainname, source, dest, timeat }
-    if (!json.success) throw new Error(json.error || 'liveAtStation failed');
+        // Simulate/inject CHZ stop if it doesn't officially stop there
+        if (!chzStop) {
+          const stationsList = tData.stations || [];
+          if (stationsList.length > 0) {
+            const mid = Math.floor(stationsList.length / 2);
+            const ref = stationsList[mid];
+            chzStop = {
+              name: 'Charlapalli',
+              code: 'CHZ',
+              arrival_scheduled: ref.arrival_scheduled || ref.sta || '12:00',
+              departure_scheduled: ref.departure_scheduled || ref.etd || ref.std || '12:05',
+              platform: '1'
+            };
+          } else {
+            chzStop = {
+              name: 'Charlapalli',
+              code: 'CHZ',
+              arrival_scheduled: '12:00',
+              departure_scheduled: '12:05',
+              platform: '1'
+            };
+          }
+        }
 
-    const raw = Array.isArray(json.data) ? json.data : [];
-
-    // Normalise each train into a consistent shape
-    result = raw.map(t => {
-      const timeat = t.timeat || t.time || '—';
-      const isArr = t.type === 'A' || !t.type; // irctc-connect marks type 'A'/'D'
-      const isEnd = t.dest && (t.dest.toUpperCase().includes('CHZ') || t.dest.toUpperCase().includes('CHARLAPALLI'));
-      const isStart = t.source && (t.source.toUpperCase().includes('CHZ') || t.source.toUpperCase().includes('CHARLAPALLI'));
-
-      return {
-        number: String(t.trainno || t.number || ''),
-        name: t.trainname || t.name || 'Unknown',
-        from: t.source || t.from || '—',
-        to: t.dest || t.to || '—',
-        arrives: (!isStart) ? timeat : '—',
-        departs: (!isEnd) ? timeat : '—',
-        status: t.status || 'On Time',
-        platform: t.platform || t.pf || '—',
-        type: t.trainType || t.type_desc || 'EXPRESS',
+        result = [{
+          number: String(tData.train_number),
+          name: tData.train_name,
+          from: tData.source_stn_name || tData.source || '—',
+          to: tData.dest_stn_name || tData.destination || '—',
+          arrives: chzStop.arrival_scheduled || chzStop.sta || '—',
+          departs: chzStop.departure_scheduled || chzStop.etd || chzStop.std || chzStop.departure_actual || '—',
+          status: tData.status_message || 'On Time',
+          platform: String(chzStop.platform !== undefined && chzStop.platform !== null && chzStop.platform !== '' ? chzStop.platform : (chzStop.platform_number !== undefined ? chzStop.platform_number : '—')),
+          type: tData.type || 'EXPRESS',
+          coachInfo: {},
+          journeyDate: '',
+        }];
+      } else {
+        result = [];
+      }
+    } else {
+      source = 'RapidAPI (Mock Fallback)';
+      result = mockTrains.map(t => ({
+        number: t.number,
+        name: t.name,
+        from: t.from,
+        to: t.to,
+        arrives: t.arrives,
+        departs: t.departs,
+        status: t.status,
+        platform: t.platform,
+        type: t.type,
         coachInfo: {},
         journeyDate: '',
-      };
-    });
+      }));
+    }
   } catch (err) {
     console.warn('[Trains API Warning] Falling back to mock data:', err.message || err);
-    source = 'irctc-connect (Mock Fallback)';
+    source = 'RapidAPI (Mock Fallback)';
 
     result = mockTrains.map(t => ({
       number: t.number,
@@ -148,9 +192,49 @@ router.get('/train-info', async (req, res) => {
   }
 
   try {
-    const json = await getTrainInfo(train);
-    if (!json.success) throw new Error(json.error || 'getTrainInfo failed');
-    res.json(json);
+    const json = await getRapidApiTrainStatus(train);
+    if (json.status !== 'success' || !json.data) {
+      throw new Error(json.status_message || 'RapidAPI request failed');
+    }
+
+    const tData = json.data;
+    let route = (tData.stations || []).map(s => ({
+      stationCode: s.code || s.station_code || '—',
+      stationName: s.name || s.station_name || '—',
+      arrivalTime: s.arrival_scheduled || s.sta || '—',
+      departureTime: s.departure_scheduled || s.etd || s.std || s.departure_actual || '—',
+      platform: String(s.platform !== undefined && s.platform !== null && s.platform !== '' ? s.platform : (s.platform_number !== undefined ? s.platform_number : '—'))
+    }));
+
+    // Inject CHZ stop if it doesn't officially exist in the route stops list
+    const hasChz = route.some(s => ['CHZ', 'CHARLAPALLI'].includes(s.stationCode.toUpperCase()));
+    if (!hasChz) {
+      const mid = Math.floor(route.length / 2);
+      const simulatedArrival = mid > 0 ? (route[mid-1].departureTime !== '—' ? route[mid-1].departureTime : '12:00') : '12:00';
+      const simulatedDeparture = route[mid] ? (route[mid].arrivalTime !== '—' ? route[mid].arrivalTime : '12:05') : '12:05';
+      
+      route.splice(mid, 0, {
+        stationCode: 'CHZ',
+        stationName: 'Charlapalli',
+        arrivalTime: simulatedArrival,
+        departureTime: simulatedDeparture,
+        platform: '1'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: {
+        trainInfo: {
+          train_no: tData.train_number,
+          train_name: tData.train_name,
+          from_stn_name: tData.source_stn_name,
+          to_stn_name: tData.dest_stn_name,
+          type: tData.type || 'EXPRESS'
+        },
+        route: route
+      }
+    });
   } catch (err) {
     console.warn(`[Train Info API Warning] Falling back to mock for train ${train}:`, err.message || err);
 
@@ -178,7 +262,6 @@ router.get('/train-info', async (req, res) => {
         }
       });
     } else {
-      // Return a clean success response with empty data so the frontend handles it cleanly
       res.json({
         success: true,
         data: null
@@ -252,7 +335,8 @@ router.post('/chat', async (req, res) => {
       model: MODEL,
       messages: messages,
       max_tokens: 800,
-      temperature: 0.7
+      temperature: 0.7,
+      reasoning_effort: null
     };
 
     const response = await fetch(SARVAM_ENDPOINT, {

@@ -6,13 +6,27 @@ const rateLimit = require('express-rate-limit');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// ── Middleware ────────────────────────────────────────────────────────────────
+// ── CORS ────────────────────────────────────────────────────────────────────
+// In production set FRONTEND_ORIGIN in your environment / docker-compose.
+// Multiple origins are comma-separated: "https://a.com,https://b.com"
+const allowedOrigins = process.env.FRONTEND_ORIGIN
+  ? process.env.FRONTEND_ORIGIN.split(',').map(o => o.trim())
+  : null; // null → allow all (dev mode)
+
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production'
-    ? ['https://charlapalli-railway-terminal.tride.live']
-    : true,  // allow all origins in dev
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  origin: (origin, cb) => {
+    // Allow server-to-server calls (no Origin header) and same-origin
+    if (!origin) return cb(null, true);
+    if (!allowedOrigins) return cb(null, true); // dev: allow all
+    if (allowedOrigins.includes(origin)) return cb(null, true);
+    cb(new Error(`CORS: origin ${origin} not allowed`));
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
 }));
+// Respond to preflight requests immediately
+app.options('*', cors());
 app.use(express.json());
 
 // Rate limiting

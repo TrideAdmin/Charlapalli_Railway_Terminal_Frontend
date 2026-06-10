@@ -1,1746 +1,1008 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Navigate | Charlapalli Terminal</title>
-<link rel="stylesheet" href="/css/style.css?v=31" />
-<script>
-  window.CT_API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:'
-    ? 'http://localhost:3001/api'
-    : 'https://charlapalli-railway-terminal-api.tride.live/api';
-</script>
-<style>
-:root {
-  --bg:      var(--black-2);
-  --white:   var(--charcoal);
-  --border:  var(--border);
-  --border2: var(--border-gold);
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Navigate | Charlapalli Terminal</title>
+  <link rel="stylesheet" href="/css/style.css?v=31" />
+  <script>
+    window.CT_API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:'
+      ? 'http://localhost:3001/api'
+      : 'https://charlapalli-railway-terminal-api.tride.live/api';
+  </script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --white: #ffffff;
+      --border: rgba(0,0,0,0.08);
+      --border2: rgba(160,120,40,0.22);
+      --txt: #0f1318;
+      --txt2: #3a4455;
+      --txt3: #7a8496;
+      --blue: #a07828;
+      --blue-lt: rgba(160,120,40,0.10);
+      --cyan: #5a6478;
+      --safe: #059669;
+      --safe-lt: rgba(5,150,105,0.06);
+      --mod: #d97706;
+      --mod-lt: rgba(217,119,6,0.06);
+      --crowd: #ea580c;
+      --crowd-lt: rgba(234,88,12,0.06);
+      --crit: #dc2626;
+      --crit-lt: rgba(220,38,38,0.06);
+      --fob-bg: rgba(160,120,40,0.10);
+      --fob-b: rgba(160,120,40,0.25);
+      --nav: #e85d26;
+      --nav-glow: rgba(232,93,38,0.15);
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+      --shadow: 0 4px 24px rgba(0,0,0,0.10);
+      --shadow-lg: 0 12px 48px rgba(0,0,0,0.14);
+      --r: 8px;
+      --r2: 12px;
+      --font: 'Space Grotesk', sans-serif;
+      --display: 'Space Grotesk', sans-serif;
+      --mono: 'JetBrains Mono', monospace;
+      --border-soothing: rgba(15,23,42,0.08);
+      --gold: #a07828;
+      --gold-glow: rgba(160,120,40,0.10);
+      --border-gold: rgba(160,120,40,0.25);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:var(--font);background:var(--bg);color:var(--txt);min-height:100vh;font-size:14.5px;-webkit-font-smoothing:antialiased}
 
-  --txt:     var(--text-primary);
-  --txt2:    var(--text-secondary);
-  --txt3:    var(--text-muted);
+    .layout{display:flex;height:calc(100vh - 118px);overflow:hidden;position:relative}
+    .site-footer{display:none!important}
+    select option{background:#ffffff;color:#0f1318}
 
-  --blue:    var(--gold);
-  --blue-lt: var(--gold-glow);
-  --cyan:    var(--silver);
-  --safe:    #059669;
-  --safe-lt: rgba(5, 150, 105, 0.12);
-  --mod:     #d97706;
-  --mod-lt:  rgba(217, 119, 6, 0.12);
-  --crowd:   #ea580c;
-  --crowd-lt: rgba(234, 88, 12, 0.12);
-  --crit:    #dc2626;
-  --crit-lt: rgba(220, 38, 38, 0.12);
+    /* ── SIDEBAR ── */
+    .sidebar{background:var(--white);border-right:1px solid var(--border);width:380px;overflow:hidden;display:flex;flex-direction:column;flex-shrink:0;transition:width .35s cubic-bezier(.4,0,.2,1),opacity .35s ease,border-color .35s ease}
+    .sidebar-inner{width:380px;height:100%;display:flex;flex-direction:column;overflow-y:auto;flex-shrink:0}
+    .layout.collapsed .sidebar{width:0;opacity:0;border-right-color:transparent;pointer-events:none}
+    .sidebar-toggle-handle{position:absolute;left:380px;top:50%;transform:translate(-50%,-50%);width:24px;height:56px;background:var(--white);border:1.5px solid var(--nav);border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:1000;transition:left .35s cubic-bezier(.4,0,.2,1);box-shadow:var(--shadow);color:var(--nav)}
+    .sidebar-toggle-handle:hover{background:var(--nav-glow)}
+    .layout.collapsed .sidebar-toggle-handle{left:0;transform:translate(0,-50%);border-left-color:transparent;border-radius:0 6px 6px 0}
+    .sb-sec{padding:20px;border-bottom:1px solid var(--border)}
+    .sb-head{font-family:var(--display);font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--txt3);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+    .sb-head::after{content:'';flex:1;height:1px;background:var(--border)}
+    .nav-card{background:linear-gradient(135deg,#f8f9fb,#f1f3f7);border:1px solid var(--border-gold);border-radius:var(--r2);padding:16px;color:var(--txt);box-shadow:var(--shadow);margin-bottom:2px}
+    .nc-title{font-family:var(--display);font-size:17px;font-weight:800;letter-spacing:.04em;margin-bottom:8px;color:var(--gold)}
+    .nc-step{display:flex;align-items:flex-start;gap:10px;font-size:13.5px;opacity:.95;margin-top:8px}
+    .nc-num{width:18px;height:18px;background:var(--gold-glow);border:1px solid var(--border-gold);color:var(--gold);border-radius:50%;display:grid;place-items:center;font-size:10px;font-weight:700;flex-shrink:0;margin-top:1px}
+    .entry-selector{display:flex;flex-direction:column;gap:8px}
+    .entry-label{font-size:13px;font-weight:600;color:var(--txt2);display:flex;align-items:center;gap:6px}
+    .entry-dot{width:8px;height:8px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 2px var(--gold-glow)}
+    select{appearance:none;background:var(--bg);border:1px solid var(--border);border-radius:var(--r);color:var(--txt);padding:10px 32px 10px 14px;font-size:14px;font-family:var(--font);width:100%;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23a07828' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;transition:all .15s}
+    select:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-glow)}
+    .hint-text{font-size:12px;color:var(--txt3);display:flex;align-items:center;gap:6px;padding:10px 12px;background:var(--bg);border-radius:var(--r);border:1px dashed var(--border)}
+    .route-result{display:none;flex-direction:column;gap:10px}
+    .route-result.show{display:flex}
+    .rr-header{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:var(--r);border:1px solid var(--border);background:var(--bg)}
+    .rr-icon{width:32px;height:32px;border-radius:var(--r);display:grid;place-items:center;flex-shrink:0}
+    .rr-title{font-size:15px;font-weight:700;color:var(--txt)}
+    .rr-sub{font-size:12.5px;color:var(--txt2);margin-top:2px}
+    .rr-steps{display:flex;flex-direction:column;gap:6px}
+    .rs{display:flex;align-items:flex-start;gap:10px;font-size:14px;padding:10px 12px;background:var(--bg);border-radius:var(--r);border-left:3px solid var(--nav)}
+    .rs-num{width:20px;height:20px;background:var(--nav);color:#fff;border-radius:50%;display:grid;place-items:center;font-size:10px;font-weight:700;flex-shrink:0;margin-top:1px}
+    .rs-txt{color:var(--txt2);line-height:1.5}
+    .rs-txt strong{color:var(--txt)}
+    .pf-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .pf-chip{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:var(--r);border:1px solid var(--border);background:var(--white);cursor:pointer;transition:all .15s;font-size:13.5px;font-weight:600;color:var(--txt2)}
+    .pf-chip:hover{border-color:var(--gold);color:var(--txt);background:var(--gold-glow)}
+    .pf-chip.sel{border-color:var(--gold);background:var(--gold-glow);color:var(--gold)}
+    .btn-clear{display:flex;align-items:center;justify-content:center;gap:8px;padding:10px;background:transparent;border:1px solid var(--border);border-radius:var(--r);font-family:var(--font);font-size:13.5px;font-weight:600;color:var(--txt2);cursor:pointer;transition:all .15s;width:100%;margin-top:8px}
+    .btn-clear:hover{border-color:var(--crit);color:var(--crit);background:rgba(220,38,38,.06)}
 
-  --fob-bg:  var(--gold-glow);
-  --fob-b:   var(--gold-border);
+    /* ── MAP PANEL ── */
+    .map-panel{display:flex;flex-direction:column;overflow:hidden;background:var(--bg);flex:1;min-width:0;position:relative}
+    .map-head{background:var(--white);border-bottom:1px solid var(--border);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;box-shadow:var(--shadow-sm)}
+    .mh-title{font-family:var(--display);font-size:20px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--txt)}
+    .mh-sub{font-size:12.5px;color:var(--txt3);margin-top:4px}
+    .mh-right{display:flex;align-items:center;gap:16px}
+    .legend{display:flex;align-items:center;gap:14px}
+    .leg{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--txt2)}
 
-  --nav:     var(--orange);
-  --nav-glow: var(--orange-glow);
+    .map-canvas{flex:1;overflow:auto;padding:32px 24px;display:flex;justify-content:center;align-items:flex-start}
 
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
-  --shadow:    var(--shadow);
-  --shadow-lg: var(--shadow-lg);
+    /* ══ STATION WRAP — fixed size ══ */
+    .station-wrap{background:var(--white);border:1.5px solid var(--border-soothing);border-radius:var(--r2);box-shadow:var(--shadow-lg);position:relative;overflow:hidden;width:1104px;height:936px;flex-shrink:0}
 
-  --r: var(--radius);
-  --r2: var(--radius-lg);
+    #station-canvas{position:relative;width:920px;height:780px;transform:scale(1.2);transform-origin:top left;background:#eceae4;overflow:hidden}
 
-  --font:    var(--font-body);
-  --display: var(--font-display);
-  --mono:    var(--font-mono);
-  --border-soothing: rgba(15, 23, 42, 0.16);
-}
+    #nav-svg{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:50}
 
-[data-theme="dark"] {
-  --border-soothing: rgba(255, 255, 255, 0.14);
-}
+    /* ── CANVAS ENTITIES (matching reference layout style) ── */
+    .bx{position:absolute;border:.5px solid rgba(0,0,0,.2);border-radius:5px;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;font-size:8.5px;font-weight:500;color:#222;padding:3px;cursor:pointer;line-height:1.2;z-index:10;transition:.15s}
+    .bx:hover{border-color:#a07828;background:#fdf8ec;z-index:30}
+    .bx.constr{background:rgba(217,119,6,.05);border:.5px dashed rgba(217,119,6,.5);color:rgba(120,70,0,.7);cursor:default;font-size:8px}
+    .bx.constr:hover{border-color:rgba(217,119,6,.5);color:rgba(120,70,0,.7);background:rgba(217,119,6,.05)}
+    .bx.terminal{background:#0f2040;border-color:#1a3a6b;color:#fff;border-radius:7px}
+    .bx.terminal:hover{background:#1a3460}
+    .bx.dark{background:#1a2437;border-color:#1a2437;color:#cde}
+    .bx.dark:hover{background:#243050;border-color:#243050}
+    .bx.parking{background:#d8d3c8;border-color:#b0aa9e;color:#444}
+    .bx.rot{writing-mode:vertical-lr;text-orientation:mixed;transform:rotate(180deg)}
+    .bx.gate2a{border:1.5px solid #059669;background:#f0fdf4;color:#15803d}
+    .bx.gate2a:hover{background:#dcfce7}
+    .bx.active-dest{outline:2.5px solid var(--nav)!important;outline-offset:2px;z-index:40}
 
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    /* FOB */
+    .fob{position:absolute;border-left:1.5px solid rgba(217,119,6,.5);border-right:1.5px solid rgba(217,119,6,.5);background:rgba(217,119,6,.06);z-index:4;pointer-events:none}
+    .fob-lbl{position:absolute;top:3px;left:50%;transform:translateX(-50%);font-size:7px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(130,80,0,.8);white-space:nowrap}
 
-body {
-  font-family: var(--font);
-  background: var(--bg);
-  color: var(--txt);
-  min-height: 100vh;
-  font-size: 14.5px;
-  -webkit-font-smoothing: antialiased;
-}
+    /* Platform */
+    .pf-track{position:absolute;border:.5px solid rgba(0,0,0,.18);border-radius:3px;background:#dde3ea;z-index:5;cursor:pointer;transition:.15s}
+    .pf-track::before{content:'';position:absolute;top:50%;left:4px;right:4px;height:1.5px;background:repeating-linear-gradient(90deg,#a0adb8 0,#a0adb8 7px,transparent 7px,transparent 12px);transform:translateY(-50%)}
+    .pf-track:hover{border-color:#a07828}
+    .pf-track.active-dest{outline:2.5px solid var(--nav);outline-offset:2px;z-index:40}
+    .pf-label{position:absolute;font-size:8px;font-weight:700;background:#1a56db;color:#fff;border-radius:3px;padding:2px 4px;z-index:15;pointer-events:none}
 
-/* ── LAYOUT ── */
-.layout {
-  display:flex;
-  height:calc(100vh - 118px);
-  overflow:hidden;
-  position:relative;
-}
+    /* Crowd badge */
+    .cb{position:absolute;display:flex;align-items:center;gap:2px;padding:2px 5px;border-radius:4px;font-size:9px;font-weight:700;border:1px solid;z-index:16;white-space:nowrap}
+    .cb.safe{background:rgba(5,150,105,.08);border-color:rgba(5,150,105,.25);color:#059669}
+    .cb.moderate{background:rgba(217,119,6,.08);border-color:rgba(217,119,6,.25);color:#d97706}
+    .cb.crowded{background:rgba(234,88,12,.08);border-color:rgba(234,88,12,.25);color:#ea580c}
+    .cb.critical{background:rgba(220,38,38,.08);border-color:rgba(220,38,38,.25);color:#dc2626}
 
-.site-footer {
-  display: none !important;
-}
+    /* Icon strip on platforms */
+    .ic-spread{position:absolute;display:flex;align-items:center;z-index:12;pointer-events:none}
+    .ic{width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:#fff;border:.5px solid rgba(0,0,0,.18);box-shadow:0 1px 2px rgba(0,0,0,.08)}
 
-select option {
-  background: var(--charcoal);
-  color: var(--text-primary);
-}
+    /* Road / bolguda */
+    .road{position:absolute;background:#ccc9c0;z-index:2}
+    .bolguda-bar{position:absolute;bottom:0;left:0;right:0;height:20px;background:#e8e4dc;border-top:.5px dashed #c0b89a;display:flex;align-items:center;justify-content:center;font-size:8.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#888;z-index:5}
 
-/* ── SIDEBAR ── */
-.sidebar {
-  background:var(--white);
-  border-right:1px solid var(--border);
-  width:380px;
-  overflow:hidden;
-  display:flex;
-  flex-direction:column;
-  flex-shrink:0;
-  transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.35s ease, border-color 0.35s ease;
-}
+    /* Zone label */
+    .zone{position:absolute;left:0;right:0;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(0,0,0,.35);z-index:6;pointer-events:none}
 
-.sidebar-inner {
-  width:380px;
-  height:100%;
-  display:flex;
-  flex-direction:column;
-  overflow-y:auto;
-  flex-shrink:0;
-}
+    /* X/Y markers */
+    .x-marker{position:absolute;width:22px;height:22px;background:#1a56db;border:3px solid #fff;border-radius:50%;box-shadow:0 0 0 3px rgba(26,86,219,.3),var(--shadow);z-index:60;pointer-events:auto;cursor:grab;user-select:none;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff}
+    .x-marker:active{cursor:grabbing}
+    .y-marker{position:absolute;width:22px;height:22px;background:var(--crit);border:3px solid #fff;border-radius:50%;box-shadow:0 0 0 3px rgba(220,38,38,.25),var(--shadow);z-index:60;pointer-events:auto;cursor:grab;user-select:none;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff}
+    .y-marker:active{cursor:grabbing}
+    .pulse-ring{position:absolute;inset:-6px;border-radius:50%;border:2px solid;opacity:0;animation:ring 1.8s ease-out infinite}
+    .x-marker .pulse-ring{border-color:#1a56db}
+    .y-marker .pulse-ring{border-color:var(--crit)}
+    @keyframes ring{0%{opacity:.7;transform:scale(.6)}100%{opacity:0;transform:scale(1.8)}}
 
-.layout.collapsed .sidebar {
-  width:0;
-  opacity:0;
-  border-right-color:transparent;
-  pointer-events:none;
-}
+    /* Nav path */
+    .nav-path{stroke:var(--nav);stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:8 4;animation:dash 1s linear infinite}
+    .nav-path-bg{stroke:rgba(232,93,38,.12);stroke-width:7;fill:none;stroke-linecap:round;stroke-linejoin:round}
+    @keyframes dash{to{stroke-dashoffset:-24}}
 
-/* Toggle button handle styling */
-.sidebar-toggle-handle {
-  position: absolute;
-  left: 380px;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: 24px;
-  height: 56px;
-  background: var(--white);
-  border: 1.5px solid var(--nav);
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  z-index: 1000;
-  transition: left 0.35s cubic-bezier(0.4, 0, 0.2, 1), background var(--t-fast), border-color var(--t-fast), color var(--t-fast);
-  box-shadow: var(--shadow);
-  color: var(--nav);
-}
-.sidebar-toggle-handle:hover {
-  background: var(--nav-glow);
-  color: var(--orange-light);
-  border-color: var(--orange-light);
-}
-.layout.collapsed .sidebar-toggle-handle {
-  left: 0;
-  transform: translate(0, -50%);
-  border-left-color: transparent;
-  border-radius: 0 6px 6px 0;
-}
+    /* Tooltip */
+    .map-tt{position:absolute;background:#fff;border:.5px solid rgba(0,0,0,.2);border-radius:8px;padding:9px 12px;font-size:11.5px;box-shadow:0 6px 20px rgba(0,0,0,.15);z-index:200;pointer-events:none;max-width:220px;line-height:1.55;display:none;color:#222}
+    .map-tt.show{display:block}
+    .map-tt-n{font-weight:600;font-size:12px;margin-bottom:4px;color:#111}
+    .map-tt-row{font-size:10.5px;color:#555;margin-bottom:2px}
 
-.sb-sec {
-  padding: 20px;
-  border-bottom: 1px solid var(--border);
-}
-
-.sb-head {
-  font-family: var(--display);
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--txt3);
-  margin-bottom: 14px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.sb-head::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: var(--border);
-}
-
-/* Nav instruction card */
-.nav-card {
-  background: linear-gradient(135deg, var(--charcoal-2), var(--charcoal-3));
-  border: 1px solid var(--border-gold);
-  border-radius: var(--r2);
-  padding: 16px;
-  color: var(--text-primary);
-  box-shadow: var(--shadow);
-  margin-bottom: 2px;
-}
-.nc-title {
-  font-family: var(--display);
-  font-size: 17px;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  margin-bottom: 8px;
-  color: var(--gold);
-}
-.nc-step {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  font-size: 13.5px;
-  opacity: 0.95;
-  margin-top: 8px;
-}
-.nc-num {
-  width: 18px;
-  height: 18px;
-  background: var(--gold-glow);
-  border: 1px solid var(--border-gold);
-  color: var(--gold);
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  font-size: 10px;
-  font-weight: 700;
-  flex-shrink: 0;
-  margin-top: 1px;
-}
-
-/* Entry point selector */
-.entry-selector {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.entry-label {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--txt2);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.entry-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--gold);
-  box-shadow: 0 0 0 2px var(--gold-glow);
-}
-select {
-  appearance: none;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: var(--r);
-  color: var(--txt);
-  padding: 10px 32px 10px 14px;
-  font-size: 14px;
-  font-family: var(--font);
-  width: 100%;
-  cursor: pointer;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23a07828' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 12px center;
-  transition: all var(--t-fast) var(--ease);
-}
-select:focus {
-  outline: none;
-  border-color: var(--gold);
-  box-shadow: 0 0 0 3px var(--gold-glow);
-}
-
-.hint-text {
-  font-size: 12px;
-  color: var(--txt3);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 10px 12px;
-  background: var(--bg);
-  border-radius: var(--r);
-  border: 1px dashed var(--border);
-}
-
-/* Route result panel */
-.route-result {
-  display: none;
-  flex-direction: column;
-  gap: 10px;
-}
-.route-result.show {
-  display: flex;
-}
-
-.rr-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 14px;
-  border-radius: var(--r);
-  border: 1px solid var(--border);
-  background: var(--bg);
-}
-.rr-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: var(--r);
-  display: grid;
-  place-items: center;
-  flex-shrink: 0;
-}
-.rr-title {
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--text-primary);
-}
-.rr-sub {
-  font-size: 12.5px;
-  color: var(--txt2);
-  margin-top: 2px;
-}
-
-.rr-steps {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.rs {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  font-size: 14px;
-  padding: 10px 12px;
-  background: var(--bg);
-  border-radius: var(--r);
-  border-left: 3px solid var(--nav);
-  transition: all var(--t-fast) var(--ease);
-}
-.rs-num {
-  width: 20px;
-  height: 20px;
-  background: var(--nav);
-  color: #fff;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  font-size: 10px;
-  font-weight: 700;
-  flex-shrink: 0;
-  margin-top: 1px;
-}
-.rs-txt {
-  color: var(--txt2);
-  line-height: 1.5;
-}
-.rs-txt strong {
-  color: var(--txt);
-}
-
-/* Platform crowd chips */
-.pf-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-
-.pf-chip {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 12px;
-  border-radius: var(--r);
-  border: 1px solid var(--border);
-  background: var(--white);
-  cursor: pointer;
-  transition: all var(--t-fast) var(--ease);
-  font-size: 13.5px;
-  font-weight: 600;
-  color: var(--txt2);
-  position: relative;
-  overflow: hidden;
-}
-.pf-chip::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 3.5px;
-  border-radius: 0 2px 2px 0;
-}
-.pf-chip.safe::before    { background: var(--safe); }
-.pf-chip.moderate::before{ background: var(--mod); }
-.pf-chip.crowded::before { background: var(--crowd); }
-.pf-chip.critical::before{ background: var(--crit); }
-.pf-chip:hover {
-  border-color: var(--gold);
-  color: var(--text-primary);
-  background: var(--gold-glow);
-}
-.pf-chip.sel {
-  border-color: var(--gold);
-  background: var(--gold-glow);
-  color: var(--gold);
-}
-.pcd {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-.pc-num {
-  margin-left: auto;
-  font-family: var(--mono);
-  font-size: 12px;
-  color: var(--txt3);
-}
-
-/* Stats */
-.stat-rows {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-.srow {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 12px;
-  background: var(--bg);
-  border-radius: var(--r);
-  border: 1px solid var(--border);
-  font-size: 13.5px;
-}
-.sk {
-  color: var(--txt2);
-}
-.sv {
-  font-family: var(--mono);
-  font-size: 13.5px;
-  font-weight: 700;
-}
-
-/* Clear btn */
-.btn-clear {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 10px;
-  background: transparent;
-  border: 1px solid var(--border);
-  border-radius: var(--r);
-  font-family: var(--font);
-  font-size: 13.5px;
-  font-weight: 600;
-  color: var(--txt2);
-  cursor: pointer;
-  transition: all var(--t-fast) var(--ease);
-  width: 100%;
-  margin-top: 8px;
-}
-.btn-clear:hover {
-  border-color: var(--crit);
-  color: var(--crit);
-  background: rgba(220, 38, 38, 0.06);
-}
-
-/* ── MAP PANEL ── */
-.map-panel {
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  background: var(--bg);
-  flex: 1;
-  min-width: 0;
-}
-
-.map-head {
-  background: var(--white);
-  border-bottom: 1px solid var(--border);
-  padding: 16px 24px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-shrink: 0;
-  box-shadow: var(--shadow-sm);
-}
-
-.mh-title {
-  font-family: var(--display);
-  font-size: 20px;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--txt);
-}
-.mh-title span {
-  color: var(--gold);
-}
-.mh-sub {
-  font-size: 12.5px;
-  color: var(--txt3);
-  margin-top: 4px;
-}
-
-.mh-right {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.legend {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-.leg {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12.5px;
-  color: var(--txt2);
-}
-.leg-d {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-}
-
-.footfall {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 16px;
-  background: var(--gold-glow);
-  border: 1px solid var(--border-gold);
-  border-radius: var(--r2);
-}
-.ff-lbl {
-  font-size: 11.5px;
-  font-weight: 700;
-  color: var(--gold);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-}
-.ff-val {
-  font-family: var(--mono);
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--gold);
-}
-
-/* Map canvas */
-.map-canvas {
-  flex: 1;
-  overflow: auto;
-  padding: 32px 24px;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-}
-
-/* ══ STATION SVG LAYOUT ══ */
-.station-wrap {
-  background: var(--white);
-  border: 1.5px solid var(--border-soothing);
-  border-radius: var(--r2);
-  box-shadow: var(--shadow-lg);
-  position: relative;
-  overflow: hidden;
-  width: 1440px; /* 1200px * 1.2 */
-  height: 888px; /* 740px * 1.2 */
-  flex-shrink: 0;
-}
-
-/* ── CANVAS (SVG-like using HTML+CSS absolute) ── */
-#station-canvas {
-  position: relative;
-  width: 1200px;
-  height: 740px;
-  transform: scale(1.2);
-  transform-origin: top left;
-  background: var(--white);
-}
-
-/* Navigation overlay path */
-#nav-svg {
-  position:absolute;
-  top:0;left:0;
-  width:100%;height:100%;
-  pointer-events:none;
-  z-index:50;
-}
-
-/* Clickable entities */
-.entity {
-  position:absolute;
-  cursor:pointer;
-  transition:.15s;
-  user-select:none;
-}
-.entity:hover { filter:brightness(.93); }
-.entity.active-dest {
-  outline:2.5px solid var(--nav);
-  outline-offset:2px;
-  z-index:40;
-}
-
-/* Platform track */
-.pf-track {
-  position:absolute;
-  background:var(--charcoal-2);
-  border:1.5px solid var(--border-soothing);
-  border-radius:3px;
-}
-.pf-track::before {
-  content:'';
-  position:absolute;
-  top:50%;left:6px;right:6px;
-  height:2px;
-  background:repeating-linear-gradient(90deg,#b0bcc8 0,#b0bcc8 10px,transparent 10px,transparent 18px);
-  transform:translateY(-50%);
-}
-
-/* Platform label */
-.pf-label {
-  position:absolute;
-  font-family:var(--mono);
-  font-size:12px;font-weight:700;
-  background:var(--blue);color:#fff;
-  border-radius:4px;
-  padding:4px 6px;
-  z-index:10;
-  pointer-events:none;
-}
-
-/* FOB bridge */
-.fob {
-  position:absolute;
-  background:rgba(217,119,6,.07);
-  border-left:2px solid var(--fob-b);
-  border-right:2px solid var(--fob-b);
-  z-index:5;
-  pointer-events:none;
-}
-.fob-label {
-  position:absolute;
-  bottom:4px;
-  left:50%;transform:translateX(-50%) rotate(-90deg);
-  transform-origin:center;
-  font-size:8.5px;font-weight:700;
-  letter-spacing:.15em;text-transform:uppercase;
-  color:rgba(180,100,0,.8);
-  white-space:nowrap;
-}
-
-/* Crowd badge */
-.crowd-badge {
-  position:absolute;
-  display:flex;align-items:center;gap:3px;
-  padding:4px 8px;border-radius:6px;
-  font-family:var(--mono);font-size:13px;font-weight:700;
-  border:1.5px solid;
-  box-shadow:var(--shadow-sm);
-  z-index:20;
-  cursor:pointer;
-  transition:.15s;
-  white-space:nowrap;
-}
-.crowd-badge:hover{transform:scale(1.07);box-shadow:var(--shadow)}
-.crowd-badge.safe  {background:var(--safe-lt);border-color:rgba(5,150,105,.3);color:var(--safe)}
-.crowd-badge.moderate{background:var(--mod-lt);border-color:rgba(217,119,6,.3);color:var(--mod)}
-.crowd-badge.crowded {background:var(--crowd-lt);border-color:rgba(234,88,12,.3);color:var(--crowd)}
-.crowd-badge.critical{background:var(--crit-lt);border-color:rgba(220,38,38,.3);color:var(--crit)}
-
-/* Congested tag */
-.congested-tag {
-  position:absolute;
-  display:flex;align-items:center;gap:3px;
-  padding:2px 7px;
-  background:var(--crit-lt);
-  border:1px solid rgba(220,38,38,.3);
-  border-radius:4px;
-  font-size:9.5px;font-weight:700;
-  letter-spacing:.1em;text-transform:uppercase;
-  color:var(--crit);
-  z-index:25;
-  pointer-events:none;
-}
-
-/* BOX entities (booking offices, etc.) */
-.box-entity {
-  position:absolute;
-  background:var(--white);
-  border:1.5px solid var(--border-soothing);
-  border-radius:var(--r);
-  display:flex;flex-direction:column;
-  align-items:center;justify-content:center;
-  text-align:center;
-  font-size:13px;font-weight:600;color:var(--txt2);
-  line-height:1.3;
-  padding:6px 8px;
-  cursor:pointer;
-  transition:.15s;
-  z-index:10;
-}
-.box-entity:hover{border-color:var(--blue);color:var(--blue);box-shadow:var(--shadow-sm)}
-.box-entity.active-dest{border-color:var(--nav)!important;box-shadow:0 0 0 3px var(--nav-glow)}
-.box-entity.construction{
-  border:1.5px dashed rgba(217,119,6,.5);
-  background:rgba(217,119,6,.04);
-  color:rgba(180,100,0,.7);
-  cursor:default;
-}
-.box-entity.construction:hover{border-color:rgba(217,119,6,.5);color:rgba(180,100,0,.7)}
-.box-entity.dark{
-  background:#1a2437;border-color:#1a2437;
-  color:#e2eaf3;
-}
-.box-entity.dark:hover{background:#243050;border-color:#243050}
-
-/* Entry gates (green) */
-.gate-entity {
-  position:absolute;
-  background:var(--white);
-  border:1.5px solid var(--border-soothing);
-  border-radius:var(--r);
-  display:flex;flex-direction:column;
-  align-items:center;justify-content:center;
-  text-align:center;
-  font-size:12px;font-weight:600;
-  line-height:1.3;
-  padding:6px 8px;
-  cursor:pointer;
-  transition:.15s;
-  z-index:10;
-}
-.gate-entity:hover{border-color:var(--blue);box-shadow:var(--shadow-sm)}
-.gate-entity.active-dest{border-color:var(--nav)!important}
-
-/* X-point marker (entry) */
-.x-marker {
-  position:absolute;
-  width:22px;height:22px;
-  background:var(--blue);
-  border:3px solid #fff;
-  border-radius:50%;
-  box-shadow:0 0 0 3px rgba(26,86,219,.3),var(--shadow);
-  z-index:60;
-  pointer-events:none;
-  display:flex;align-items:center;justify-content:center;
-  font-size:9px;font-weight:700;color:#fff;
-}
-
-/* Y-point marker */
-.y-marker {
-  position:absolute;
-  width:22px;height:22px;
-  background:var(--crit);
-  border:3px solid #fff;
-  border-radius:50%;
-  box-shadow:0 0 0 3px rgba(220,38,38,.25),var(--shadow);
-  z-index:60;
-  pointer-events:none;
-  display:flex;align-items:center;justify-content:center;
-  font-size:9px;font-weight:700;color:#fff;
-}
-
-/* Nav path */
-.nav-path {
-  stroke:var(--nav);
-  stroke-width:3;
-  fill:none;
-  stroke-linecap:round;
-  stroke-linejoin:round;
-  stroke-dasharray:8 4;
-  animation:dash 1s linear infinite;
-}
-.nav-path-bg {
-  stroke:rgba(26,86,219,.12);
-  stroke-width:7;
-  fill:none;
-  stroke-linecap:round;
-  stroke-linejoin:round;
-}
-@keyframes dash{to{stroke-dashoffset:-24}}
-
-/* Pulse ring on markers */
-.pulse-ring{
-  position:absolute;
-  inset:-6px;
-  border-radius:50%;
-  border:2px solid;
-  opacity:0;
-  animation:ring 1.8s ease-out infinite;
-}
-.x-marker .pulse-ring{border-color:var(--blue)}
-.y-marker .pulse-ring{border-color:var(--crit)}
-@keyframes ring{0%{opacity:.7;transform:scale(.6)}100%{opacity:0;transform:scale(1.8)}}
-
-/* Route tooltip */
-.route-tooltip {
-  position:absolute;
-  background:var(--txt);
-  color:#fff;
-  border-radius:var(--r);
-  padding:6px 12px;
-  font-size:11.5px;
-  font-weight:500;
-  box-shadow:var(--shadow-lg);
-  z-index:100;
-  white-space:nowrap;
-  pointer-events:none;
-  transform:translate(-50%,-100%);
-  margin-top:-8px;
-}
-.route-tooltip::after{
-  content:'';
-  position:absolute;
-  top:100%;left:50%;transform:translateX(-50%);
-  border:5px solid transparent;
-  border-top-color:var(--txt);
-}
-
-/* Station header */
-.st-header {
-  background:linear-gradient(90deg,#0f2040,#1a3a6b,#0f2040);
-  padding:10px 24px;
-  display:flex;align-items:center;justify-content:space-between;
-}
-.st-ends{font-size:11px;font-weight:600;color:rgba(255,255,255,.5);letter-spacing:.1em;text-transform:uppercase}
-.st-title-wrap{text-align:center;flex:1}
-.st-title{
-  font-family:var(--display);
-  font-size:15px;font-weight:800;
-  letter-spacing:.12em;text-transform:uppercase;
-  color:#fff;
-}
-.st-sub{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-top:2px}
-
-/* Zone label */
-.zone-label {
-  text-align:center;
-  font-size:9.5px;font-weight:700;
-  letter-spacing:.2em;text-transform:uppercase;
-  color:var(--txt3);
-  padding:5px 0 3px;
-  border-bottom:1px solid var(--border);
-  background:var(--bg);
-}
-
-/* Bolguda bar */
-.bolguda {
-  position:absolute;
-  bottom:0;left:0;right:0;
-  padding:5px;
-  text-align:center;
-  font-size:9.5px;font-weight:600;
-  letter-spacing:.15em;text-transform:uppercase;
-  color:var(--txt3);
-  border-top:1px dashed var(--border2);
-  background:var(--bg);
-}
-
-.map-footer {
-  background:var(--white);
-  border-top:1px solid var(--border);
-  padding:9px 20px;
-  display:flex;align-items:center;gap:20px;
-  flex-shrink:0;
-  box-shadow:0 -1px 0 var(--border);
-}
-.emg-tag {
-  display:flex;align-items:center;gap:5px;
-  padding:4px 10px;
-  background:var(--crit-lt);
-  border:1px solid rgba(220,38,38,.25);
-  border-radius:5px;
-  font-size:10.5px;font-weight:700;
-  letter-spacing:.1em;text-transform:uppercase;
-  color:var(--crit);
-  flex-shrink:0;
-}
-.emg-contacts{display:flex;align-items:center;gap:18px;flex:1}
-.emg-item{font-size:11.5px;color:var(--txt2)}
-.emg-num{font-family:var(--mono);font-size:11.5px;font-weight:700;color:var(--txt);margin-left:4px}
-.copy{font-size:10.5px;color:var(--txt3);margin-left:auto}
-
-/* Rotated text boxes */
-.rotated-box {
-  writing-mode:vertical-lr;
-  text-orientation:mixed;
-  transform:rotate(180deg);
-  font-size:9.5px;font-weight:600;
-  white-space:nowrap;
-}
-
-/* Divider */
-.divider{width:1px;height:18px;background:var(--border2);flex-shrink:0}
-</style>
+    /* Fullscreen Button */
+    .map-fs-btn {
+      position: absolute;
+      top: 92px;
+      right: 24px;
+      width: 44px;
+      height: 44px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--txt2);
+      cursor: pointer;
+      z-index: 100;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .map-fs-btn:hover {
+      background: var(--gold-glow);
+      color: var(--gold);
+      border-color: var(--border-gold);
+      transform: scale(1.08);
+    }
+    .map-fs-btn:active {
+      transform: scale(0.95);
+    }
+  </style>
 </head>
+
+<!-- SVG icon defs (hidden) -->
+<svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <symbol id="ic-chair" viewBox="0 0 16 16"><rect x="3" y="3" width="10" height="6" rx="1.5" stroke="currentColor" stroke-width="1.2" fill="none"/><rect x="3" y="9" width="10" height="1.5" rx=".5" fill="currentColor"/><line x1="4" y1="10.5" x2="4" y2="13.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="12" y1="10.5" x2="12" y2="13.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></symbol>
+    <symbol id="ic-toilet" viewBox="0 0 16 16"><circle cx="8" cy="4" r="2" stroke="currentColor" stroke-width="1.2" fill="none"/><path d="M5 7h6l-1 6H6z" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linejoin="round"/></symbol>
+    <symbol id="ic-atvm" viewBox="0 0 16 16"><rect x="2" y="4" width="12" height="8" rx="1.5" stroke="currentColor" stroke-width="1.2" fill="none"/><line x1="2" y1="7.5" x2="14" y2="7.5" stroke="currentColor" stroke-width="1"/><line x1="5" y1="10" x2="8" y2="10" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></symbol>
+    <symbol id="ic-escalator" viewBox="0 0 16 16"><line x1="3" y1="13" x2="13" y2="3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><circle cx="11.5" cy="4.5" r="1.5" stroke="currentColor" stroke-width="1.1" fill="none"/><line x1="3" y1="13" x2="6" y2="13" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><line x1="10" y1="3" x2="13" y2="3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></symbol>
+    <symbol id="ic-lift" viewBox="0 0 16 16"><rect x="3" y="2" width="10" height="12" rx="1.5" stroke="currentColor" stroke-width="1.2" fill="none"/><path d="M6 7l2-2 2 2" stroke="currentColor" stroke-width="1.1" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 9l2 2 2-2" stroke="currentColor" stroke-width="1.1" fill="none" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="ic-water" viewBox="0 0 16 16"><path d="M8 2C8 2 3.5 7.5 3.5 10.5a4.5 4.5 0 009 0C12.5 7.5 8 2 8 2z" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linejoin="round"/></symbol>
+    <symbol id="ic-food" viewBox="0 0 16 16"><line x1="5" y1="3" x2="5" y2="13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M3.5 3v3.5a1.5 1.5 0 003 0V3" stroke="currentColor" stroke-width="1.1" fill="none" stroke-linecap="round"/><line x1="11" y1="3" x2="11" y2="13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M9 3h4v4a2 2 0 01-4 0V3z" stroke="currentColor" stroke-width="1.1" fill="none" stroke-linejoin="round"/></symbol>
+    <symbol id="ic-stair" viewBox="0 0 16 16"><path d="M3 13h3v-3h3V7h4V3" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="ic-sleep" viewBox="0 0 16 16"><rect x="2" y="7" width="12" height="5" rx="1" stroke="currentColor" stroke-width="1.2" fill="none"/><circle cx="5" cy="6" r="1.5" stroke="currentColor" stroke-width="1.1" fill="none"/><line x1="2" y1="12" x2="2" y2="14" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="14" y1="12" x2="14" y2="14" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></symbol>
+    <symbol id="ic-charge" viewBox="0 0 16 16"><path d="M9 2L5 9h5l-3 5 7-8H9l3-4z" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linejoin="round" stroke-linecap="round"/></symbol>
+  </defs>
+</svg>
+
 <body>
-<script src="/js/layout.js"></script>
+  <script src="/js/layout.js"></script>
 
-<!-- LAYOUT -->
-<div class="layout">
-
-  <!-- SIDEBAR -->
-  <aside class="sidebar">
-    <div class="sidebar-inner">
-
-      <!-- Nav instruction -->
-    <div class="sb-sec">
-      <div class="nav-card">
-        <div class="nc-title">🗺 Navigate Station</div>
-        <div class="nc-step"><div class="nc-num">1</div><span>Choose your <strong>entry point</strong> (X) below</span></div>
-        <div class="nc-step"><div class="nc-num">2</div><span>Click any <strong>platform or entity</strong> on the map (Y)</span></div>
-        <div class="nc-step"><div class="nc-num">3</div><span>Your <strong>route</strong> lights up instantly</span></div>
-      </div>
-      <div style="height:10px"></div>
-      <div class="entry-selector">
-        <div class="entry-label"><span class="entry-dot"></span>Your Entry Point (X)</div>
-        <select id="entry-select" onchange="onEntryChange()">
-          <option value="gate2a">Gate 2A Booking Counter (Main)</option>
-          <option value="gate4">Gate 4 / Booking Office</option>
-          <option value="gate8">Gate 8 Entry</option>
-          <option value="ate4">ATE-4 Outside Entrance</option>
-          <option value="vip">VIP Entry Gate</option>
-          <option value="bolguda">Bolguda Entrance (PF10)</option>
-        </select>
-      </div>
-      <div style="height:8px"></div>
-      <div class="hint-text">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;opacity:.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        Click any platform, gate, or office on the map to see your route
-      </div>
-    </div>
-
-    <!-- Route Result -->
-    <div class="sb-sec">
-      <div class="sb-head">Route</div>
-      <div class="route-result" id="route-result">
-        <div class="rr-header" id="rr-header"></div>
-        <div class="rr-steps" id="rr-steps"></div>
-        <button class="btn-clear" onclick="clearRoute()">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          Clear Route
-        </button>
-      </div>
-      <div id="route-empty" style="font-size:12px;color:var(--txt3);text-align:center;padding:12px 0">
-        No route selected yet
-      </div>
-    </div>
-
-    <!-- Platform status -->
-    <div class="sb-sec">
-      <div class="sb-head">Platforms</div>
-      <div class="pf-grid" id="pf-chips"></div>
-    </div>
-
-    <!-- Stats -->
-    <div class="sb-sec">
-      <div class="sb-head">Live Status</div>
-      <div class="stat-rows">
-        <div class="srow"><span class="sk">Total Footfall</span><span class="sv" style="color:var(--blue)">3,847</span></div>
-        <div class="srow"><span class="sk">Safe Platforms</span><span class="sv" style="color:var(--safe)">4</span></div>
-        <div class="srow"><span class="sk">Moderate Zones</span><span class="sv" style="color:var(--mod)">3</span></div>
-        <div class="srow"><span class="sk">Critical/Congested</span><span class="sv" style="color:var(--crit)">PF 1, PF 9</span></div>
-      </div>
-    </div>
-
-    </div><!-- /sidebar-inner -->
-  </aside>
-
-  <!-- Sidebar toggle handle on the border -->
-  <button id="sidebar-toggle-handle" class="sidebar-toggle-handle" onclick="toggleSidebar()" title="Collapse Sidebar">
-    <svg id="sidebar-toggle-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-      <polyline points="15 18 9 12 15 6"></polyline>
-    </svg>
-  </button>
-
-  <!-- MAP PANEL -->
-  <main class="map-panel">
-
-    <div class="map-head">
-      <div>
-        <div class="mh-title">Charlapalli Terminal — <span>CCTV Digital Layout</span></div>
-        <div class="mh-sub">Live Mode · Last sync 09:53 AM · Click any entity to navigate</div>
-      </div>
-      <div class="mh-right">
-        <div class="legend">
-          <div class="leg"><span class="leg-d" style="background:var(--safe)"></span>Safe</div>
-          <div class="leg"><span class="leg-d" style="background:var(--mod)"></span>Moderate</div>
-          <div class="leg"><span class="leg-d" style="background:var(--crowd)"></span>Crowded</div>
-          <div class="leg"><span class="leg-d" style="background:var(--crit)"></span>Critical</div>
-          <div class="leg"><span style="display:inline-block;width:14px;height:7px;border-radius:2px;background:rgba(217,119,6,.1);border:1px solid rgba(217,119,6,.35)"></span>FOB</div>
+  <div class="layout">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-inner">
+        <div class="sb-sec">
+          <div class="nav-card">
+            <div class="nc-title">🗺 Navigate Station</div>
+            <div class="nc-step"><div class="nc-num">1</div><span>Choose your <strong>entry point</strong> (X) below</span></div>
+            <div class="nc-step"><div class="nc-num">2</div><span>Click any <strong>platform or entity</strong> on the map (Y)</span></div>
+            <div class="nc-step"><div class="nc-num">3</div><span>Your <strong>route</strong> lights up instantly</span></div>
+          </div>
+          <div style="height:10px"></div>
+          <div class="entry-selector">
+            <div class="entry-label"><span class="entry-dot"></span>Your Entry Point (X)</div>
+            <select id="entry-select" onchange="onEntryChange()">
+              <option value="gate2a">Gate 2A Booking Counter (Main)</option>
+              <option value="gate4">Gate 4 / Booking Office</option>
+              <option value="gate8">Gate 8 Entry</option>
+              <option value="ate4">ATE-4 Outside Entrance</option>
+              <option value="vip">VIP Entry Gate</option>
+              <option value="bolguda">Bolguda Entrance (PF10)</option>
+            </select>
+          </div>
+          <div style="height:8px"></div>
+          <div class="hint-text">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;opacity:.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Click any platform, gate, or office on the map to see your route
+          </div>
         </div>
-        <div class="footfall">
-          <div class="ff-lbl">Footfall</div>
-          <div class="ff-val">3,847</div>
+
+        <div class="sb-sec">
+          <div class="sb-head">Route</div>
+          <div class="route-result" id="route-result">
+            <div class="rr-header" id="rr-header"></div>
+            <div class="rr-steps" id="rr-steps"></div>
+            <button class="btn-clear" onclick="clearRoute()">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              Clear Route
+            </button>
+          </div>
+          <div id="route-empty" style="font-size:12px;color:var(--txt3);text-align:center;padding:12px 0">No route selected yet</div>
+        </div>
+
+        <div class="sb-sec">
+          <div class="sb-head">Platforms</div>
+          <div class="pf-grid" id="pf-chips"></div>
         </div>
       </div>
-    </div>
+    </aside>
 
-    <div class="map-canvas">
-      <div class="station-wrap">
-        <div id="station-canvas">
+    <button id="sidebar-toggle-handle" class="sidebar-toggle-handle" onclick="toggleSidebar()" title="Collapse Sidebar">
+      <svg id="sidebar-toggle-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"></polyline>
+      </svg>
+    </button>
 
-          <!-- SVG nav overlay -->
-          <svg id="nav-svg" xmlns="http://www.w3.org/2000/svg"></svg>
-
-        </div><!-- /station-canvas -->
+    <!-- MAP PANEL -->
+    <main class="map-panel">
+      <div class="map-head">
+        <div>
+          <div class="mh-title">Charlapalli Terminal</div>
+          <div class="mh-sub">Click any entity to navigate · Drag X/Y markers to adjust</div>
+        </div>
+        <div class="mh-right">
+          <div class="legend">
+            <div class="leg"><span style="display:inline-block;width:14px;height:7px;border-radius:2px;background:rgba(217,119,6,.1);border:1px solid rgba(217,119,6,.35)"></span>FOB Bridge</div>
+            <div class="leg"><span style="width:10px;height:10px;border-radius:50%;background:#1a56db;display:inline-block"></span>Entry (X)</div>
+            <div class="leg"><span style="width:10px;height:10px;border-radius:50%;background:#dc2626;display:inline-block"></span>Dest (Y)</div>
+          </div>
+        </div>
       </div>
-    </div>
 
-    <footer class="map-footer">
-      <div class="emg-tag">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
-        Emergency
+      <div class="map-canvas">
+        <div class="station-wrap">
+          <div id="station-canvas">
+            <svg id="nav-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+            <div class="map-tt" id="map-tt"></div>
+          </div>
+        </div>
       </div>
-      <div class="emg-contacts">
-        <div class="emg-item">RPF Control <span class="emg-num">9771449927</span></div>
-        <div class="emg-item">Station Manager <span class="emg-num">040-27261100</span></div>
-        <div class="emg-item">Medical Help <span class="emg-num">139</span></div>
-        <div class="emg-item">Railway Enquiry <span class="emg-num">139</span></div>
-      </div>
-      <div class="copy">© 2025 TRIDE — Crowd Analytics Platform</div>
-    </footer>
+      <!-- Fullscreen Button -->
+      <button id="map-fullscreen-btn" class="map-fs-btn" onclick="toggleMapFullscreen()" title="Fullscreen Map">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+        </svg>
+      </button>
+    </main>
+  </div>
 
-  </main>
-</div>
+  <script>
+    /* ════════════════════════════
+       PLATFORM DATA
+    ════════════════════════════ */
+    const PF = [
+      {num:1},
+      {num:2},
+      {num:3},
+      {num:4},
+      {num:5},
+      {num:6},
+      {num:7},
+      {num:8},
+      {num:9},
+    ];
 
-<script>
-/* ══════════════════════════════════════
-   DATA
-══════════════════════════════════════ */
-const PF = [
-  {num:1,  crowd:65,  status:'critical'},
-  {num:2,  crowd:82,  status:'critical'},
-  {num:3,  crowd:28,  status:'moderate'},
-  {num:4,  crowd:70,  status:'crowded'},
-  {num:5,  crowd:35,  status:'moderate'},
-  {num:6,  crowd:42,  status:'moderate'},
-  {num:7,  crowd:18,  status:'safe'},
-  {num:8,  crowd:55,  status:'crowded'},
-  {num:9,  crowd:75,  status:'critical'},
-];
+    /* ════════════════════════════
+       CANVAS CONSTANTS  (920×780, scaled 1.2×)
+    ════════════════════════════ */
+    const CANVAS_W = 920;
+    const CANVAS_H = 780;
 
-const STATUS_COLOR = {safe:'#059669',moderate:'#d97706',crowded:'#ea580c',critical:'#dc2626'};
-const STATUS_BG    = {safe:'#d1fae5',moderate:'#fef3c7',crowded:'#ffedd5',critical:'#fee2e2'};
+    // Platform Y centers — grouped: (PF1) | (PF2,PF3) | (PF4,PF5) | (PF6,PF7) | (PF8,PF9)
+    const PF_Y = {1:150, 2:206, 3:248, 4:304, 5:346, 6:402, 7:444, 8:500, 9:542};
+    const TRACK_LEFT = 178;
+    const TRACK_RIGHT = 898; // 178+720
+    const TRACK_H = 38;
 
-/* ══════════════════════════════════════
-   LAYOUT CONSTANTS
-   Canvas: ~900px wide, 740px tall
-══════════════════════════════════════ */
+    // FOB X positions — matching reference file exactly
+    const FOB_DEFS = [
+      {key:'FOB-Ramp',     x:148, label:'FOB Ramp'},
+      {key:'FOB-Terminal', x:388, label:'FOB Terminal'},
+      {key:'KZJ-2',        x:596, label:'KZJ 2'},
+      {key:'KZJ-3',        x:744, label:'KZJ 3'},
+    ];
 
-// Columns (as % of canvas width, computed in px at render)
-// Left edge starts after pf-label (48px)
-const CANVAS_W = 1200;
-const CANVAS_H = 740;
+    // Entry point coordinates (on 920×780 canvas)
+    const ENTRY_POINTS = {
+      gate2a:  {x:471, y:88,  label:'Gate 2A',  desc:'Main Booking Counter'},
+      gate4:   {x:207, y:88,  label:'Gate 4',   desc:'ATVM + Help Desk'},
+      gate8:   {x:696, y:660, label:'Gate 8',   desc:'South-East Entry'},
+      ate4:    {x:476, y:660, label:'ATE-4',    desc:'Alternate Entry'},
+      vip:     {x:455, y:660, label:'VIP Gate', desc:'VIP Entry'},
+      bolguda: {x:460, y:760, label:'Bolguda',  desc:'PF10 Entry / Exit'},
+    };
+    const ORIGINAL_ENTRY_POINTS = JSON.parse(JSON.stringify(ENTRY_POINTS));
 
-// Row Y positions for platforms (center of track)
-const PF_Y = {
-  1: 195,
-  2: 255,
-  3: 285,
-  4: 345,
-  5: 375,
-  6: 435,
-  7: 465,
-  8: 535,
-  9: 565
-};
+    const DESTINATIONS = {};
+    let activeEntry = 'gate2a';
+    let activeDest  = null;
 
-// Track bounds
-const TRACK_LEFT  = 52;
-const TRACK_RIGHT = 1160;
-const TRACK_H     = 26;
+    /* ════════════════════════════
+       ICON SYSTEM
+    ════════════════════════════ */
+    const ICONS = {
+      chair:    {stroke:'#d97706', sym:'ic-chair'},
+      toilet:   {stroke:'#0284c7', sym:'ic-toilet'},
+      atvm:     {stroke:'#059669', sym:'ic-atvm'},
+      escalator:{stroke:'#8b5cf6', sym:'ic-escalator'},
+      lift:     {stroke:'#3b82f6', sym:'ic-lift'},
+      water:    {stroke:'#16a34a', sym:'ic-water'},
+      food:     {stroke:'#ea580c', sym:'ic-food'},
+      stair:    {stroke:'#78716c', sym:'ic-stair'},
+      sleep:    {stroke:'#0ea5e9', sym:'ic-sleep'},
+      charge:   {stroke:'#f59e0b', sym:'ic-charge'},
+    };
+    const PF_ICONS = {
+      1:['chair','toilet','atvm','escalator','lift','water','food','stair'],
+      2:['escalator','lift','water','food','stair'],
+      3:['escalator','lift','water','stair'],
+      4:['escalator','lift','water','food','stair'],
+      5:['escalator','lift','water','stair'],
+      6:['escalator','lift','water','food','stair'],
+      7:['escalator','lift','water','stair'],
+      8:['escalator','lift','water','stair','food'],
+      9:['escalator','lift','water','stair','atvm'],
+    };
+    const IC_LABELS = {
+      chair:'AC Waiting Hall', toilet:'Pay & Use Toilet', atvm:'ATVM',
+      escalator:'Escalator', lift:'Lift / Elevator', water:'RO Water',
+      food:'Catering Stall', stair:'Staircase', sleep:'Sleeping Pods', charge:'Charging Points',
+    };
 
-// FOB X center positions
-const FOB_X = {
-  'HYD1': 200,  // left FOB
-  'KZJ1': 550,  // middle-left
-  'KZJ2': 850,  // middle-right
-  'KZJ3': 1050, // right
-};
+    function makeIcon(key) {
+      const cfg = ICONS[key]; if (!cfg) return null;
+      const div = document.createElement('div');
+      div.className = 'ic';
+      div.title = IC_LABELS[key] || key;
+      div.innerHTML = `<svg width="9" height="9" viewBox="0 0 16 16" fill="none" stroke="${cfg.stroke}" stroke-width="1.4"><use href="#${cfg.sym}"/></svg>`;
+      return div;
+    }
 
-// FOB covers rows:
-const FOB_ROWS = {
-  'HYD1': [1,2,3,4,5,6,7,8,9],
-  'KZJ1': [1,2,3,4,5,6,7,8,9],
-  'KZJ2': [1,2,3,4,5,6,7,8,9],
-  'KZJ3': [1,2,3,4,5,6,7,8,9],
-};
+    /* ════════════════════════════
+       BUILD CANVAS
+    ════════════════════════════ */
+    function buildCanvas() {
+      const c = document.getElementById('station-canvas');
 
-// Crowd badges: {pfNum, fobKey, count, status}
-const CROWD_BADGES = [
-  {pfNum:1, x: 200, count:65,  status:'critical'},
-  {pfNum:2, x: 200, count:82,  status:'critical'},
-  {pfNum:4, x: 200, count:70,  status:'crowded'},
-  {pfNum:8, x: 200, count:75,  status:'critical'},
+      // ── Header bar ──
+      c.insertAdjacentHTML('afterbegin', `
+        <div style="position:absolute;top:0;left:0;right:0;height:30px;
+          background:#0f2040;display:flex;align-items:center;
+          justify-content:space-between;padding:0 14px;z-index:25">
+          <span style="font-size:9.5px;font-weight:600;color:rgba(255,255,255,.45);letter-spacing:.08em;text-transform:uppercase">← HYD end · west</span>
+          <span style="font-size:11px;font-weight:700;color:#fff;letter-spacing:.1em;text-transform:uppercase">Charlapalli Terminal — Full Facility Map</span>
+          <span style="font-size:9.5px;font-weight:600;color:rgba(255,255,255,.45);letter-spacing:.08em;text-transform:uppercase">east · KZJ end →</span>
+        </div>`);
 
-  {pfNum:1, x: 550, count:30,  status:'moderate'},
-  {pfNum:4, x: 550, count:60,  status:'crowded'},
-  {pfNum:6, x: 550, count:42,  status:'moderate'},
+      // ── Zone label ──
+      c.insertAdjacentHTML('beforeend', `
+        <div class="zone" style="top:30px;height:18px;font-size:7.5px">Entrance &amp; Booking Offices</div>`);
 
-  {pfNum:2, x: 850, count:135, status:'critical'},
-  {pfNum:3, x: 850, count:50,  status:'crowded'},
+      // ── Road ──
+      c.insertAdjacentHTML('beforeend', `
+        <div class="road" style="left:0;bottom:20px;right:0;height:32px"></div>
+        <div style="position:absolute;bottom:36px;left:16px;font-size:7.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#888;z-index:6">Circulating area / road · pick-up drop</div>`);
 
-  {pfNum:2, x: 1050, count:145, status:'critical'},
-  {pfNum:8, x: 1050, count:55,  status:'crowded'},
-  {pfNum:9, x: 1050, count:90,  status:'critical'},
-];
+      // ── Bolguda bar ──
+      c.insertAdjacentHTML('beforeend', `
+        <div class="bolguda-bar">Bolguda Entrance — Entry / Exit</div>`);
 
-/* Entry point definitions: {x,y} on canvas */
-const ENTRY_POINTS = {
-  gate2a:  {x: 560, y: 125, label:'Gate 2A', desc:'Main Entrance'},
-  gate4:   {x: 140, y: 125, label:'Gate 4',  desc:'Booking Office Entry'},
-  gate8:   {x: 1100, y: 630, label:'Gate 8',  desc:'South East Entry'},
-  ate4:    {x: 320, y: 630, label:'ATE-4',   desc:'Outside Entrance'},
-  vip:     {x: 220, y: 630, label:'VIP Gate',desc:'VIP Entry'},
-  bolguda: {x: 600, y: 720, label:'Bolguda', desc:'PF10 Entry/Exit'},
-};
+      buildFOBs(c);
+      buildNorthZone(c);
+      buildPlatforms(c);
+      buildTerminalBuilding(c);
+      buildSouthZone(c);
+      buildMarkers(c);
+      buildPfChips();
 
-/* Destination definitions: {type, id, x, y, label, pfNum?} */
-const DESTINATIONS = {};
+      c.addEventListener('click', e => {
+        if (e.target !== c && (
+          e.target.onclick || e.target.closest('[onclick]') ||
+          e.target.classList.contains('bx') || e.target.closest('.bx') ||
+          e.target.classList.contains('pf-track') || e.target.closest('.pf-track')
+        )) return;
+        const rect = c.getBoundingClientRect();
+        const sx = 920/rect.width, sy = 780/rect.height;
+        const cx = (e.clientX - rect.left)*sx, cy = (e.clientY - rect.top)*sy;
+        setDest('custom_point', cx, cy, `Position (${Math.round(cx)},${Math.round(cy)})`, null);
+      });
+    }
 
-/* Navigation state */
-let activeEntry = 'gate2a';
-let activeDest  = null;
+    /* ── FOBs ── */
+    function buildFOBs(c) {
+      FOB_DEFS.forEach(f => {
+        const el = document.createElement('div');
+        el.className = 'fob';
+        el.style.cssText = `left:${f.x}px;top:30px;width:40px;height:650px`;
+        el.innerHTML = `<div class="fob-lbl">${f.label}</div>`;
+        c.appendChild(el);
+      });
+    }
 
-/* ══════════════════════════════════════
-   BUILD CANVAS
-══════════════════════════════════════ */
-function buildCanvas() {
-  const canvas = document.getElementById('station-canvas');
-  canvas.style.height = CANVAS_H + 'px';
+    /* ── North booking zone ── */
+    function buildNorthZone(c) {
+      // West column
+      addBx(c,'busbay',     4, 34, 58, 32, 'Bus Bay',              'new', 'Bus stop · west end');
+      addBx(c,'divyang_w',  4, 70, 58, 28, 'Divyangjan\nParking W','new', 'Accessible parking west');
+      addBx(c,'booking_w',  4,102, 58, 28, 'Booking\nCounters',    'new', '2 Unified + 3 UTS counters');
 
-  // Station header bar
-  canvas.insertAdjacentHTML('afterbegin', `
-    <div style="position:absolute;top:0;left:0;right:0;height:46px;
-      background:linear-gradient(90deg,#0f2040,#1a3a6b,#0f2040);
-      display:flex;align-items:center;justify-content:space-between;padding:0 24px;z-index:30">
-      <span style="font-size:12px;font-weight:600;color:rgba(255,255,255,.45);letter-spacing:.1em;text-transform:uppercase">← HYD END</span>
-      <div style="text-align:center">
-        <div style="font-family:var(--display);font-size:16px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#fff">Charlapalli Terminal</div>
-        <div style="font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-top:1px">CCTV Surveillance Digital Layout</div>
-      </div>
-      <span style="font-size:12px;font-weight:600;color:rgba(255,255,255,.45);letter-spacing:.1em;text-transform:uppercase">KZJ END →</span>
-    </div>
-  `);
+      // Rotated gates
+      addBxRot(c,'gate5',  178, 48, 16, 40, 'Gate 5',   'Gate 5 · north entry');
+      addBxRot(c,'gate4box',198, 48, 16, 40, 'Gate 4',  'Gate 4 / ATVM + Help Desk · 5 ATVMs available');
 
-  // Entrance zone label
-  canvas.insertAdjacentHTML('beforeend', `
-    <div style="position:absolute;top:46px;left:0;right:0;height:22px;
-      background:var(--bg);border-bottom:1px solid var(--border);
-      display:flex;align-items:center;justify-content:center;
-      font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--txt3);z-index:5">
-      ENTRANCE &amp; BOOKING OFFICES AREA
-    </div>
-  `);
+      // Gate 4 crowd indicator
+      const g4 = document.createElement('div');
+      g4.className = 'bx moderate';
+      g4.style.cssText = 'left:218px;top:48px;width:42px;height:40px';
+      g4.innerHTML = `<span style="font-size:7.5px;color:#d97706;font-weight:700">GATE 4</span><span style="font-size:7px;color:#d97706;opacity:.8">Moderate</span>`;
+      g4.dataset.n = 'Gate 4 Entry'; g4.dataset.d = 'Moderate crowd · ATVM machines here';
+      g4.onclick = () => { setDest('gate4box', 218+21, 48+20, 'Gate 4', g4); showTip(event, g4); };
+      DESTINATIONS['gate4box'] = {x:218+21, y:48+20, label:'Gate 4', el:g4};
+      c.appendChild(g4);
 
-  // Bolguda bar
-  canvas.insertAdjacentHTML('beforeend', `
-    <div style="position:absolute;bottom:0;left:0;right:0;height:22px;
-      background:var(--bg);border-top:1px dashed var(--border2);
-      display:flex;align-items:center;justify-content:center;
-      font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--txt3);z-index:5">
-      Bolguda Entrance — PF10 Entry / Exit
-    </div>
-  `);
+      addBx(c,'northblock', 264, 48,120, 40, 'North Block\n(Under Construction)', 'constr');
 
-  buildBookingArea(canvas);
-  buildFOBs(canvas);
-  buildPlatforms(canvas);
-  buildCrowdBadges(canvas);
-  buildSouthZone(canvas);
-  buildEntryMarker(canvas);
-  buildPfChips();
-}
+      // Gate 2A — Main Booking Counter
+      const g2a = document.createElement('div');
+      g2a.className = 'bx gate2a';
+      g2a.style.cssText = 'left:416px;top:48px;width:110px;height:40px;font-size:8.5px';
+      g2a.innerHTML = `<span style="font-size:9px;font-weight:600;color:#059669">Gate 2A</span><span style="font-size:7.5px;color:#059669">Booking Counter · Main</span>`;
+      g2a.dataset.n = 'Gate 2A — Main Booking Counter';
+      g2a.dataset.d = 'Primary entry X point · Help Desk nearby · 2 Unified + 3 UTS counters · 5 ATVMs';
+      g2a.onclick = (e) => { setDest('gate2acrowd', 416+55, 48+20, 'Gate 2A Booking Counter', g2a); showTip(e, g2a); };
+      DESTINATIONS['gate2acrowd'] = {x:416+55, y:48+20, label:'Gate 2A Booking Counter', el:g2a};
+      c.appendChild(g2a);
 
-/* ── BOOKING ENTITIES ── */
-function buildBookingArea(canvas) {
-  // Outward Parcel Office
-  addBoxEntity(canvas, {id:'outward',x:20,y:68,w:90,h:60,label:'Outward\nParcel\nOffice'});
+      addBx(c,'rethifile',  530, 48,  62, 28, 'Rethifile\nBooking',  '', 'Secondary booking office');
+      addBx(c,'rethiexit',  530, 78,  62, 16, 'Rethifile Exit',       'small', 'Exit from Rethifile area');
+      addBx(c,'prs',        622, 48,  60, 40, 'PRS Booking\nOffice',  '', 'Reserved ticketing');
+      addBx(c,'parking',    686, 48, 106, 28, 'Parking 2/4W + Cabs', 'parking', 'Large vehicle parking zone east-center');
+      addBx(c,'parcel',     796, 48,  60, 40, 'Parcel\nOffice',       '', 'East end of station');
+      addBx(c,'divyang_e',  796, 92,  60, 26, 'Divyangjan\nParking E','new', 'Accessible parking east');
+      addBx(c,'terminal_e', 858, 48,  56, 40, 'Terminal\nEntrance',   'new', 'Formal entrance east end');
+    }
 
-  // Gate 5 rotated
-  addBoxEntityRotated(canvas, {id:'gate5',x:120,y:68,w:26,h:60,label:'Gate 5'});
+    /* ── Platforms ── */
+    function buildPlatforms(c) {
+      PF.forEach(p => {
+        const cy = PF_Y[p.num];
+        const ty = cy - TRACK_H/2;
 
-  // Gate 4 Booking - rotated
-  addBoxEntityRotated(canvas, {id:'gate4box',x:156,y:68,w:26,h:60,label:'Gate 4'});
+        // Track
+        const track = document.createElement('div');
+        track.className = 'pf-track';
+        track.id = 'pf-track-' + p.num;
+        track.style.cssText = `left:${TRACK_LEFT}px;top:${ty}px;width:${TRACK_RIGHT-TRACK_LEFT}px;height:${TRACK_H}px`;
+        track.title = `Platform ${p.num}`;
+        track.dataset.n = `Platform ${p.num}`;
+        track.dataset.d = PF_ICONS[p.num].map(k => IC_LABELS[k]).join(' · ');
+        track.onclick = (e) => {
+          // Convert the click position to canvas coordinates (accounting for scale(1.2))
+          const canvasEl = document.getElementById('station-canvas');
+          const rect = canvasEl.getBoundingClientRect();
+          const clickX = Math.round((e.clientX - rect.left) * (920 / rect.width));
+          const clampedX = Math.max(TRACK_LEFT + 2, Math.min(TRACK_RIGHT - 2, clickX));
+          // Update destination X to where the user actually clicked on the platform
+          DESTINATIONS['pf'+p.num].x = clampedX;
+          setDest('pf'+p.num, clampedX, cy, `Platform ${p.num}`, track);
+          showTip(e, track);
+        };
+        DESTINATIONS['pf'+p.num] = {x:TRACK_LEFT+100, y:cy, label:`Platform ${p.num}`, pfNum:p.num, el:track};
+        c.appendChild(track);
 
-  // Crowd count Gate 4
-  addBoxEntity(canvas, {id:'gate4crowd',x:192,y:68,w:50,h:60,label:'52',type:'crowd',status:'crowded', crowdNum:'52'});
+        // PF label
+        const lbl = document.createElement('div');
+        lbl.className = 'pf-label';
+        lbl.id = 'pf-lbl-' + p.num;
+        lbl.style.cssText = `left:${TRACK_LEFT-40}px;top:${cy-9}px`;
+        lbl.textContent = 'PF ' + p.num;
+        c.appendChild(lbl);
 
-  // North Block construction
-  addBoxEntity(canvas, {id:'northblock',x:260,y:68,w:180,h:60,label:'North Block\n(Under Construction)',type:'construction'});
+        // Icon strip
+        const strip = document.createElement('div');
+        strip.className = 'ic-spread';
+        strip.id = 'pf' + p.num + '-icons';
+        strip.style.cssText = `left:${TRACK_LEFT+10}px;top:${ty+11}px;width:${TRACK_RIGHT-TRACK_LEFT-20}px;justify-content:space-around`;
+        PF_ICONS[p.num].forEach(key => { const ic = makeIcon(key); if(ic) strip.appendChild(ic); });
+        c.appendChild(strip);
+      });
+    }
 
-  // Gate 2A crowd
-  addBoxEntity(canvas, {id:'gate2acrowd',x:460,y:68,w:180,h:60,label:'30',type:'crowd',status:'safe', crowdNum:'30', sublabel:'GATE 2A BOOKING COUNTER'});
+    /* ── Terminal Building ── */
+    function buildTerminalBuilding(c) {
+      const el = document.createElement('div');
+      el.className = 'bx terminal';
+      el.style.cssText = 'left:354px;top:576px;width:190px;height:56px;font-size:9.5px;font-weight:600;border-radius:9px;z-index:10';
+      el.dataset.n = 'Terminal Building — New Building';
+      el.dataset.d = 'Multi-floor: Ground = Booking + Concourse. First Floor = AC Waiting Hall + Prepaid AC Waiting Hall + Food Plaza + Sleeping Pods + Pay&Use Toilets. FOB passes through building.';
 
-  // Rethifile Booking
-  addBoxEntity(canvas, {id:'rethifile',x:750,y:68,w:140,h:40,label:'Rethifile Booking Office'});
-  addBoxEntity(canvas, {id:'rethifileexit',x:750,y:111,w:140,h:17,label:'Rethifile Exit',small:true});
+      // Icon strip inside terminal
+      const iconRow = document.createElement('div');
+      iconRow.style.cssText = 'display:flex;align-items:center;justify-content:space-around;width:170px;margin-top:3px;pointer-events:none;position:relative';
+      ['chair','food','sleep','toilet','charge'].forEach(key => {
+        const ic = makeIcon(key); if(ic){ ic.style.background='rgba(255,255,255,.15)'; ic.style.borderColor='rgba(255,255,255,.2)'; iconRow.appendChild(ic); }
+      });
 
-  // PRS Booking
-  addBoxEntity(canvas, {id:'prs',x:930,y:68,w:140,h:60,label:'PRS Booking\nOffice'});
-}
+      el.innerHTML = `Terminal Building<span style="font-size:8px;opacity:.7;font-weight:400;display:block">New building concourse</span>`;
+      el.appendChild(iconRow);
+      el.onclick = (e) => { setDest('terminal', 354+95, 576+28, 'Terminal Building', el); showTip(e, el); };
+      DESTINATIONS['terminal'] = {x:354+95, y:576+28, label:'Terminal Building', el};
+      c.appendChild(el);
+    }
 
-function addBoxEntity(canvas, opts) {
-  const el = document.createElement('div');
-  el.className = 'box-entity entity';
-  if (opts.type === 'construction') el.classList.add('construction');
-  else if (opts.type === 'crowd') {
-    // special crowd box
-    el.style.cssText = `
-      position:absolute;left:${opts.x}px;top:${opts.y}px;
-      width:${opts.w}px;height:${opts.h}px;
-      background:${STATUS_BG[opts.status]};
-      border:1.5px solid rgba(0,0,0,.1);
-      border-radius:8px;
-      display:flex;flex-direction:column;align-items:center;justify-content:center;
-      cursor:pointer;z-index:10;padding:4px;
-      box-shadow:0 2px 8px rgba(0,0,0,.08);
-    `;
-    el.innerHTML = `
-      <span style="font-family:var(--mono);font-size:22px;font-weight:700;color:${STATUS_COLOR[opts.status]};line-height:1">👤 ${opts.crowdNum}</span>
-      ${opts.sublabel ? `<span style="font-size:11px;color:${STATUS_COLOR[opts.status]};margin-top:3px;opacity:.7;font-weight:600">${opts.sublabel}</span>` : ''}
-    `;
-    el.dataset.dest = opts.id;
-    el.dataset.label = opts.sublabel || opts.id;
-    el.onclick = () => setDest(opts.id, opts.x+opts.w/2, opts.y+opts.h/2, opts.label, el);
-    DESTINATIONS[opts.id] = {x:opts.x+opts.w/2, y:opts.y+opts.h/2, label:opts.sublabel||'Gate Area', el};
-    canvas.appendChild(el);
-    return;
-  }
-  el.style.cssText = `position:absolute;left:${opts.x}px;top:${opts.y}px;width:${opts.w}px;height:${opts.h}px`;
-  const lines = opts.label.split('\n');
-  el.innerHTML = lines.map((l,i) => i===0
-    ? `<span style="font-size:${opts.small?10.5:12.5}px;font-weight:${opts.small?500:600};color:var(--txt)">${l}</span>`
-    : `<span style="font-size:11px;color:var(--txt3)">${l}</span>`
-  ).join('');
-  if (opts.type !== 'construction') {
-    el.onclick = () => setDest(opts.id, opts.x+opts.w/2, opts.y+opts.h/2, opts.label.replace('\n',' '), el);
-    DESTINATIONS[opts.id] = {x:opts.x+opts.w/2, y:opts.y+opts.h/2, label:opts.label.replace('\n',' '), el};
-  }
-  canvas.appendChild(el);
-}
+    /* ── South zone ── */
+    function buildSouthZone(c) {
+      c.insertAdjacentHTML('beforeend', `<div class="zone" style="top:568px;height:16px;font-size:7px">South concourse</div>`);
 
-function addBoxEntityRotated(canvas, opts) {
-  const el = document.createElement('div');
-  el.className = 'box-entity entity';
-  el.style.cssText = `
-    position:absolute;left:${opts.x}px;top:${opts.y}px;
-    width:${opts.w}px;height:${opts.h}px;
-    cursor:pointer;z-index:10;padding:4px;
-  `;
-  el.innerHTML = `<span class="rotated-box">${opts.label}</span>`;
-  el.onclick = () => setDest(opts.id, opts.x+opts.w/2, opts.y+opts.h/2, opts.label, el);
-  DESTINATIONS[opts.id] = {x:opts.x+opts.w/2, y:opts.y+opts.h/2, label:opts.label, el};
-  canvas.appendChild(el);
-}
+      addBx(c,'bldg_entrance', 178,638,120,44,'Building Entrance\n+ Baggage Scanner','new','Main south entry · baggage scanner at entry');
+      addBx(c,'exit_gate',     302,638, 68,44,'Exit Gate','new','Separate public exit from terminal');
+      addBx(c,'vip_saloon',    374,638, 70,44,'VIP Saloon\nSiding','','VIP area west south zone');
+      addBxRot(c,'vip_entry',  448,638, 16,44,'VIP Entry', 'VIP Entry Gate');
+      addBxRot(c,'ate4',       468,638, 16,44,'ATE-4',     'ATE-4 Alternate Entry');
 
-/* ── FOB STRIPS ── */
-function buildFOBs(canvas) {
-  const FOB_DEFS = [
-    {key:'HYD1', x:180, label:'HYD 1 FOB'},
-    {key:'KZJ1', x:530, label:'KZJ 1 FOB'},
-    {key:'KZJ2', x:830, label:'KZJ 2 FOB'},
-    {key:'KZJ3', x:1030, label:'KZJ 3 FOB'},
-  ];
+      // Gate 6 crowd indicator
+      const g6 = document.createElement('div');
+      g6.className = 'bx moderate';
+      g6.style.cssText = 'left:488px;top:638px;width:72px;height:44px';
+      g6.innerHTML = `<span style="font-size:8px;font-weight:700;color:#d97706">GATE-6</span><span style="font-size:7px;color:#d97706;opacity:.8">Moderate</span>`;
+      g6.dataset.n = 'Gate 6 Outside Entrance'; g6.dataset.d = 'Moderate crowd · South external gate';
+      g6.onclick = (e) => { setDest('gate6outside', 488+36, 638+22, 'Gate 6 Outside', g6); showTip(e,g6); };
+      DESTINATIONS['gate6outside'] = {x:488+36, y:638+22, label:'Gate 6 Outside', el:g6};
+      c.appendChild(g6);
 
-  const top    = 130;
-  const bottom = 600;
+      addBx(c,'southblock', 564,638,120,44,'South Block\n(Under Construction)','constr');
+      addBxRot(c,'gate8box', 688,638, 16,44,'Gate 8','Gate 8 · South-east entry gate');
 
-  FOB_DEFS.forEach(f => {
-    const el = document.createElement('div');
-    el.className = 'fob';
-    el.style.cssText = `
-      position:absolute;
-      left:${f.x}px;top:${top}px;
-      width:40px;height:${bottom-top}px;
-      background:rgba(217,119,6,.06);
-      border-left:2px solid rgba(217,119,6,.3);
-      border-right:2px solid rgba(217,119,6,.3);
-      z-index:4;pointer-events:none;
-    `;
-    // Label
-    const lbl = document.createElement('div');
-    lbl.style.cssText = `
-      position:absolute;bottom:6px;left:50%;
-      transform:translateX(-50%) rotate(-90deg);
-      transform-origin:center;
-      font-size:8px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;
-      color:rgba(180,100,0,.7);white-space:nowrap;
-    `;
-    lbl.textContent = f.label;
-    el.appendChild(lbl);
-    canvas.appendChild(el);
-  });
-}
+      // Basement parking
+      const bp = document.createElement('div');
+      bp.className = 'bx dark';
+      bp.style.cssText = 'left:708px;top:638px;width:76px;height:44px;font-size:8px';
+      bp.innerHTML = `Basement<br>Parking<span style="font-size:7.5px;opacity:.6;display:block">Gate 8</span>`;
+      bp.dataset.n = 'Basement Parking — Gate 8'; bp.dataset.d = 'Underground parking near Gate 8 south-east';
+      bp.onclick = (e) => { setDest('basement', 708+38, 638+22, 'Basement Parking', bp); showTip(e,bp); };
+      DESTINATIONS['basement'] = {x:708+38, y:638+22, label:'Basement Parking', el:bp};
+      c.appendChild(bp);
 
-/* ── PLATFORMS ── */
-function buildPlatforms(canvas) {
-  // Groups: [1], [2,3], [4,5], [6,7], [8,9]
-  const groups = [[1],[2,3],[4,5],[6,7],[8,9]];
+      addBx(c,'circulating', 788,638, 94,44,'Circulating\n/ Holding Area','new','Pick-up · Drop · east side');
+    }
 
-  groups.forEach(group => {
-    group.forEach(pfNum => {
-      const p   = PF[pfNum-1];
-      const cy  = PF_Y[pfNum];
-      const ty  = cy - TRACK_H/2;
+    /* ════════════════════════════
+       HELPER: add box entity
+    ════════════════════════════ */
+    function addBx(c, id, x, y, w, h, label, type, desc) {
+      if (type === 'constr') {
+        const el = document.createElement('div');
+        el.className = 'bx constr';
+        el.style.cssText = `left:${x}px;top:${y}px;width:${w}px;height:${h}px`;
+        el.textContent = label.replace('\n',' ');
+        c.appendChild(el); return;
+      }
+      const el = document.createElement('div');
+      el.className = 'bx' + (type === 'parking' ? ' parking' : type === 'new' ? ' new' : type === 'small' ? '' : '');
+      el.style.cssText = `left:${x}px;top:${y}px;width:${w}px;height:${h}px`;
+      const lines = label.split('\n');
+      el.innerHTML = lines.map((l,i)=>`<span style="font-size:${i?7.5:8.5}px;font-weight:${i?400:600}">${l}</span>`).join('');
+      if (desc) { el.dataset.n = lines[0]; el.dataset.d = desc; }
+      el.onclick = (e) => { setDest(id, x+w/2, y+h/2, label.replace('\n',' '), el); if(desc) showTip(e,el); };
+      DESTINATIONS[id] = {x:x+w/2, y:y+h/2, label:label.replace('\n',' '), el};
+      c.appendChild(el);
+    }
 
-      // Track
-      const track = document.createElement('div');
-      track.className = 'pf-track entity';
-      track.id = 'pf-track-' + pfNum;
-      track.style.cssText = `
-        position:absolute;
-        left:${TRACK_LEFT}px;top:${ty}px;
-        width:${TRACK_RIGHT - TRACK_LEFT}px;height:${TRACK_H}px;
-      `;
-      track.title = `Platform ${pfNum} — ${p.crowd} people — ${p.status}`;
-      track.onclick = () => setDest('pf'+pfNum, TRACK_LEFT+100, cy, `Platform ${pfNum}`, track);
-      DESTINATIONS['pf'+pfNum] = {x:TRACK_LEFT+100, y:cy, label:`Platform ${pfNum}`, pfNum, el:track};
-      canvas.appendChild(track);
+    function addBxRot(c, id, x, y, w, h, label, desc) {
+      const el = document.createElement('div');
+      el.className = 'bx rot';
+      el.style.cssText = `left:${x}px;top:${y}px;width:${w}px;height:${h}px;cursor:pointer`;
+      el.textContent = label;
+      if (desc) { el.dataset.n = label; el.dataset.d = desc; }
+      el.onclick = (e) => { setDest(id, x+w/2, y+h/2, label, el); if(desc) showTip(e,el); };
+      DESTINATIONS[id] = {x:x+w/2, y:y+h/2, label, el};
+      c.appendChild(el);
+    }
 
-      // PF Label
-      const lbl = document.createElement('div');
-      lbl.className = 'pf-label';
-      lbl.id = 'pf-lbl-' + pfNum;
-      lbl.style.cssText = `
-        position:absolute;
-        left:14px;top:${cy - 11}px;
-        z-index:15;
-      `;
-      lbl.textContent = 'PF ' + pfNum;
-      canvas.appendChild(lbl);
+    /* ════════════════════════════
+       MARKERS
+    ════════════════════════════ */
+    function buildMarkers(c) {
+      const xm = document.createElement('div');
+      xm.id = 'x-marker'; xm.className = 'x-marker';
+      xm.innerHTML = `X<div class="pulse-ring"></div>`;
+      xm.style.display = 'none';
+      c.appendChild(xm);
+
+      const ym = document.createElement('div');
+      ym.id = 'y-marker'; ym.className = 'y-marker';
+      ym.innerHTML = `Y<div class="pulse-ring"></div>`;
+      ym.style.display = 'none';
+      c.appendChild(ym);
+
+      makeDraggable(xm, true, c);
+      makeDraggable(ym, false, c);
+    }
+
+    function makeDraggable(markerEl, isX, canvas) {
+      let dragging=false, startX, startY, startMX, startMY;
+      markerEl.addEventListener('click', e=>e.stopPropagation());
+      markerEl.addEventListener('mousedown', start);
+      markerEl.addEventListener('touchstart', start, {passive:false});
+
+      function start(e) {
+        e.preventDefault(); e.stopPropagation(); dragging=true;
+        startMX = parseFloat(markerEl.style.left||0)+11;
+        startMY = parseFloat(markerEl.style.top||0)+11;
+        const cx = e.type.startsWith('touch')?e.touches[0].clientX:e.clientX;
+        const cy = e.type.startsWith('touch')?e.touches[0].clientY:e.clientY;
+        startX=cx; startY=cy;
+        document.addEventListener('mousemove', drag);
+        document.addEventListener('touchmove', drag, {passive:false});
+        document.addEventListener('mouseup', stop);
+        document.addEventListener('touchend', stop);
+      }
+      function drag(e) {
+        if(!dragging) return;
+        if(e.type.startsWith('touch')) e.preventDefault();
+        const cx = e.type.startsWith('touch')?e.touches[0].clientX:e.clientX;
+        const cy = e.type.startsWith('touch')?e.touches[0].clientY:e.clientY;
+        const rect = canvas.getBoundingClientRect();
+        const sx=920/rect.width, sy=780/rect.height;
+        let nx = startMX+(cx-startX)*sx, ny = startMY+(cy-startY)*sy;
+        nx = Math.max(11,Math.min(909,nx)); ny = Math.max(11,Math.min(769,ny));
+        markerEl.style.left=(nx-11)+'px'; markerEl.style.top=(ny-11)+'px';
+        if(isX){
+          ENTRY_POINTS[activeEntry].x=nx; ENTRY_POINTS[activeEntry].y=ny;
+          if(activeDest){ drawRoute(); updateSidebarRoute(activeDest.label, activeDest.id); }
+        } else {
+          if(!activeDest) activeDest={id:'custom_point',label:'Custom Point'};
+          activeDest.x=nx; activeDest.y=ny; activeDest.id='custom_point';
+          activeDest.label=`Custom Position (${Math.round(nx)},${Math.round(ny)})`;
+          document.querySelectorAll('.bx.active-dest,.pf-track.active-dest').forEach(el=>el.classList.remove('active-dest'));
+          document.querySelectorAll('.pf-chip').forEach(c=>c.classList.remove('sel'));
+          drawRoute(); updateSidebarRoute(activeDest.label, activeDest.id);
+        }
+      }
+      function stop(){ dragging=false; document.removeEventListener('mousemove',drag); document.removeEventListener('touchmove',drag); document.removeEventListener('mouseup',stop); document.removeEventListener('touchend',stop); }
+    }
+
+    /* ════════════════════════════
+       TOOLTIP
+    ════════════════════════════ */
+    function showTip(e, el) {
+      const n=el.dataset.n, d=el.dataset.d;
+      if(!n) return;
+      const tt = document.getElementById('map-tt');
+      let html = `<div class="map-tt-n">${n}</div>`;
+      if(d) d.split('·').forEach(s=>{ const t=s.trim(); if(t) html+=`<div class="map-tt-row">• ${t}</div>`; });
+      tt.innerHTML = html;
+      const canvas = document.getElementById('station-canvas');
+      const r = canvas.getBoundingClientRect();
+      const ex = (e.clientX-r.left)*(920/r.width);
+      const ey = (e.clientY-r.top)*(780/r.height);
+      tt.style.left = Math.min(ex+12, 680)+'px';
+      tt.style.top  = Math.max(ey-80, 32)+'px';
+      tt.classList.add('show');
+      setTimeout(()=>tt.classList.remove('show'), 3000);
+    }
+    document.addEventListener('click', ()=>{ const tt=document.getElementById('map-tt'); if(tt) tt.classList.remove('show'); });
+
+    /* ════════════════════════════
+       ENTRY CHANGE
+    ════════════════════════════ */
+    function onEntryChange() {
+      activeEntry = document.getElementById('entry-select').value;
+      const orig = ORIGINAL_ENTRY_POINTS[activeEntry];
+      ENTRY_POINTS[activeEntry].x = orig.x;
+      ENTRY_POINTS[activeEntry].y = orig.y;
+      const ep = ENTRY_POINTS[activeEntry];
+      const xm = document.getElementById('x-marker');
+      xm.style.left=(ep.x-11)+'px'; xm.style.top=(ep.y-11)+'px'; xm.style.display='grid';
+      if(activeDest) drawRoute();
+    }
+
+    /* ════════════════════════════
+       SET DESTINATION
+    ════════════════════════════ */
+    function setDest(id, x, y, label, el) {
+      document.querySelectorAll('.bx.active-dest,.pf-track.active-dest').forEach(e=>e.classList.remove('active-dest'));
+      if(el) el.classList.add('active-dest');
+      activeDest = {id, x, y, label, el};
+      const ym = document.getElementById('y-marker');
+      ym.style.left=(x-11)+'px'; ym.style.top=(y-11)+'px'; ym.style.display='grid';
+      const ep = ENTRY_POINTS[activeEntry];
+      const xm = document.getElementById('x-marker');
+      xm.style.left=(ep.x-11)+'px'; xm.style.top=(ep.y-11)+'px'; xm.style.display='grid';
+      drawRoute(); updateSidebarRoute(label, id);
+      document.querySelectorAll('.pf-chip').forEach(c=>c.classList.remove('sel'));
+      const dd = DESTINATIONS[id];
+      if(dd?.pfNum) document.getElementById('chip-pf-'+dd.pfNum)?.classList.add('sel');
+    }
+
+    /* ════════════════════════════
+       PATHFINDING  (FOB-aware)
+    ════════════════════════════ */
+    function drawRoute() {
+      const ep = ENTRY_POINTS[activeEntry];
+      const dp = activeDest;
+      if(!ep||!dp) return;
+      const svg = document.getElementById('nav-svg');
+      const path = buildPath(ep.x, ep.y, dp.x, dp.y, dp.id);
+      svg.innerHTML='';
+      const bg = document.createElementNS('http://www.w3.org/2000/svg','polyline');
+      bg.setAttribute('points', path.map(p=>`${p.x},${p.y}`).join(' '));
+      bg.setAttribute('class','nav-path-bg'); svg.appendChild(bg);
+      const line = document.createElementNS('http://www.w3.org/2000/svg','polyline');
+      line.setAttribute('points', path.map(p=>`${p.x},${p.y}`).join(' '));
+      line.setAttribute('class','nav-path'); svg.appendChild(line);
+      path.slice(1,-1).forEach(pt => {
+        if(pt.waypoint){
+          const ci = document.createElementNS('http://www.w3.org/2000/svg','circle');
+          ci.setAttribute('cx',pt.x); ci.setAttribute('cy',pt.y); ci.setAttribute('r',5);
+          ci.setAttribute('fill','#1a56db'); ci.setAttribute('stroke','#fff'); ci.setAttribute('stroke-width',2);
+          svg.appendChild(ci);
+        }
+      });
+    }
+
+    /* ════════════════════════════
+       PATHFINDING  (FOB-from-X constrained)
+    ════════════════════════════ */
+
+    // Platform barrier: can't cross horizontally between these Y values without FOB
+    const PLATFORM_TOP    = 130;   // just above PF1 track
+    const PLATFORM_BOTTOM = 570;   // just below PF9 track
+
+    function inPlatformZone(y) { return y > PLATFORM_TOP && y < PLATFORM_BOTTOM; }
+    function inNorthZone(y)    { return y <= PLATFORM_TOP; }
+    function inSouthZone(y)    { return y >= PLATFORM_BOTTOM; }
+
+    function buildPath(sx, sy, dx, dy, destId) {
+      const pts = [{x:sx, y:sy}];
+      const destData = DESTINATIONS[destId];
+      const pfNum = destData?.pfNum;
+
+      // ALWAYS use the FOB nearest to the ENTRY point (X)
+      const nearFob = getNearestFob(sx);
+      const fobX    = nearFob.x + 20; // center of 40px FOB
+
+      if (pfNum) {
+        // ── Destination is a platform ──
+        const pfY = PF_Y[pfNum];
+
+        if (inNorthZone(sy)) {
+          // North entry: walk to FOB, descend to platform level, walk along track
+          pts.push({x: fobX, y: sy});                    // walk to FOB column
+          pts.push({x: fobX, y: pfY, waypoint: true});   // descend through FOB
+          pts.push({x: dx,   y: pfY});                   // along platform
+        } else if (inSouthZone(sy)) {
+          // South entry: walk to FOB, ascend to platform level, walk along track
+          pts.push({x: fobX, y: sy});                    // walk to FOB column
+          pts.push({x: fobX, y: pfY, waypoint: true});   // ascend through FOB
+          pts.push({x: dx,   y: pfY});                   // along platform
+        } else {
+          // Already in platform zone (dragging X marker onto track area)
+          pts.push({x: fobX, y: sy});                    // go to FOB first
+          pts.push({x: fobX, y: pfY, waypoint: true});   // move to correct platform
+          pts.push({x: dx,   y: pfY});
+        }
+
+      } else {
+        // ── Destination is a facility (not a platform) ──
+        const needsCross = (inNorthZone(sy) && !inNorthZone(dy)) ||
+                           (inSouthZone(sy) && !inSouthZone(dy)) ||
+                           (inPlatformZone(sy) && !inPlatformZone(dy));
+
+        if (needsCross) {
+          // Must pass through FOB vertical corridor to cross platform zone
+          pts.push({x: fobX, y: sy});                     // walk to FOB column
+          pts.push({x: fobX, y: dy, waypoint: true});     // traverse FOB vertically
+          pts.push({x: dx,   y: dy});                     // walk to destination
+        } else {
+          // Same zone — simple L-shaped path
+          pts.push({x: sx, y: dy});
+          pts.push({x: dx, y: dy});
+        }
+      }
+
+      pts.push({x: dx, y: dy});
+      return pts;
+    }
+
+    function getNearestFob(targetX) {
+      return FOB_DEFS.reduce((best, f) =>
+        Math.abs(f.x - targetX) < Math.abs(best.x - targetX) ? f : best
+      );
+    }
+
+    // Center of 40px-wide FOB column
+    function getFobCenter(fob) { return fob.x + 20; }
+
+    /* ════════════════════════════
+       SIDEBAR ROUTE UPDATE
+    ════════════════════════════ */
+    function updateSidebarRoute(label, destId) {
+      const ep = ENTRY_POINTS[activeEntry];
+      const result = document.getElementById('route-result');
+      const empty  = document.getElementById('route-empty');
+      const header = document.getElementById('rr-header');
+      const steps  = document.getElementById('rr-steps');
+      const dd = DESTINATIONS[destId];
+      const pfNum = dd?.pfNum;
+      const color = '#e85d26';
+
+      header.innerHTML = `
+        <div class="rr-icon" style="background:${color}18;border:1px solid ${color}30">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 8 16 12 12 16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+        </div>
+        <div>
+          <div class="rr-title">${ep.label} → ${label}</div>
+          <div class="rr-sub" style="color:${color}">${pfNum?'Platform Destination':destId==='custom_point'?'Custom Destination':'Facility'}</div>
+        </div>`;
+
+      // FOB based on ENTRY point — consistent with route drawn on map
+      const entryFob = getNearestFob(ep.x);
+      const nearFob  = entryFob;
+      const stepsArr = buildSteps(ep, label, nearFob, pfNum);
+      steps.innerHTML = stepsArr.map((s,i)=>`
+        <div class="rs">
+          <div class="rs-num">${i+1}</div>
+          <div class="rs-txt">${s}</div>
+        </div>`).join('');
+
+      // Icon strip for platform destinations
+      if(pfNum && PF_ICONS[pfNum]) {
+        const iconRow = document.createElement('div');
+        iconRow.style.cssText='display:flex;gap:6px;flex-wrap:wrap;padding:8px 12px;background:var(--bg);border-radius:var(--r);border:1px solid var(--border)';
+        PF_ICONS[pfNum].forEach(key=>{
+          const ic=makeIcon(key);
+          if(ic){
+            ic.style.width='20px'; ic.style.height='20px';
+            const wrap=document.createElement('div');
+            wrap.style.cssText='display:flex;flex-direction:column;align-items:center;gap:3px';
+            const lbl=document.createElement('span');
+            lbl.style.cssText='font-size:9px;color:var(--txt3);white-space:nowrap';
+            lbl.textContent=IC_LABELS[key]||key;
+            wrap.appendChild(ic); wrap.appendChild(lbl);
+            iconRow.appendChild(wrap);
+          }
+        });
+        steps.appendChild(iconRow);
+      }
+
+      result.classList.add('show');
+      empty.style.display='none';
+    }
+
+    function buildSteps(ep, destLabel, nearFob, pfNum) {
+      const steps = [];
+      const fobName = nearFob?.label || 'FOB Bridge';
+      steps.push(`Start at <strong>${ep.label}</strong> (${ep.desc})`);
+      steps.push(`Walk to the <strong>${fobName}</strong> foot over bridge`);
+      if (pfNum) {
+        steps.push(`Use the <strong>${fobName}</strong> to reach <strong>Platform ${pfNum}</strong> level`);
+        steps.push(`Walk along the platform to <strong>Platform ${pfNum}</strong>`);
+      } else {
+        steps.push(`Cross through <strong>${fobName}</strong> to your zone`);
+        steps.push(`Proceed to <strong>${destLabel}</strong>`);
+      }
+      return steps;
+    }
+
+    /* ════════════════════════════
+       SIDEBAR CHIPS & TOGGLE
+    ════════════════════════════ */
+    function buildPfChips() {
+      const grid = document.getElementById('pf-chips');
+      PF.forEach(p=>{
+        const el=document.createElement('div');
+        el.className='pf-chip'; el.id='chip-pf-'+p.num;
+        el.innerHTML=`<span>Pf ${p.num}</span>`;
+        el.onclick=()=>setDest('pf'+p.num, TRACK_LEFT+100, PF_Y[p.num], `Platform ${p.num}`, document.getElementById('pf-track-'+p.num));
+        grid.appendChild(el);
+      });
+    }
+
+    function toggleSidebar() {
+      const layout = document.querySelector('.layout');
+      const icon   = document.getElementById('sidebar-toggle-icon');
+      const isCollapsed = layout.classList.toggle('collapsed');
+      icon.innerHTML = isCollapsed
+        ? `<polyline points="9 18 15 12 9 6"></polyline>`
+        : `<polyline points="15 18 9 12 15 6"></polyline>`;
+      document.getElementById('sidebar-toggle-handle').title = isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar';
+    }
+
+    function clearRoute() {
+      document.getElementById('nav-svg').innerHTML='';
+      document.getElementById('y-marker').style.display='none';
+      document.querySelectorAll('.bx.active-dest,.pf-track.active-dest').forEach(e=>e.classList.remove('active-dest'));
+      document.querySelectorAll('.pf-chip').forEach(c=>c.classList.remove('sel'));
+      document.getElementById('route-result').classList.remove('show');
+      document.getElementById('route-empty').style.display='block';
+      activeDest=null;
+    }
+
+    /* Fullscreen Toggle Logic */
+    function toggleMapFullscreen() {
+      const panel = document.querySelector('.map-panel');
+      if (!document.fullscreenElement) {
+        panel.requestFullscreen().catch(err => {
+          console.error(`Error attempting to enable fullscreen: ${err.message}`);
+        });
+      } else {
+        document.exitFullscreen();
+      }
+    }
+
+    document.addEventListener('fullscreenchange', () => {
+      const btn = document.getElementById('map-fullscreen-btn');
+      if (!btn) return;
+      if (document.fullscreenElement) {
+        btn.title = "Exit Fullscreen";
+        btn.innerHTML = `
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 14h6v6m10-6h-6v6M4 10h6V4m10 6h-6V4"/>
+          </svg>`;
+      } else {
+        btn.title = "Fullscreen Map";
+        btn.innerHTML = `
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+          </svg>`;
+      }
     });
-  });
-}
 
-/* ── CROWD BADGES ── */
-function buildCrowdBadges(canvas) {
-  CROWD_BADGES.forEach((b,i) => {
-    const cy = PF_Y[b.pfNum];
-    const badge = document.createElement('div');
-    badge.className = `crowd-badge ${b.status} entity`;
-    badge.id = `badge-${i}`;
-    badge.style.cssText = `
-      left:${b.x - 28}px;
-      top:${cy - 14}px;
-    `;
-    badge.innerHTML = `
-      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-      ${b.count}
-    `;
-    const destId = `badge_${b.pfNum}_${b.x}`;
-    badge.onclick = () => setDest(destId, b.x, cy, `Platform ${b.pfNum} (${b.status}, ${b.count} people)`, badge);
-    DESTINATIONS[destId] = {x:b.x, y:cy, label:`Platform ${b.pfNum}`, pfNum:b.pfNum, el:badge};
-    canvas.appendChild(badge);
-  });
-
-  // Congested tags on PF1
-  const congested = [
-    {x: TRACK_LEFT+2, y: PF_Y[1]-14},
-    {x: 770, y: PF_Y[1]-14},
-    {x: 990, y: PF_Y[1]-14},
-  ];
-  congested.forEach(c => {
-    const t = document.createElement('div');
-    t.className = 'congested-tag';
-    t.style.left  = c.x + 'px';
-    t.style.top   = c.y + 'px';
-    t.innerHTML   = '⚠ CONGESTED';
-    document.getElementById('station-canvas').appendChild(t);
-  });
-}
-
-/* ── SOUTH ZONE ── */
-function buildSouthZone(canvas) {
-  const sy = 610;
-  const sh = 64; // Increased height from 54px to 64px for vertical space
-
-  // VIP Saloon Siding
-  addBoxEntityAt(canvas,'vip_saloon',150,sy,90,sh,'VIP Saloon\nSiding');
-
-  // VIP Entry Gate rotated
-  addBoxEntityRotatedAt(canvas,'vip_entry',250,sy,26,sh,'VIP Entry');
-
-  // ATE-4 rotated
-  addBoxEntityRotatedAt(canvas,'ate4',286,sy,26,sh,'ATE-4 Entry');
-
-  // Gate 6 Outside entrance crowd
-  const el3 = document.createElement('div');
-  el3.className = 'box-entity entity';
-  el3.style.cssText = `position:absolute;left:322px;top:${sy}px;width:90px;height:${sh}px;
-    background:var(--mod-lt);border-color:rgba(217,119,6,.3);`;
-  el3.innerHTML = `
-    <span style="font-family:var(--mono);font-size:20px;font-weight:700;color:var(--mod)">👤 44</span>
-    <span style="font-size:11px;color:var(--mod);font-weight:600;margin-top:2px">GATE-6 OUTSIDE</span>
-  `;
-  el3.onclick = () => setDest('gate6outside',367,sy+sh/2,'Gate 6 Outside Entrance',el3);
-  DESTINATIONS['gate6outside'] = {x:367, y:sy+sh/2, label:'Gate 6 Outside Entrance', el:el3};
-  canvas.appendChild(el3);
-
-  // South Block construction
-  addBoxEntityAt(canvas,'southblock',430,sy,250,sh,'South Block\n(Under Construction)','construction');
-
-  // Gate 8 rotated
-  addBoxEntityRotatedAt(canvas,'gate8box',1040,sy,26,sh,'Gate 8');
-
-  // Basement parking dark
-  const ep = document.createElement('div');
-  ep.className = 'box-entity dark entity';
-  ep.style.cssText = `position:absolute;left:1076px;top:${sy}px;width:100px;height:${sh}px;z-index:10`;
-  ep.innerHTML = `<span style="font-size:11.5px;font-weight:600">Basement\nParking</span><span style="font-size:10px;opacity:.6;margin-top:2px">near Gate 8</span>`;
-  ep.onclick = () => setDest('basement',1126,sy+sh/2,'Basement Parking',ep);
-  DESTINATIONS['basement'] = {x:1126, y:sy+sh/2, label:'Basement Parking', el:ep};
-  canvas.appendChild(ep);
-}
-
-function addBoxEntityAt(canvas,id,x,y,w,h,label,type) {
-  const el = document.createElement('div');
-  el.className = 'box-entity entity' + (type?' '+type:'');
-  el.style.cssText = `position:absolute;left:${x}px;top:${y}px;width:${w}px;height:${h}px;z-index:10`;
-  const lines = label.split('\n');
-  el.innerHTML = lines.map((l,i) => `<span style="font-size:${i?11:12.5}px;font-weight:${i?400:600};color:${type==='construction'?'rgba(180,100,0,.7)':'var(--txt)'}">${l}</span>`).join('');
-  if(type!=='construction'){
-    el.onclick = ()=>setDest(id,x+w/2,y+h/2,label.replace('\n',' '),el);
-    DESTINATIONS[id]={x:x+w/2,y:y+h/2,label:label.replace('\n',' '),el};
-  }
-  canvas.appendChild(el);
-}
-
-function addBoxEntityRotatedAt(canvas,id,x,y,w,h,label) {
-  const el = document.createElement('div');
-  el.className = 'box-entity entity';
-  el.style.cssText = `position:absolute;left:${x}px;top:${y}px;width:${w}px;height:${h}px;z-index:10;cursor:pointer`;
-  el.innerHTML = `<span class="rotated-box">${label}</span>`;
-  el.onclick = ()=>setDest(id,x+w/2,y+h/2,label,el);
-  DESTINATIONS[id]={x:x+w/2,y:y+h/2,label,el};
-  canvas.appendChild(el);
-}
-
-/* ── X MARKER (entry point) ── */
-function buildEntryMarker(canvas) {
-  const m = document.createElement('div');
-  m.id = 'x-marker';
-  m.className = 'x-marker';
-  m.innerHTML = `X<div class="pulse-ring"></div>`;
-  m.style.display = 'none';
-  canvas.appendChild(m);
-
-  const m2 = document.createElement('div');
-  m2.id = 'y-marker';
-  m2.className = 'y-marker';
-  m2.innerHTML = `Y<div class="pulse-ring"></div>`;
-  m2.style.display = 'none';
-  canvas.appendChild(m2);
-}
-
-/* ══════════════════════════════════════
-   ENTRY CHANGE
-══════════════════════════════════════ */
-function onEntryChange() {
-  activeEntry = document.getElementById('entry-select').value;
-  // Move X marker
-  const ep = ENTRY_POINTS[activeEntry];
-  const xm = document.getElementById('x-marker');
-  xm.style.left = (ep.x - 11) + 'px';
-  xm.style.top  = (ep.y - 11) + 'px';
-  xm.style.display = 'grid';
-
-  if (activeDest) drawRoute();
-}
-
-/* ══════════════════════════════════════
-   SET DESTINATION (Y point)
-══════════════════════════════════════ */
-function setDest(id, x, y, label, el) {
-  // Remove previous active
-  document.querySelectorAll('.entity.active-dest').forEach(e => e.classList.remove('active-dest'));
-  if (el) el.classList.add('active-dest');
-
-  activeDest = {id, x, y, label, el};
-
-  // Move Y marker
-  const ym = document.getElementById('y-marker');
-  ym.style.left = (x - 11) + 'px';
-  ym.style.top  = (y - 11) + 'px';
-  ym.style.display = 'grid';
-
-  // Ensure entry marker is showing
-  const ep = ENTRY_POINTS[activeEntry];
-  const xm = document.getElementById('x-marker');
-  xm.style.left = (ep.x - 11) + 'px';
-  xm.style.top  = (ep.y - 11) + 'px';
-  xm.style.display = 'grid';
-
-  drawRoute();
-  updateSidebarRoute(label, id);
-
-  // Highlight chip
-  document.querySelectorAll('.pf-chip').forEach(c => c.classList.remove('sel'));
-  const destData = DESTINATIONS[id];
-  if (destData && destData.pfNum) {
-    document.getElementById('chip-pf-'+destData.pfNum)?.classList.add('sel');
-  }
-}
-
-/* ══════════════════════════════════════
-   DRAW ROUTE (pathfinding via FOB)
-══════════════════════════════════════ */
-function drawRoute() {
-  const ep = ENTRY_POINTS[activeEntry];
-  const dp = activeDest;
-  if (!ep || !dp) return;
-
-  const svg = document.getElementById('nav-svg');
-
-  // Build smart path: entry → nearest FOB → platform
-  const path = buildPath(ep.x, ep.y, dp.x, dp.y, dp.id);
-
-  // Render
-  svg.innerHTML = '';
-
-  // Glow background
-  const bg = document.createElementNS('http://www.w3.org/2000/svg','polyline');
-  bg.setAttribute('points', path.map(p=>`${p.x},${p.y}`).join(' '));
-  bg.setAttribute('class','nav-path-bg');
-  svg.appendChild(bg);
-
-  // Animated dashed line
-  const line = document.createElementNS('http://www.w3.org/2000/svg','polyline');
-  line.setAttribute('points', path.map(p=>`${p.x},${p.y}`).join(' '));
-  line.setAttribute('class','nav-path');
-  svg.appendChild(line);
-
-  // Waypoint dots
-  path.slice(1,-1).forEach(pt => {
-    if (pt.waypoint) {
-      const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
-      c.setAttribute('cx', pt.x);
-      c.setAttribute('cy', pt.y);
-      c.setAttribute('r',  5);
-      c.setAttribute('fill','#1a56db');
-      c.setAttribute('stroke','#fff');
-      c.setAttribute('stroke-width',2);
-      svg.appendChild(c);
-    }
-  });
-}
-
-function buildPath(sx, sy, dx, dy, destId) {
-  const pts = [{x:sx, y:sy}];
-  const destData = DESTINATIONS[destId];
-  const pfNum = destData?.pfNum;
-
-  // Find nearest FOB to use for crossing
-  const entryIsNorth = sy < 300; // entry from top (booking area)
-  const entryIsSouth = sy > 500; // entry from south gates
-
-  if (pfNum) {
-    const pfY = PF_Y[pfNum];
-
-    if (entryIsNorth) {
-      // Walk down from entry to FOB closest to destination platform
-      const nearestFob = getNearestFob(dx);
-      const fobX = nearestFob.x;
-
-      // go horizontally to FOB
-      pts.push({x: fobX, y: sy});
-      // go down the FOB to PF level
-      pts.push({x: fobX, y: pfY, waypoint:true});
-      // go horizontally to platform
-      pts.push({x: dx, y: pfY});
-
-    } else if (entryIsSouth) {
-      // Walk up from south gate
-      const nearestFob = getNearestFob(dx);
-      const fobX = nearestFob.x;
-
-      pts.push({x: sx,   y: pfY});
-      pts.push({x: fobX, y: pfY, waypoint:true});
-      pts.push({x: dx,   y: pfY});
-
-    } else {
-      // Side entry — go straight across
-      pts.push({x: sx, y: pfY});
-      pts.push({x: dx, y: pfY});
-    }
-  } else {
-    // Non-platform destination: simple L-shape
-    pts.push({x: sx, y: dy});
-    pts.push({x: dx, y: dy});
-  }
-
-  pts.push({x: dx, y: dy});
-  return pts;
-}
-
-function getNearestFob(targetX) {
-  const fobs = [
-    {key:'HYD1', x:200},
-    {key:'KZJ1', x:550},
-    {key:'KZJ2', x:850},
-    {key:'KZJ3', x:1050},
-  ];
-  return fobs.reduce((best, f) =>
-    Math.abs(f.x - targetX) < Math.abs(best.x - targetX) ? f : best
-  );
-}
-
-/* ══════════════════════════════════════
-   SIDEBAR ROUTE UPDATE
-══════════════════════════════════════ */
-function updateSidebarRoute(label, destId) {
-  const ep = ENTRY_POINTS[activeEntry];
-  const result = document.getElementById('route-result');
-  const empty  = document.getElementById('route-empty');
-  const header = document.getElementById('rr-header');
-  const steps  = document.getElementById('rr-steps');
-
-  const destData = DESTINATIONS[destId];
-  const pfNum    = destData?.pfNum;
-  const pfInfo   = pfNum ? PF[pfNum-1] : null;
-
-  const statusColor = pfInfo ? STATUS_COLOR[pfInfo.status] : '#1a56db';
-  const statusLabel = pfInfo ? pfInfo.status.charAt(0).toUpperCase()+pfInfo.status.slice(1) : '';
-
-  header.innerHTML = `
-    <div class="rr-icon" style="background:${statusColor}18;border:1px solid ${statusColor}30">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="${statusColor}" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 8 16 12 12 16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-    </div>
-    <div>
-      <div class="rr-title">${ep.label} → ${label}</div>
-      <div class="rr-sub" style="color:${statusColor}">
-        ${pfInfo ? `${statusLabel} · ${pfInfo.crowd} people` : 'Click destination on map'}
-      </div>
-    </div>
-  `;
-
-  const nearestFob = pfNum ? getNearestFob(DESTINATIONS[destId]?.x || 0) : null;
-  const stepsArr = buildSteps(ep, label, nearestFob, pfNum);
-
-  steps.innerHTML = stepsArr.map((s,i) => `
-    <div class="rs">
-      <div class="rs-num">${i+1}</div>
-      <div class="rs-txt">${s}</div>
-    </div>
-  `).join('');
-
-  result.classList.add('show');
-  empty.style.display = 'none';
-}
-
-function buildSteps(ep, destLabel, nearestFob, pfNum) {
-  const steps = [];
-  steps.push(`Start at <strong>${ep.label}</strong> (${ep.desc})`);
-
-  if (ep.y < 300) {
-    steps.push(`Head towards the <strong>${nearestFob?.key || 'FOB'} Bridge</strong>`);
-    steps.push(`Use the bridge to reach <strong>Platform level</strong>`);
-  } else {
-    steps.push(`Walk through the <strong>South Concourse</strong>`);
-    if (nearestFob) steps.push(`Take the <strong>${nearestFob.key} FOB Bridge</strong> if crossing is needed`);
-  }
-
-  if (pfNum) {
-    const p = PF[pfNum-1];
-    steps.push(`Arrive at <strong>Platform ${pfNum}</strong>`);
-    steps.push(`Current crowd: <strong style="color:${STATUS_COLOR[p.status]}">${p.crowd} people — ${p.status}</strong>`);
-    if (p.status === 'critical' || p.status === 'crowded') {
-      steps.push(`⚠ Platform is busy. Consider using an <strong>alternate FOB</strong>.`);
-    }
-  } else {
-    steps.push(`Proceed to <strong>${destLabel}</strong>`);
-  }
-
-  return steps;
-}
-
-/* ══════════════════════════════════════
-   SIDEBAR TOGGLE
-══════════════════════════════════════ */
-function toggleSidebar() {
-  const layout = document.querySelector('.layout');
-  const btn = document.getElementById('sidebar-toggle-handle');
-  const icon = document.getElementById('sidebar-toggle-icon');
-  
-  const isCollapsed = layout.classList.toggle('collapsed');
-  
-  if (isCollapsed) {
-    icon.innerHTML = `<polyline points="9 18 15 12 9 6"></polyline>`;
-    btn.title = "Expand Sidebar";
-  } else {
-    icon.innerHTML = `<polyline points="15 18 9 12 15 6"></polyline>`;
-    btn.title = "Collapse Sidebar";
-  }
-}
-
-/* ══════════════════════════════════════
-   CLOCK
-══════════════════════════════════════ */
-function tick() {
-  const el = document.getElementById('clock');
-  if (el) {
-    el.textContent =
-      new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
-  }
-}
-
-/* ══════════════════════════════════════
-   SIDEBAR CHIPS
-══════════════════════════════════════ */
-function buildPfChips() {
-  const grid = document.getElementById('pf-chips');
-  PF.forEach(p => {
-    const el = document.createElement('div');
-    el.className = `pf-chip ${p.status}`;
-    el.id = 'chip-pf-' + p.num;
-    el.innerHTML = `
-      <span class="pcd" style="background:${STATUS_COLOR[p.status]}"></span>
-      <span>Pf ${p.num}</span>
-      <span class="pc-num">${p.crowd}</span>
-    `;
-    el.onclick = () => setDest('pf'+p.num, TRACK_LEFT+100, PF_Y[p.num], `Platform ${p.num}`,
-      document.getElementById('pf-track-'+p.num));
-    grid.appendChild(el);
-  });
-}
-
-/* ══════════════════════════════════════
-   CLEAR
-══════════════════════════════════════ */
-function clearRoute() {
-  document.getElementById('nav-svg').innerHTML = '';
-  document.getElementById('y-marker').style.display = 'none';
-  document.querySelectorAll('.entity.active-dest').forEach(e => e.classList.remove('active-dest'));
-  document.querySelectorAll('.pf-chip').forEach(c => c.classList.remove('sel'));
-  document.getElementById('route-result').classList.remove('show');
-  document.getElementById('route-empty').style.display = 'block';
-  activeDest = null;
-}
-
-
-
-/* ══════════════════════════════════════
-   INIT
-══════════════════════════════════════ */
-buildCanvas();
-tick();
-setInterval(tick, 1000);
-
-// Show initial X marker
-setTimeout(() => onEntryChange(), 100);
-</script>
-<script src="/js/chatbot.js"></script>
+    /* ════════════════════════════
+       INIT
+    ════════════════════════════ */
+    buildCanvas();
+    setTimeout(() => onEntryChange(), 100);
+  </script>
+  <script src="/js/chatbot.js"></script>
 </body>
 </html>
