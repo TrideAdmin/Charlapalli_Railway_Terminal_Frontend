@@ -155,12 +155,12 @@
     .zone{position:absolute;left:0;right:0;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(0,0,0,.35);z-index:6;pointer-events:none}
 
     /* X/Y markers */
-    .x-marker{position:absolute;width:22px;height:22px;background:#1a56db;border:3px solid #fff;border-radius:50%;box-shadow:0 0 0 3px rgba(26,86,219,.3),var(--shadow);z-index:60;pointer-events:auto;cursor:grab;user-select:none;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff}
+    .x-marker{position:absolute;width:22px;height:22px;background:#059669;border:3px solid #fff;border-radius:50%;box-shadow:0 0 0 3px rgba(5,150,105,.3),var(--shadow);z-index:60;pointer-events:auto;cursor:grab;user-select:none;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff}
     .x-marker:active{cursor:grabbing}
     .y-marker{position:absolute;width:22px;height:22px;background:var(--crit);border:3px solid #fff;border-radius:50%;box-shadow:0 0 0 3px rgba(220,38,38,.25),var(--shadow);z-index:60;pointer-events:auto;cursor:grab;user-select:none;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff}
     .y-marker:active{cursor:grabbing}
     .pulse-ring{position:absolute;inset:-6px;border-radius:50%;border:2px solid;opacity:0;animation:ring 1.8s ease-out infinite}
-    .x-marker .pulse-ring{border-color:#1a56db}
+    .x-marker .pulse-ring{border-color:#059669}
     .y-marker .pulse-ring{border-color:var(--crit)}
     @keyframes ring{0%{opacity:.7;transform:scale(.6)}100%{opacity:0;transform:scale(1.8)}}
 
@@ -232,26 +232,6 @@
         <div class="sb-sec">
           <div class="nav-card">
             <div class="nc-title">🗺 Navigate Station</div>
-            <div class="nc-step"><div class="nc-num">1</div><span>Choose your <strong>entry point</strong> (X) below</span></div>
-            <div class="nc-step"><div class="nc-num">2</div><span>Click any <strong>platform or entity</strong> on the map (Y)</span></div>
-            <div class="nc-step"><div class="nc-num">3</div><span>Your <strong>route</strong> lights up instantly</span></div>
-          </div>
-          <div style="height:10px"></div>
-          <div class="entry-selector">
-            <div class="entry-label"><span class="entry-dot"></span>Your Entry Point (X)</div>
-            <select id="entry-select" onchange="onEntryChange()">
-              <option value="gate2a">Gate 2A Booking Counter (Main)</option>
-              <option value="gate4">Gate 4 / Booking Office</option>
-              <option value="gate8">Gate 8 Entry</option>
-              <option value="ate4">ATE-4 Outside Entrance</option>
-              <option value="vip">VIP Entry Gate</option>
-              <option value="bolguda">Bolguda Entrance (PF10)</option>
-            </select>
-          </div>
-          <div style="height:8px"></div>
-          <div class="hint-text">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;opacity:.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            Click any platform, gate, or office on the map to see your route
           </div>
         </div>
 
@@ -291,8 +271,8 @@
         <div class="mh-right">
           <div class="legend">
             <div class="leg"><span style="display:inline-block;width:14px;height:7px;border-radius:2px;background:rgba(217,119,6,.1);border:1px solid rgba(217,119,6,.35)"></span>FOB Bridge</div>
-            <div class="leg"><span style="width:10px;height:10px;border-radius:50%;background:#1a56db;display:inline-block"></span>Entry (X)</div>
-            <div class="leg"><span style="width:10px;height:10px;border-radius:50%;background:#dc2626;display:inline-block"></span>Dest (Y)</div>
+            <div class="leg"><span style="width:10px;height:10px;border-radius:50%;background:#059669;display:inline-block"></span>Pick-up (X)</div>
+            <div class="leg"><span style="width:10px;height:10px;border-radius:50%;background:#dc2626;display:inline-block"></span>Drop (Y)</div>
           </div>
         </div>
       </div>
@@ -344,25 +324,18 @@
 
     // FOB X positions — matching reference file exactly
     const FOB_DEFS = [
-      {key:'FOB-Ramp',     x:148, label:'FOB Ramp'},
       {key:'FOB-Terminal', x:388, label:'FOB Terminal'},
       {key:'KZJ-2',        x:596, label:'KZJ 2'},
-      {key:'KZJ-3',        x:744, label:'KZJ 3'},
     ];
-
     // Entry point coordinates (on 920×780 canvas)
     const ENTRY_POINTS = {
-      gate2a:  {x:471, y:88,  label:'Gate 2A',  desc:'Main Booking Counter'},
-      gate4:   {x:207, y:88,  label:'Gate 4',   desc:'ATVM + Help Desk'},
-      gate8:   {x:696, y:660, label:'Gate 8',   desc:'South-East Entry'},
-      ate4:    {x:476, y:660, label:'ATE-4',    desc:'Alternate Entry'},
-      vip:     {x:455, y:660, label:'VIP Gate', desc:'VIP Entry'},
+      gate1:   {x:471, y:88,  label:'Gate 1',   desc:'Main Booking Counter'},
       bolguda: {x:460, y:760, label:'Bolguda',  desc:'PF10 Entry / Exit'},
     };
     const ORIGINAL_ENTRY_POINTS = JSON.parse(JSON.stringify(ENTRY_POINTS));
 
     const DESTINATIONS = {};
-    let activeEntry = 'gate2a';
+    let activeEntry = 'gate1';
     let activeDest  = null;
 
     /* ════════════════════════════
@@ -422,9 +395,6 @@
           <span style="font-size:9.5px;font-weight:600;color:rgba(255,255,255,.45);letter-spacing:.08em;text-transform:uppercase">east · KZJ end →</span>
         </div>`);
 
-      // ── Zone label ──
-      c.insertAdjacentHTML('beforeend', `
-        <div class="zone" style="top:30px;height:18px;font-size:7.5px">Entrance &amp; Booking Offices</div>`);
 
       // ── Road ──
       c.insertAdjacentHTML('beforeend', `
@@ -469,41 +439,22 @@
 
     /* ── North booking zone ── */
     function buildNorthZone(c) {
-      // West column
-      addBx(c,'busbay',     4, 34, 58, 32, 'Bus Bay',              'new', 'Bus stop · west end');
-      addBx(c,'divyang_w',  4, 70, 58, 28, 'Divyangjan\nParking W','new', 'Accessible parking west');
-      addBx(c,'booking_w',  4,102, 58, 28, 'Booking\nCounters',    'new', '2 Unified + 3 UTS counters');
+      // West items — horizontal row (clear of FOB Terminal at x:388)
+      addBx(c,'busbay',    182, 48, 60, 40, 'Bus Bay',              'new', 'Bus stop · west end');
+      addBx(c,'divyang_w', 246, 48, 70, 40, 'Divyangjan\nParking W','new', 'Accessible parking west');
+      addBx(c,'booking_w', 320, 48, 66, 40, 'Booking\nCounters',    'new', '2 Unified + 3 UTS counters');
 
-      // Rotated gates
-      addBxRot(c,'gate5',  178, 48, 16, 40, 'Gate 5',   'Gate 5 · north entry');
-      addBxRot(c,'gate4box',198, 48, 16, 40, 'Gate 4',  'Gate 4 / ATVM + Help Desk · 5 ATVMs available');
+      // Gate 1 — Main Booking Counter
+      const g1 = document.createElement('div');
+      g1.className = 'bx gate2a';
+      g1.style.cssText = 'left:416px;top:48px;width:110px;height:40px;font-size:8.5px';
+      g1.innerHTML = `<span style="font-size:9px;font-weight:600;color:#059669">Gate 1</span><span style="font-size:7.5px;color:#059669">Booking Counter · Main</span>`;
+      g1.dataset.n = 'Gate 1 — Main Booking Counter';
+      g1.dataset.d = 'Primary entry X point · Help Desk nearby · 2 Unified + 3 UTS counters · 5 ATVMs';
+      g1.onclick = (e) => { setDest('gate1crowd', 416+55, 48+20, 'Gate 1 Booking Counter', g1); showTip(e, g1); };
+      DESTINATIONS['gate1crowd'] = {x:416+55, y:48+20, label:'Gate 1 Booking Counter', el:g1};
+      c.appendChild(g1);
 
-      // Gate 4 crowd indicator
-      const g4 = document.createElement('div');
-      g4.className = 'bx moderate';
-      g4.style.cssText = 'left:218px;top:48px;width:42px;height:40px';
-      g4.innerHTML = `<span style="font-size:7.5px;color:#d97706;font-weight:700">GATE 4</span><span style="font-size:7px;color:#d97706;opacity:.8">Moderate</span>`;
-      g4.dataset.n = 'Gate 4 Entry'; g4.dataset.d = 'Moderate crowd · ATVM machines here';
-      g4.onclick = () => { setDest('gate4box', 218+21, 48+20, 'Gate 4', g4); showTip(event, g4); };
-      DESTINATIONS['gate4box'] = {x:218+21, y:48+20, label:'Gate 4', el:g4};
-      c.appendChild(g4);
-
-      addBx(c,'northblock', 264, 48,120, 40, 'North Block\n(Under Construction)', 'constr');
-
-      // Gate 2A — Main Booking Counter
-      const g2a = document.createElement('div');
-      g2a.className = 'bx gate2a';
-      g2a.style.cssText = 'left:416px;top:48px;width:110px;height:40px;font-size:8.5px';
-      g2a.innerHTML = `<span style="font-size:9px;font-weight:600;color:#059669">Gate 2A</span><span style="font-size:7.5px;color:#059669">Booking Counter · Main</span>`;
-      g2a.dataset.n = 'Gate 2A — Main Booking Counter';
-      g2a.dataset.d = 'Primary entry X point · Help Desk nearby · 2 Unified + 3 UTS counters · 5 ATVMs';
-      g2a.onclick = (e) => { setDest('gate2acrowd', 416+55, 48+20, 'Gate 2A Booking Counter', g2a); showTip(e, g2a); };
-      DESTINATIONS['gate2acrowd'] = {x:416+55, y:48+20, label:'Gate 2A Booking Counter', el:g2a};
-      c.appendChild(g2a);
-
-      addBx(c,'rethifile',  530, 48,  62, 28, 'Rethifile\nBooking',  '', 'Secondary booking office');
-      addBx(c,'rethiexit',  530, 78,  62, 16, 'Rethifile Exit',       'small', 'Exit from Rethifile area');
-      addBx(c,'prs',        622, 48,  60, 40, 'PRS Booking\nOffice',  '', 'Reserved ticketing');
       addBx(c,'parking',    686, 48, 106, 28, 'Parking 2/4W + Cabs', 'parking', 'Large vehicle parking zone east-center');
       addBx(c,'parcel',     796, 48,  60, 40, 'Parcel\nOffice',       '', 'East end of station');
       addBx(c,'divyang_e',  796, 92,  60, 26, 'Divyangjan\nParking E','new', 'Accessible parking east');
@@ -582,35 +533,9 @@
     function buildSouthZone(c) {
       c.insertAdjacentHTML('beforeend', `<div class="zone" style="top:568px;height:16px;font-size:7px">South concourse</div>`);
 
-      addBx(c,'bldg_entrance', 178,638,120,44,'Building Entrance\n+ Baggage Scanner','new','Main south entry · baggage scanner at entry');
+      addBx(c,'bldg_entrance', 178,638,120,44,'Gate 2\n+ Baggage Scanner','new','Main south entry · baggage scanner at entry');
       addBx(c,'exit_gate',     302,638, 68,44,'Exit Gate','new','Separate public exit from terminal');
-      addBx(c,'vip_saloon',    374,638, 70,44,'VIP Saloon\nSiding','','VIP area west south zone');
-      addBxRot(c,'vip_entry',  448,638, 16,44,'VIP Entry', 'VIP Entry Gate');
-      addBxRot(c,'ate4',       468,638, 16,44,'ATE-4',     'ATE-4 Alternate Entry');
-
-      // Gate 6 crowd indicator
-      const g6 = document.createElement('div');
-      g6.className = 'bx moderate';
-      g6.style.cssText = 'left:488px;top:638px;width:72px;height:44px';
-      g6.innerHTML = `<span style="font-size:8px;font-weight:700;color:#d97706">GATE-6</span><span style="font-size:7px;color:#d97706;opacity:.8">Moderate</span>`;
-      g6.dataset.n = 'Gate 6 Outside Entrance'; g6.dataset.d = 'Moderate crowd · South external gate';
-      g6.onclick = (e) => { setDest('gate6outside', 488+36, 638+22, 'Gate 6 Outside', g6); showTip(e,g6); };
-      DESTINATIONS['gate6outside'] = {x:488+36, y:638+22, label:'Gate 6 Outside', el:g6};
-      c.appendChild(g6);
-
       addBx(c,'southblock', 564,638,120,44,'South Block\n(Under Construction)','constr');
-      addBxRot(c,'gate8box', 688,638, 16,44,'Gate 8','Gate 8 · South-east entry gate');
-
-      // Basement parking
-      const bp = document.createElement('div');
-      bp.className = 'bx dark';
-      bp.style.cssText = 'left:708px;top:638px;width:76px;height:44px;font-size:8px';
-      bp.innerHTML = `Basement<br>Parking<span style="font-size:7.5px;opacity:.6;display:block">Gate 8</span>`;
-      bp.dataset.n = 'Basement Parking — Gate 8'; bp.dataset.d = 'Underground parking near Gate 8 south-east';
-      bp.onclick = (e) => { setDest('basement', 708+38, 638+22, 'Basement Parking', bp); showTip(e,bp); };
-      DESTINATIONS['basement'] = {x:708+38, y:638+22, label:'Basement Parking', el:bp};
-      c.appendChild(bp);
-
       addBx(c,'circulating', 788,638, 94,44,'Circulating\n/ Holding Area','new','Pick-up · Drop · east side');
     }
 
