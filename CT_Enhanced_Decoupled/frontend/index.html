@@ -977,6 +977,13 @@
       tagClass = 'tag-red';
     }
     const typeBadge = t.type ? `<span class="tag ${tagClass}" style="font-size:0.55rem;margin-left:0.5rem;padding:0.1rem 0.4rem;vertical-align:middle;border-radius:4px;font-family:var(--font-mono);font-weight:700;">${t.type}</span>` : '';
+    const pfNum = parseInt(t.platform, 10);
+    const pfLink = (pfNum >= 1 && pfNum <= 9)
+      ? `<a href="/pages/navigate.html?dest=pf${pfNum}" style="display:inline-flex;align-items:center;gap:4px;margin-top:4px;padding:4px 10px;background:rgba(232,93,38,0.1);border:1px solid rgba(232,93,38,0.35);border-radius:6px;color:#e85d26;font-size:11px;font-weight:700;text-decoration:none;white-space:nowrap;transition:all 0.15s" onmouseover="this.style.background='rgba(232,93,38,0.2)'" onmouseout="this.style.background='rgba(232,93,38,0.1)'">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          PF ${pfNum}
+        </a>`
+      : '';
     return `<tr>
       <td><strong style="color:var(--gold);font-family:var(--font-mono)">${t.number}</strong></td>
       <td>${t.name}${typeBadge}</td>
@@ -984,11 +991,12 @@
       <td style="font-family:var(--font-mono)">${t.arrives}</td>
       <td style="font-family:var(--font-mono)">${t.departs}</td>
       <td><span class="status-badge ${isDelay ? 'delay' : 'ok'}">${t.status}</span></td>
-      <td>
+      <td style="white-space:nowrap">
         <button class="btn-find-coach"
           onclick="window.CoachFinder.open(${JSON.stringify(t).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '\\u003c')})">
           🚃 Find Coach
         </button>
+        ${pfLink}
       </td>
     </tr>`;
   }).join('')}

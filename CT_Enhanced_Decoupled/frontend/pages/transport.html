@@ -13,6 +13,32 @@
   </script>
 </head>
 
+<style>
+  .nav-here-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 12px;
+    padding: 7px 14px;
+    background: rgba(232,93,38,0.08);
+    border: 1px solid rgba(232,93,38,0.35);
+    border-radius: 8px;
+    color: #e85d26;
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.18s ease;
+    font-family: inherit;
+    letter-spacing: 0.03em;
+  }
+  .nav-here-btn:hover {
+    background: rgba(232,93,38,0.16);
+    border-color: #e85d26;
+    transform: translateX(2px);
+  }
+  .nav-here-btn svg { flex-shrink: 0; }
+</style>
+
 <body>
   <script src="/js/layout.js"></script>
 
@@ -85,6 +111,10 @@
           <h3>Gamyam App — Real-Time Tracking</h3>
           <p>Track all TSRTC buses to Cherlapally Railway Station in real time. Download Gamyam App on Android / iOS for
             live updates.</p>
+          <a href="/pages/navigate.html?dest=busbay" class="nav-here-btn">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Find Bus Bay on Map
+          </a>
         </div>
       </div>
     </section>
@@ -100,6 +130,10 @@
           <h3>Locations</h3>
           <p>Platform 01 side entrance<br>New Terminal Side<br>Bus Bay (Pick-up / Drop)<br>Autos & Taxis (Pick-up /
             Drop)</p>
+          <a href="/pages/navigate.html?dest=parking" class="nav-here-btn">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Find Parking on Map
+          </a>
         </div>
         <div class="facility-card">
           <div class="card-icon"><i data-lucide="list-checks"></i></div>
@@ -121,6 +155,10 @@
           <h3>Why Choose Prepaid?</h3>
           <p>Fixed rates — no overcharging<br>Vetted & authorized drivers<br>Receipt with driver details<br>Available at
             both terminal entrances</p>
+          <a href="/pages/navigate.html?dest=circulating" class="nav-here-btn">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Find Pick-up Point on Map
+          </a>
         </div>
         <div class="facility-card">
           <div class="card-icon"><i data-lucide="help-circle"></i></div>

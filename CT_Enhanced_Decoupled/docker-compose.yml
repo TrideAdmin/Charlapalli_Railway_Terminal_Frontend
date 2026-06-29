@@ -14,6 +14,7 @@ services:
       - backend
     environment:
       - BACKEND_URL=https://charlapalli-railway-terminal-api.tride.live
+      - VITE_GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}
 
   backend:
     build:
@@ -25,7 +26,7 @@ services:
       - "6019:3001"
     restart: always
     env_file:
-      - ./backend/.env          # loads SARVAM_API_KEY, RAPIDAPI_KEY, RAPIDAPI_HOST
+      - ./backend/.env          # loads SARVAM_API_KEY, RAPIDAPI_KEY, RAPIDAPI_HOST, GOOGLE_MAPS_API_KEY
     environment:
       - PORT=3001
       - NODE_ENV=production

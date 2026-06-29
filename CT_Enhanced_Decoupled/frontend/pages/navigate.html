@@ -204,6 +204,9 @@
       transform: scale(0.95);
     }
   </style>
+
+  <!-- Google Maps JS SDK (key injected by serve.js from .env) -->
+  <script src="https://maps.googleapis.com/maps/api/js?key=PLACEHOLDER&libraries=places&callback=Function.prototype" async defer></script>
 </head>
 
 <!-- SVG icon defs (hidden) -->
@@ -232,6 +235,36 @@
         <div class="sb-sec">
           <div class="nav-card">
             <div class="nc-title">🗺 Navigate Station</div>
+            <div class="nc-step">
+              <div class="nc-num">1</div>
+              <span>Choose your entry point below</span>
+            </div>
+            <div class="nc-step">
+              <div class="nc-num">2</div>
+              <span>Click any platform, facility or entity on the map</span>
+            </div>
+            <div class="nc-step">
+              <div class="nc-num">3</div>
+              <span>Follow the highlighted route · Use GPS for outdoor nav</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Entry Point Selector -->
+        <div class="sb-sec">
+          <div class="sb-head">Entry Point (You Are Here)</div>
+          <div class="entry-selector">
+            <label class="entry-label" for="entry-select">
+              <span class="entry-dot"></span> Starting Gate
+            </label>
+            <select id="entry-select" onchange="onEntryChange()">
+              <option value="gate1">Gate 1 — Main Booking Counter (North)</option>
+              <option value="bolguda">Bolguda — PF10 Entry / Exit (South)</option>
+            </select>
+            <div class="hint-text">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              Drag the green X marker to adjust your exact position
+            </div>
           </div>
         </div>
 
@@ -240,12 +273,18 @@
           <div class="route-result" id="route-result">
             <div class="rr-header" id="rr-header"></div>
             <div class="rr-steps" id="rr-steps"></div>
-            <button class="btn-clear" onclick="clearRoute()">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-              Clear Route
-            </button>
+            <div style="display:flex;gap:6px;margin-top:8px">
+              <button class="btn-clear" onclick="clearRoute()" style="flex:1">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                Clear
+              </button>
+              <button class="btn-clear" id="share-route-btn" onclick="shareRoute()" style="flex:1;border-color:var(--blue);color:var(--blue)" title="Copy shareable link">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                Share Link
+              </button>
+            </div>
           </div>
-          <div id="route-empty" style="font-size:12px;color:var(--txt3);text-align:center;padding:12px 0">No route selected yet</div>
+          <div id="route-empty" style="font-size:12px;color:var(--txt3);text-align:center;padding:12px 0">Click any platform or facility to get directions</div>
         </div>
 
         <div class="sb-sec">
@@ -923,11 +962,147 @@
     });
 
     /* ════════════════════════════
+       SHARE / QR LINK
+    ════════════════════════════ */
+    function shareRoute() {
+      if (!activeDest) return;
+      const url = `${location.origin}${location.pathname}?dest=${activeDest.id}&entry=${activeEntry}`;
+      navigator.clipboard.writeText(url).then(() => {
+        const btn = document.getElementById('share-route-btn');
+        const orig = btn.innerHTML;
+        btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Copied!`;
+        btn.style.borderColor = 'var(--safe)'; btn.style.color = 'var(--safe)';
+        setTimeout(() => { btn.innerHTML = orig; btn.style.borderColor = ''; btn.style.color = ''; }, 2000);
+      }).catch(() => {
+        prompt('Copy this link:', url);
+      });
+    }
+
+    /* ════════════════════════════
+       URL PARAM DEEP-LINK
+    ════════════════════════════ */
+    function applyURLParams() {
+      const params = new URLSearchParams(location.search);
+      const destId = params.get('dest');
+      const entryId = params.get('entry');
+
+      // Set entry point if provided
+      if (entryId && ENTRY_POINTS[entryId]) {
+        activeEntry = entryId;
+        const sel = document.getElementById('entry-select');
+        if (sel) sel.value = entryId;
+      }
+
+      // Apply entry change to place X marker
+      onEntryChange();
+
+      // Set destination if provided and valid
+      if (destId && DESTINATIONS[destId]) {
+        const d = DESTINATIONS[destId];
+        // Small delay to let canvas fully render
+        setTimeout(() => {
+          setDest(destId, d.x, d.y, d.label, d.el);
+          // Scroll map into view on mobile
+          document.querySelector('.map-panel')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 200);
+      }
+    }
+
+    /* ════════════════════════════
        INIT
     ════════════════════════════ */
     buildCanvas();
-    setTimeout(() => onEntryChange(), 100);
+    // Apply URL params after canvas is built (destinations registered)
+    setTimeout(() => applyURLParams(), 100);
   </script>
   <script src="/js/chatbot.js"></script>
+
+  <!-- ═══════════════════════════════════════════════════════════════════
+       BLOCK 2 — Live GPS Navigation Controller (required)
+       Bootstraps GPSTracker → NavigationEngine → MapRenderer + Announcer.
+       Injects the GPS nav panel above the station canvas automatically.
+  ═══════════════════════════════════════════════════════════════════ -->
+  <script type="module" src="/js/nav/liveNavController.js"></script>
+
+  <!-- ═══════════════════════════════════════════════════════════════════
+       BLOCK 3 — Indoor click → Outdoor GPS destination bridge (optional)
+       Maps every canvas entity ID to its real-world lat/lng so that
+       clicking a platform or facility on the station map automatically
+       sets the outdoor GPS destination in liveNavController.
+       Update ENTITY_GPS_COORDS with surveyed GPS points for accuracy.
+  ═══════════════════════════════════════════════════════════════════ -->
+  <script>
+  (function () {
+    /**
+     * ENTITY_GPS_COORDS
+     * Keys must match the entity IDs used in DESTINATIONS (set by addBx /
+     * the platform onclick handlers), e.g. 'pf1' … 'pf9', 'gate1crowd',
+     * 'terminal', 'bldg_entrance', 'exit_gate', etc.
+     *
+     * Values are approximate GPS coords for Charlapalli Railway Terminal.
+     * Replace with surveyed points for production accuracy.
+     */
+    const ENTITY_GPS_COORDS = {
+      // ── Platforms (centre of each platform track) ──────────────────────
+      pf1:           { lat: 17.41108, lng: 78.58900, label: 'Platform 1' },
+      pf2:           { lat: 17.41100, lng: 78.58900, label: 'Platform 2' },
+      pf3:           { lat: 17.41093, lng: 78.58900, label: 'Platform 3' },
+      pf4:           { lat: 17.41086, lng: 78.58900, label: 'Platform 4' },
+      pf5:           { lat: 17.41079, lng: 78.58900, label: 'Platform 5' },
+      pf6:           { lat: 17.41072, lng: 78.58900, label: 'Platform 6' },
+      pf7:           { lat: 17.41065, lng: 78.58900, label: 'Platform 7' },
+      pf8:           { lat: 17.41058, lng: 78.58900, label: 'Platform 8' },
+      pf9:           { lat: 17.41051, lng: 78.58900, label: 'Platform 9' },
+
+      // ── North zone ─────────────────────────────────────────────────────
+      gate1crowd:    { lat: 17.41130, lng: 78.58870, label: 'Gate 1 — Main Booking Counter' },
+      busbay:        { lat: 17.41135, lng: 78.58840, label: 'Bus Bay' },
+      divyang_w:     { lat: 17.41133, lng: 78.58850, label: 'Divyangjan Parking West' },
+      booking_w:     { lat: 17.41131, lng: 78.58858, label: 'Booking Counters' },
+      parking:       { lat: 17.41125, lng: 78.58925, label: 'Parking 2/4W + Cabs' },
+      parcel:        { lat: 17.41122, lng: 78.58945, label: 'Parcel Office' },
+      divyang_e:     { lat: 17.41120, lng: 78.58950, label: 'Divyangjan Parking East' },
+      terminal_e:    { lat: 17.41118, lng: 78.58958, label: 'Terminal Entrance East' },
+
+      // ── Terminal building ───────────────────────────────────────────────
+      terminal:      { lat: 17.41090, lng: 78.58900, label: 'Terminal Building' },
+
+      // ── South zone ─────────────────────────────────────────────────────
+      bldg_entrance: { lat: 17.41075, lng: 78.58855, label: 'Gate 2 + Baggage Scanner' },
+      exit_gate:     { lat: 17.41073, lng: 78.58870, label: 'Exit Gate' },
+      southblock:    { lat: 17.41070, lng: 78.58910, label: 'South Block' },
+      circulating:   { lat: 17.41068, lng: 78.58945, label: 'Circulating / Holding Area' },
+    };
+
+    /**
+     * Patch the page-level setDest() so every indoor canvas interaction
+     * also updates the live GPS controller destination.
+     */
+    function patchSetDest() {
+      const origSetDest = window.setDest;
+      if (typeof origSetDest !== 'function') return; // not ready yet
+
+      window.setDest = function (id, x, y, label, el) {
+        // Call the original indoor routing logic unchanged
+        origSetDest.call(this, id, x, y, label, el);
+
+        // Bridge to outdoor GPS if we have coords for this entity
+        const gps = ENTITY_GPS_COORDS[id];
+        if (gps && window._lnc && typeof window._lnc.setDestination === 'function') {
+          window._lnc.setDestination(gps.lat, gps.lng, gps.label || label);
+        }
+      };
+    }
+
+    // setDest is defined inside an inline <script> that runs before this
+    // block, so it should already be available. Guard with a tiny retry
+    // just in case the DOM parse order changes.
+    if (typeof window.setDest === 'function') {
+      patchSetDest();
+    } else {
+      document.addEventListener('DOMContentLoaded', patchSetDest);
+    }
+  })();
+  </script>
 </body>
 </html>

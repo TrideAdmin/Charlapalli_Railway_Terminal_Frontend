@@ -13,6 +13,32 @@
   </script>
 </head>
 
+<style>
+  .nav-here-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 12px;
+    padding: 7px 14px;
+    background: rgba(232,93,38,0.08);
+    border: 1px solid rgba(232,93,38,0.35);
+    border-radius: 8px;
+    color: #e85d26;
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.18s ease;
+    font-family: inherit;
+    letter-spacing: 0.03em;
+  }
+  .nav-here-btn:hover {
+    background: rgba(232,93,38,0.16);
+    border-color: #e85d26;
+    transform: translateX(2px);
+  }
+  .nav-here-btn svg { flex-shrink: 0; }
+</style>
+
 <body>
   <script src="/js/layout.js"></script>
 
@@ -133,6 +159,10 @@
           <h3>Baggage X-Ray Scanning</h3>
           <p>Advanced X-ray baggage screening systems at all station entry points. All luggage is scanned for prohibited
             and suspicious items.</p>
+          <a href="/pages/navigate.html?dest=bldg_entrance" class="nav-here-btn">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Find Scanner on Map
+          </a>
         </div>
         <div class="facility-card">
           <div class="card-img-top">
@@ -172,6 +202,10 @@
           <h3>Arrive Early</h3>
           <p>Passengers are advised to arrive at least 30 minutes before scheduled train departure to allow time for
             security checks.</p>
+          <a href="/pages/navigate.html?dest=gate1crowd" class="nav-here-btn">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Find Main Gate on Map
+          </a>
         </div>
         <div class="facility-card">
           <div class="card-icon"><i data-lucide="eye"></i></div>

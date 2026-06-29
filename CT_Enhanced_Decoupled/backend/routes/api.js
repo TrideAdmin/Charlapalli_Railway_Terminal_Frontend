@@ -366,4 +366,34 @@ router.post('/chat', async (req, res) => {
   }
 });
 
+// ── Google Maps Directions proxy ──────────────────────────────────────────────
+// The browser cannot call maps.googleapis.com/maps/api/directions/json directly
+// due to CORS restrictions. This backend proxy forwards the request server-side.
+const GMAPS_KEY = process.env.GOOGLE_MAPS_API_KEY || '';
+
+router.get('/maps/directions', async (req, res) => {
+  const { origin, destination, mode = 'walking', language = 'en' } = req.query;
+
+  if (!origin || !destination) {
+    return res.status(400).json({ success: false, message: 'origin and destination are required' });
+  }
+
+  if (!GMAPS_KEY) {
+    return res.status(503).json({ success: false, message: 'GOOGLE_MAPS_API_KEY not configured on server' });
+  }
+
+  const params = new URLSearchParams({ origin, destination, mode, language, key: GMAPS_KEY });
+  const url = `https://maps.googleapis.com/maps/api/directions/json?${params}`;
+
+  try {
+    const r = await fetch(url);
+    const json = await r.json();
+    // Forward exactly what Google returned — routingService.js already knows how to parse it
+    res.json(json);
+  } catch (err) {
+    console.error('[Maps Proxy Error]', err.message);
+    res.status(502).json({ success: false, message: 'Failed to reach Google Maps API' });
+  }
+});
+
 module.exports = router;
