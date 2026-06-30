@@ -49,6 +49,13 @@ const MIME = {
   '.ico':  'image/x-icon',
 };
 
+// Binary extensions — must NOT be read as utf8
+const BINARY_EXTS = new Set([
+  '.png', '.jpg', '.jpeg', '.webp', '.gif', '.ico',
+  '.woff', '.woff2', '.ttf', '.eot', '.otf',
+  '.mp4', '.webm', '.mp3', '.wav', '.pdf', '.zip',
+]);
+
 http.createServer((req, res) => {
   let urlPath = req.url.split('?')[0];
   if (urlPath === '/') urlPath = '/index.html';
@@ -60,48 +67,50 @@ http.createServer((req, res) => {
 
   const ext         = path.extname(filePath).toLowerCase();
   const contentType = MIME[ext] || 'application/octet-stream';
+  const isBinary    = BINARY_EXTS.has(ext);
 
+  // ── Binary files (images, fonts…): read as raw Buffer ──────────────────
+  if (isBinary) {
+    fs.readFile(filePath, (err, data) => {
+      if (err) {
+        res.writeHead(404); res.end('Not found'); return;
+      }
+      res.writeHead(200, {
+        'Content-Type': contentType,
+        'Cache-Control': 'public, max-age=86400',
+      });
+      res.end(data);
+    });
+    return;
+  }
+
+  // ── Text files (html, css, js, json…): read as utf8 ────────────────────
   fs.readFile(filePath, 'utf8', (err, raw) => {
     if (err) {
-      // Try binary for images etc.
-      fs.readFile(filePath, (e2, bin) => {
-        if (e2) {
-          fs.readFile(path.join(ROOT, '404.html'), (e3, d) => {
-            res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8' });
-            res.end(e3 ? '<h1>404 Not Found</h1>' : d);
-          });
-        } else {
-          res.writeHead(200, {
-            'Content-Type': contentType,
-            'Cache-Control': 'public, max-age=86400',
-          });
-          res.end(bin);
-        }
+      fs.readFile(path.join(ROOT, '404.html'), (e, d) => {
+        res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8' });
+        res.end(e ? '<h1>404 Not Found</h1>' : d);
       });
       return;
     }
 
-    // For HTML files: inject the Maps key snippet and strip any hardcoded
-    // placeholder so the .env value is always the single source of truth.
+    // HTML only: inject Maps API key and replace SDK placeholder key
     let body = raw;
     if (ext === '.html' && KEY_SNIPPET) {
-      // Remove any existing hardcoded window.GOOGLE_MAPS_API_KEY script tags
       body = body.replace(
         /<script>\s*window\.GOOGLE_MAPS_API_KEY\s*=\s*['"][^'"]*['"]\s*;\s*<\/script>\n?/g,
         ''
       );
-      // Also strip the placeholder from SDK loader src (key is not needed when using backend proxy)
       body = body.replace(
         /(src="https:\/\/maps\.googleapis\.com\/maps\/api\/js\?key=)[^"&]*/g,
         `$1${MAPS_KEY}`
       );
-      // Inject our clean snippet right after <head>
       body = body.replace('<head>', `<head>\n  ${KEY_SNIPPET}`);
     }
 
     res.writeHead(200, {
       'Content-Type': contentType,
-      'Cache-Control': 'no-cache',
+      'Cache-Control': ext === '.html' ? 'no-cache' : 'public, max-age=3600',
     });
     res.end(body);
   });

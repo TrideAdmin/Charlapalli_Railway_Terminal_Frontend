@@ -366,34 +366,72 @@ router.post('/chat', async (req, res) => {
   }
 });
 
-// ── Google Maps Directions proxy ──────────────────────────────────────────────
-// The browser cannot call maps.googleapis.com/maps/api/directions/json directly
-// due to CORS restrictions. This backend proxy forwards the request server-side.
-const GMAPS_KEY = process.env.GOOGLE_MAPS_API_KEY || '';
+// ══════════════════════════════════════════════════════════════════════════════
+// GOOGLE MAPS API PROXY
+// All browser→Google calls are blocked by CORS. These routes forward requests
+// server-side so the API key never appears in client network traffic.
+// GOOGLE_MAPS_API_KEY is read from process.env (loaded via .env or Docker env).
+// ══════════════════════════════════════════════════════════════════════════════
 
+const GMAPS_KEY = process.env.GOOGLE_MAPS_API_KEY || '';
+const GMAPS_BASE = 'https://maps.googleapis.com/maps/api';
+
+/** Shared proxy helper — forwards query params to Google, returns JSON. */
+async function gmapsProxy(res, endpoint, extraParams = {}) {
+  if (!GMAPS_KEY) {
+    return res.status(503).json({
+      success: false,
+      message: 'GOOGLE_MAPS_API_KEY not configured on server. Set it in backend/.env.'
+    });
+  }
+  const params = new URLSearchParams({ ...extraParams, key: GMAPS_KEY });
+  const url = `${GMAPS_BASE}/${endpoint}?${params}`;
+  try {
+    const r    = await fetch(url);
+    const json = await r.json();
+    res.json(json);          // forward Google's response unchanged
+  } catch (err) {
+    console.error(`[Maps Proxy /${endpoint}]`, err.message);
+    res.status(502).json({ success: false, message: 'Failed to reach Google Maps API' });
+  }
+}
+
+// ── GET /api/maps/directions ───────────────────────────────────────────────────
+// Used by routingService.js for turn-by-turn walking directions.
+// Query params: origin (lat,lng), destination (lat,lng), mode, language
 router.get('/maps/directions', async (req, res) => {
   const { origin, destination, mode = 'walking', language = 'en' } = req.query;
-
   if (!origin || !destination) {
     return res.status(400).json({ success: false, message: 'origin and destination are required' });
   }
+  await gmapsProxy(res, 'directions/json', { origin, destination, mode, language });
+});
 
-  if (!GMAPS_KEY) {
-    return res.status(503).json({ success: false, message: 'GOOGLE_MAPS_API_KEY not configured on server' });
+// ── GET /api/maps/geocode ──────────────────────────────────────────────────────
+// Converts an address string → lat/lng coordinates.
+// Query params: address  OR  latlng (for reverse geocoding)
+// Usage: /api/maps/geocode?address=Charlapalli+Railway+Station
+//        /api/maps/geocode?latlng=17.4110,78.5888
+router.get('/maps/geocode', async (req, res) => {
+  const { address, latlng, language = 'en' } = req.query;
+  if (!address && !latlng) {
+    return res.status(400).json({ success: false, message: 'address or latlng is required' });
   }
+  const extra = address ? { address, language } : { latlng, language };
+  await gmapsProxy(res, 'geocode/json', extra);
+});
 
-  const params = new URLSearchParams({ origin, destination, mode, language, key: GMAPS_KEY });
-  const url = `https://maps.googleapis.com/maps/api/directions/json?${params}`;
-
-  try {
-    const r = await fetch(url);
-    const json = await r.json();
-    // Forward exactly what Google returned — routingService.js already knows how to parse it
-    res.json(json);
-  } catch (err) {
-    console.error('[Maps Proxy Error]', err.message);
-    res.status(502).json({ success: false, message: 'Failed to reach Google Maps API' });
+// ── GET /api/maps/distancematrix ───────────────────────────────────────────────
+// Returns travel time/distance between origins and destinations.
+// Useful for multi-stop ETA or showing how far the user is from each platform.
+// Query params: origins (pipe-separated lat,lng), destinations (pipe-separated), mode
+// Usage: /api/maps/distancematrix?origins=17.41,78.58&destinations=17.411,78.589&mode=walking
+router.get('/maps/distancematrix', async (req, res) => {
+  const { origins, destinations, mode = 'walking', language = 'en' } = req.query;
+  if (!origins || !destinations) {
+    return res.status(400).json({ success: false, message: 'origins and destinations are required' });
   }
+  await gmapsProxy(res, 'distancematrix/json', { origins, destinations, mode, language });
 });
 
 module.exports = router;

@@ -12,9 +12,11 @@ services:
     restart: always
     depends_on:
       - backend
+    env_file:
+      - ./backend/.env          # gives GOOGLE_MAPS_API_KEY to serve.js → injected into every HTML page
     environment:
       - BACKEND_URL=https://charlapalli-railway-terminal-api.tride.live
-      - VITE_GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}
+
 
   backend:
     build:
