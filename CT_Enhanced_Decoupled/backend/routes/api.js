@@ -323,7 +323,80 @@ router.post('/contact', (req, res) => {
   res.json({ success: true, message: 'Message received. We will respond within 24 hours.' });
 });
 
+// ── GET /api/trains/live/:number ──────────────────────────────────────────────
+// Returns real-time running status for a specific train from RapidAPI.
+// Used by the chatbot when the user asks about a specific train number.
+// Response includes: current station, delay, status message, CHZ arrival/departure.
+router.get('/trains/live/:number', async (req, res) => {
+  const { number } = req.params;
+
+  if (!/^\d{5}$/.test(number)) {
+    return res.status(400).json({ success: false, message: 'Invalid train number. Must be exactly 5 digits.' });
+  }
+
+  try {
+    const json = await getRapidApiTrainStatus(number);
+    if (json.status !== 'success' || !json.data) {
+      throw new Error(json.status_message || 'RapidAPI returned no data');
+    }
+
+    const d = json.data;
+
+    // Find CHZ stop in the route
+    const chzStop = (d.stations || []).find(s => {
+      const name = (s.name || s.station_name || '').toUpperCase();
+      const code = (s.code || s.station_code || '').toUpperCase();
+      return ['CHZ', 'CHARLAPALLI', 'CHARLAPALLY'].some(x => name.includes(x) || code.includes(x));
+    });
+
+    res.json({
+      success: true,
+      source: 'RapidAPI Live',
+      data: {
+        number:         String(d.train_number),
+        name:           d.train_name,
+        from:           d.source_stn_name || d.source || '—',
+        to:             d.dest_stn_name   || d.destination || '—',
+        status:         d.status_message  || 'Running',
+        delay:          d.delay           || 0,
+        currentStation: d.current_station_name || d.station_from || '—',
+        chzArrival:     chzStop ? (chzStop.arrival_scheduled || chzStop.sta || '—') : '—',
+        chzDeparture:   chzStop ? (chzStop.departure_scheduled || chzStop.std || '—') : '—',
+        chzPlatform:    chzStop ? String(chzStop.platform || '—') : '—',
+        updatedAt:      new Date().toISOString(),
+      }
+    });
+  } catch (err) {
+    console.warn(`[Live Train] RapidAPI failed for ${number}:`, err.message);
+
+    // Graceful fallback: check mock trains
+    const mock = mockTrains.find(t => t.number === number);
+    if (mock) {
+      return res.json({
+        success: true,
+        source: 'Mock Fallback',
+        data: {
+          number:         mock.number,
+          name:           mock.name,
+          from:           mock.from,
+          to:             mock.to,
+          status:         mock.status,
+          delay:          0,
+          currentStation: 'Unknown (live data unavailable)',
+          chzArrival:     mock.arrives,
+          chzDeparture:   mock.departs,
+          chzPlatform:    mock.platform,
+          updatedAt:      new Date().toISOString(),
+        }
+      });
+    }
+
+    res.status(502).json({ success: false, message: `Could not fetch live status for train ${number}. Try again shortly.` });
+  }
+});
+
 // Chatbot proxy
+
 const SARVAM_API_KEY = process.env.SARVAM_API_KEY;
 const SARVAM_ENDPOINT = 'https://api.sarvam.ai/v1/chat/completions';
 const MODEL = 'sarvam-30b';

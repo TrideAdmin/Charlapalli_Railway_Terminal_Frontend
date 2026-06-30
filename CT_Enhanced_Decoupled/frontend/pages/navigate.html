@@ -1039,40 +1039,45 @@
      * the platform onclick handlers), e.g. 'pf1' … 'pf9', 'gate1crowd',
      * 'terminal', 'bldg_entrance', 'exit_gate', etc.
      *
-     * Values are approximate GPS coords for Charlapalli Railway Terminal.
-     * Replace with surveyed points for production accuracy.
+     * Values are anchored to the real geocoded station centre from Google Maps
+     * Geocoding API: 17.459046, 78.604332 (Cherlapalli Railway Station).
+     * Platform spacing: ~13 m N-S (0.000117° lat). North/South zones use
+     * realistic metric offsets from the platform block centre.
      */
     const ENTITY_GPS_COORDS = {
-      // ── Platforms (centre of each platform track) ──────────────────────
-      pf1:           { lat: 17.41108, lng: 78.58900, label: 'Platform 1' },
-      pf2:           { lat: 17.41100, lng: 78.58900, label: 'Platform 2' },
-      pf3:           { lat: 17.41093, lng: 78.58900, label: 'Platform 3' },
-      pf4:           { lat: 17.41086, lng: 78.58900, label: 'Platform 4' },
-      pf5:           { lat: 17.41079, lng: 78.58900, label: 'Platform 5' },
-      pf6:           { lat: 17.41072, lng: 78.58900, label: 'Platform 6' },
-      pf7:           { lat: 17.41065, lng: 78.58900, label: 'Platform 7' },
-      pf8:           { lat: 17.41058, lng: 78.58900, label: 'Platform 8' },
-      pf9:           { lat: 17.41051, lng: 78.58900, label: 'Platform 9' },
+      // ── Platforms ──────────────────────────────────────────────────────────
+      // Geocoded centre of station: 17.459046, 78.604332
+      // Platforms spread N-S at 13 m (0.000117°) intervals, pf5 = station centre
+      pf1:           { lat: 17.459514, lng: 78.604332, label: 'Platform 1' },
+      pf2:           { lat: 17.459397, lng: 78.604332, label: 'Platform 2' },
+      pf3:           { lat: 17.459280, lng: 78.604332, label: 'Platform 3' },
+      pf4:           { lat: 17.459163, lng: 78.604332, label: 'Platform 4' },
+      pf5:           { lat: 17.459046, lng: 78.604332, label: 'Platform 5' },
+      pf6:           { lat: 17.458929, lng: 78.604332, label: 'Platform 6' },
+      pf7:           { lat: 17.458812, lng: 78.604332, label: 'Platform 7' },
+      pf8:           { lat: 17.458695, lng: 78.604332, label: 'Platform 8' },
+      pf9:           { lat: 17.458578, lng: 78.604332, label: 'Platform 9' },
 
-      // ── North zone ─────────────────────────────────────────────────────
-      gate1crowd:    { lat: 17.41130, lng: 78.58870, label: 'Gate 1 — Main Booking Counter' },
-      busbay:        { lat: 17.41135, lng: 78.58840, label: 'Bus Bay' },
-      divyang_w:     { lat: 17.41133, lng: 78.58850, label: 'Divyangjan Parking West' },
-      booking_w:     { lat: 17.41131, lng: 78.58858, label: 'Booking Counters' },
-      parking:       { lat: 17.41125, lng: 78.58925, label: 'Parking 2/4W + Cabs' },
-      parcel:        { lat: 17.41122, lng: 78.58945, label: 'Parcel Office' },
-      divyang_e:     { lat: 17.41120, lng: 78.58950, label: 'Divyangjan Parking East' },
-      terminal_e:    { lat: 17.41118, lng: 78.58958, label: 'Terminal Entrance East' },
+      // ── Terminal building (station main structure, north of platforms) ───
+      terminal:      { lat: 17.459746, lng: 78.604332, label: 'Terminal Building' },
 
-      // ── Terminal building ───────────────────────────────────────────────
-      terminal:      { lat: 17.41090, lng: 78.58900, label: 'Terminal Building' },
+      // ── North zone — main gate / booking / parking (NW quadrant) ────────
+      gate1crowd:    { lat: 17.460046, lng: 78.603932, label: 'Gate 1 — Main Booking Counter' },
+      busbay:        { lat: 17.460146, lng: 78.603732, label: 'Bus Bay' },
+      divyang_w:     { lat: 17.460046, lng: 78.603832, label: 'Divyangjan Parking West' },
+      booking_w:     { lat: 17.460046, lng: 78.603932, label: 'Booking Counters' },
+      parking:       { lat: 17.460046, lng: 78.604532, label: 'Parking 2/4W + Cabs' },
+      parcel:        { lat: 17.460046, lng: 78.604732, label: 'Parcel Office' },
+      divyang_e:     { lat: 17.460046, lng: 78.604832, label: 'Divyangjan Parking East' },
+      terminal_e:    { lat: 17.459746, lng: 78.605032, label: 'Terminal Entrance East' },
 
-      // ── South zone ─────────────────────────────────────────────────────
-      bldg_entrance: { lat: 17.41075, lng: 78.58855, label: 'Gate 2 + Baggage Scanner' },
-      exit_gate:     { lat: 17.41073, lng: 78.58870, label: 'Exit Gate' },
-      southblock:    { lat: 17.41070, lng: 78.58910, label: 'South Block' },
-      circulating:   { lat: 17.41068, lng: 78.58945, label: 'Circulating / Holding Area' },
+      // ── South zone — Gate 2 / exit / holding area ────────────────────────
+      bldg_entrance: { lat: 17.458378, lng: 78.603932, label: 'Gate 2 + Baggage Scanner' },
+      exit_gate:     { lat: 17.458378, lng: 78.604132, label: 'Exit Gate' },
+      southblock:    { lat: 17.458378, lng: 78.604332, label: 'South Block' },
+      circulating:   { lat: 17.458378, lng: 78.604732, label: 'Circulating / Holding Area' },
     };
+
 
     /**
      * Patch the page-level setDest() so every indoor canvas interaction

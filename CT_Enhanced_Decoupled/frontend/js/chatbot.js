@@ -24,8 +24,9 @@
   'use strict';
 
   /* ── CONFIG ──────────────────────────────────────────── */
-  const API_ENDPOINT = (window.CT_API_BASE || 'https://charlapalli-railway-terminal-api.tride.live/api') + '/chat';
+  const API_ENDPOINT    = (window.CT_API_BASE || 'https://charlapalli-railway-terminal-api.tride.live/api') + '/chat';
   const TRAINS_ENDPOINT = (window.CT_API_BASE || 'https://charlapalli-railway-terminal-api.tride.live/api') + '/trains';
+  const LIVE_ENDPOINT   = (window.CT_API_BASE || 'https://charlapalli-railway-terminal-api.tride.live/api') + '/trains/live';
 
   const SYSTEM_PROMPT = `You are ARIA (AI Railway Intelligence Assistant), the official AI guide for Charlapalli Railway Terminal, Hyderabad — a modern South Central Railway station.
 You help passengers with:
@@ -41,12 +42,44 @@ Reply in 1-3 short sentences. Be precise, warm and futuristic. Always call the s
 
   const WELCOME_MSG = "Hi! I'm ARIA, your AI guide for Charlapalli Terminal. How can I assist you today?";
 
+  /* ── RELOAD DETECTION ─────────────────────────────────── */
+  // Clear sessionStorage only on manual page reload/refresh
+  (function checkPageReload() {
+    try {
+      const navs = performance.getEntriesByType('navigation');
+      if (navs.length > 0 && navs[0].type === 'reload') {
+        sessionStorage.removeItem('ct_chat_history');
+        sessionStorage.removeItem('ct_chat_is_open');
+        sessionStorage.removeItem('ct_chat_has_greeted');
+      }
+    } catch (e) {
+      console.warn('[ARIA] Failed to check navigation type', e);
+    }
+  })();
+
   /* ── STATE ───────────────────────────────────────────── */
   let isOpen = false;
   let isTyping = false;
   let hasGreeted = false;
-  const history = [];          // [{role, content}]
+  let history = [];          // [{role, content}]
   let dynamicSystemPrompt = SYSTEM_PROMPT;
+
+  try {
+    const savedHistory = sessionStorage.getItem('ct_chat_history');
+    if (savedHistory) {
+      history = JSON.parse(savedHistory);
+    }
+    const savedIsOpen = sessionStorage.getItem('ct_chat_is_open');
+    if (savedIsOpen === 'true') {
+      isOpen = true;
+    }
+    const savedHasGreeted = sessionStorage.getItem('ct_chat_has_greeted');
+    if (savedHasGreeted === 'true') {
+      hasGreeted = true;
+    }
+  } catch (e) {
+    console.warn('[ARIA] Failed to load state from sessionStorage', e);
+  }
 
   /* ── DOM INJECTION ───────────────────────────────────── */
   function injectHTML() {
@@ -137,7 +170,8 @@ Reply in 1-3 short sentences. Be precise, warm and futuristic. Always call the s
         <div class="ct-quick-chips" id="ct-chips">
           <button class="ct-chip" data-q="What platforms are available?">Platforms</button>
           <button class="ct-chip" data-q="Tell me about waiting hall charges">Waiting Halls</button>
-          <button class="ct-chip" data-q="How do I find my train?">Find Train</button>
+          <button class="ct-chip" data-q="Live train arrivals at Charlapalli now">Live Arrivals</button>
+          <button class="ct-chip" data-q="What is the status of train 12728?">Train Status</button>
           <button class="ct-chip" data-q="Is there free Wi-Fi?">Wi-Fi</button>
           <button class="ct-chip" data-q="Locker prices and sizes">Lockers</button>
         </div>
@@ -494,18 +528,61 @@ Reply in 1-3 short sentences. Be precise, warm and futuristic. Always call the s
     document.head.appendChild(style);
   }
 
+  /* ── TRAIN DATA HELPERS ──────────────────────────────────── */
+
+  /** Extract a 5-digit Indian train number from arbitrary user text. */
+  function detectTrainNumber(text) {
+    const m = text.match(/\b([0-9]{5})\b/);
+    return m ? m[1] : null;
+  }
+
+  /**
+   * Fetch real-time running status for a train and format it as a
+   * plain-text context string to inject into Sarvam's system prompt.
+   */
+  async function fetchLiveTrainStatus(trainNumber) {
+    try {
+      const res  = await fetch(`${LIVE_ENDPOINT}/${trainNumber}`);
+      if (!res.ok) return '';
+      const data = await res.json();
+      if (!data.success || !data.data) return '';
+
+      const t = data.data;
+      let ctx = `\n\n--- Live Status: Train ${t.number} (${t.name}) ---\n`;
+      ctx += `Route : ${t.from} → ${t.to}\n`;
+      ctx += `Status: ${t.status}${t.delay > 0 ? ` (delayed by ${t.delay} min)` : ''}\n`;
+      if (t.currentStation && t.currentStation !== 'Unknown (live data unavailable)') {
+        ctx += `Currently at/near: ${t.currentStation}\n`;
+      }
+      if (t.chzArrival !== '—')   ctx += `CHZ Arrival  : ${t.chzArrival}\n`;
+      if (t.chzDeparture !== '—') ctx += `CHZ Departure: ${t.chzDeparture}\n`;
+      if (t.chzPlatform !== '—')  ctx += `CHZ Platform : ${t.chzPlatform}\n`;
+      ctx += `Data source  : ${data.source || 'RapidAPI'}\n`;
+      ctx += `---`;
+      return ctx;
+    } catch {
+      return '';
+    }
+  }
+
   /* ── API CALL ─────────────────────────────────── */
-  async function callSarvam(userMessage) {
+  async function callSarvam(userMessage, liveContext = '') {
     history.push({ role: 'user', content: userMessage });
+    try {
+      sessionStorage.setItem('ct_chat_history', JSON.stringify(history));
+    } catch (e) {}
+
+    // Merge live train context into the system prompt for this request only
+    const effectiveSystemPrompt = liveContext
+      ? dynamicSystemPrompt + liveContext
+      : dynamicSystemPrompt;
 
     const response = await fetch(API_ENDPOINT, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         messages: [
-          { role: 'system', content: dynamicSystemPrompt },
+          { role: 'system', content: effectiveSystemPrompt },
           ...history
         ]
       })
@@ -516,10 +593,12 @@ Reply in 1-3 short sentences. Be precise, warm and futuristic. Always call the s
       throw new Error(`API error ${response.status}: ${err}`);
     }
 
-    const data = await response.json();
+    const data  = await response.json();
     const reply = data.reply || "I'm sorry, I couldn't process that. Please try again.";
-
     history.push({ role: 'assistant', content: reply });
+    try {
+      sessionStorage.setItem('ct_chat_history', JSON.stringify(history));
+    } catch (e) {}
     return reply;
   }
 
@@ -579,7 +658,14 @@ Reply in 1-3 short sentences. Be precise, warm and futuristic. Always call the s
     showTyping();
 
     try {
-      const reply = await callSarvam(text);
+      // ── Live train enrichment ──────────────────────────────────────────
+      // If the user mentions a 5-digit train number, fetch its live status
+      // from RapidAPI and inject it into the Sarvam context so ARIA can
+      // answer with real current data instead of guessing.
+      const trainNumber = detectTrainNumber(text);
+      const liveContext = trainNumber ? await fetchLiveTrainStatus(trainNumber) : '';
+
+      const reply = await callSarvam(text, liveContext);
       hideTyping();
       addMessage(reply, 'bot');
       speakFor(reply);
@@ -597,6 +683,9 @@ Reply in 1-3 short sentences. Be precise, warm and futuristic. Always call the s
   /* ── OPEN / CLOSE ────────────────────────────────────── */
   function openChat() {
     isOpen = true;
+    try {
+      sessionStorage.setItem('ct_chat_is_open', 'true');
+    } catch (e) {}
     const win = document.getElementById('ct-chat-window');
     win.classList.add('ct-open');
     win.setAttribute('aria-hidden', 'false');
@@ -604,6 +693,9 @@ Reply in 1-3 short sentences. Be precise, warm and futuristic. Always call the s
 
     if (!hasGreeted) {
       hasGreeted = true;
+      try {
+        sessionStorage.setItem('ct_chat_has_greeted', 'true');
+      } catch (e) {}
       setTimeout(() => {
         addMessage(WELCOME_MSG, 'bot');
         speakFor(WELCOME_MSG);
@@ -613,6 +705,9 @@ Reply in 1-3 short sentences. Be precise, warm and futuristic. Always call the s
 
   function closeChat() {
     isOpen = false;
+    try {
+      sessionStorage.setItem('ct_chat_is_open', 'false');
+    } catch (e) {}
     const win = document.getElementById('ct-chat-window');
     win.classList.remove('ct-open');
     win.setAttribute('aria-hidden', 'true');
@@ -621,14 +716,35 @@ Reply in 1-3 short sentences. Be precise, warm and futuristic. Always call the s
   /* ── CONTEXT FETCH ───────────────────────────────────── */
   async function fetchTrainsContext() {
     try {
-      const res = await fetch(TRAINS_ENDPOINT);
-      if (!res.ok) return;
-      const data = await res.json();
-      if (data.success && data.data && data.data.length > 0) {
-        let trainText = '\\n\\nCurrent Train Schedule:\\n';
-        data.data.forEach(t => {
-          trainText += `- ${t.number} ${t.name} (from ${t.from} to ${t.to}) | Arr: ${t.arrives}, Dep: ${t.departs} | PF: ${t.platform} | Status: ${t.status}\\n`;
+      // Fetch both arrivals and departures for a complete station picture
+      const [arrRes, depRes] = await Promise.all([
+        fetch(`${TRAINS_ENDPOINT}?type=arrivals`),
+        fetch(`${TRAINS_ENDPOINT}?type=departures`),
+      ]);
+
+      const arrData = arrRes.ok ? await arrRes.json() : { data: [] };
+      const depData = depRes.ok ? await depRes.json() : { data: [] };
+
+      const arrivals   = arrData.data   || [];
+      const departures = depData.data   || [];
+
+      // Deduplicate: a train can appear in both lists
+      const seen = new Set();
+      const allTrains = [...arrivals, ...departures].filter(t => {
+        if (seen.has(t.number)) return false;
+        seen.add(t.number);
+        return true;
+      });
+
+      if (allTrains.length > 0) {
+        let trainText = '\n\n--- Current Schedule at Charlapalli Terminal (CHZ) ---\n';
+        allTrains.forEach(t => {
+          trainText += `• ${t.number} ${t.name}`;
+          if (t.arrives && t.arrives !== '—') trainText += ` | Arr: ${t.arrives}`;
+          if (t.departs && t.departs !== '—') trainText += ` | Dep: ${t.departs}`;
+          trainText += ` | PF: ${t.platform} | ${t.status}\n`;
         });
+        trainText += `(Source: ${arrData.source || 'Schedule'}, as of ${new Date().toLocaleTimeString('en-IN')})\n---`;
         dynamicSystemPrompt = SYSTEM_PROMPT + trainText;
       }
     } catch (err) {
@@ -636,17 +752,47 @@ Reply in 1-3 short sentences. Be precise, warm and futuristic. Always call the s
     }
   }
 
+  // Refresh train schedule in system prompt every 5 minutes
+  function startTrainContextRefresh() {
+    fetchTrainsContext();
+    setInterval(fetchTrainsContext, 5 * 60 * 1000);
+  }
+
+  /* ── RENDER SAVED HISTORY ────────────────────────────── */
+  function renderSavedMessages() {
+    if (hasGreeted) {
+      // Hide chips if they had real conversation history
+      if (history.length > 0) {
+        const chips = document.getElementById('ct-chips');
+        if (chips) chips.style.display = 'none';
+      }
+      
+      addMessage(WELCOME_MSG, 'bot');
+      history.forEach(msg => {
+        addMessage(msg.content, msg.role === 'user' ? 'user' : 'bot');
+      });
+    }
+  }
+
   /* ── BOOT ────────────────────────────────────────────── */
   function init() {
-    fetchTrainsContext();
+    startTrainContextRefresh();   // fetch schedule now + every 5 min
     injectCSS();
     injectHTML();
+    renderSavedMessages();        // render any existing messages
 
-    /* Waving greeting on page load */
-    setTimeout(() => {
-      root().classList.add('ct-waving');
-      setTimeout(() => root().classList.remove('ct-waving'), 3500);
-    }, 1200);
+    /* Waving greeting on page load if not open and not greeted */
+    if (!isOpen && !hasGreeted) {
+      setTimeout(() => {
+        root().classList.add('ct-waving');
+        setTimeout(() => root().classList.remove('ct-waving'), 3500);
+      }, 1200);
+    }
+
+    /* Open window automatically if it was left open */
+    if (isOpen) {
+      openChat();
+    }
 
     /* Events */
     document.getElementById('ct-avatar-btn').addEventListener('click', () => {
