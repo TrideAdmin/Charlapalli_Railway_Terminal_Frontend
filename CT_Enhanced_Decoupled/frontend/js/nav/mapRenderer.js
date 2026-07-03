@@ -11,6 +11,7 @@
  * Designed to be loaded AFTER the Google Maps JS script is ready.
  * ──────────────────────────────────────────────────────────────────────────
  */
+import { STATION_ANCHOR } from './stationGeo.js';
 
 export default class MapRenderer {
   /**
@@ -56,8 +57,11 @@ export default class MapRenderer {
     const mapOptions = {
       center,
       zoom:             this._opts.initialZoom,
-      mapTypeId:        'roadmap',
+      mapTypeId:        'hybrid',
       disableDefaultUI: false,
+      streetViewControl: false,
+      fullscreenControl: false,
+      zoomControl:       false,
       gestureHandling:  'greedy',
       clickableIcons:   false,
       styles: this._getMapStyles(),
@@ -183,6 +187,11 @@ export default class MapRenderer {
     this._routePoly  = null;
     this._walkedPoly = null;
     this._destMarker = null;
+
+    if (this._entityMarkers) {
+      this._entityMarkers.forEach(m => m.setMap(null));
+      this._entityMarkers = [];
+    }
   }
 
   destroy() {
@@ -267,9 +276,9 @@ export default class MapRenderer {
   </defs>
   <g transform="rotate(${r},20,20)" filter="url(#s)">
     <!-- Accuracy circle glow -->
-    <circle cx="20" cy="20" r="18" fill="rgba(26,118,255,0.15)" stroke="rgba(26,118,255,0.3)" stroke-width="1"/>
+    <circle cx="20" cy="20" r="18" fill="rgba(255,193,7,0.15)" stroke="rgba(255,193,7,0.3)" stroke-width="1"/>
     <!-- Body circle -->
-    <circle cx="20" cy="20" r="10" fill="#1a76ff" stroke="#fff" stroke-width="2.5"/>
+    <circle cx="20" cy="20" r="10" fill="#FFC107" stroke="#fff" stroke-width="2.5"/>
     <!-- Direction arrow -->
     <polygon points="20,4 15,18 20,15 25,18" fill="#fff" opacity="0.95"/>
   </g>
@@ -298,5 +307,88 @@ export default class MapRenderer {
     // Return [] for default Google Maps style
     // Swap for a custom style array if you have one
     return [];
+  }
+
+  /**
+   * Render station entities as small neutral circular markers on the hybrid map.
+   * Also draws STATION_ANCHOR itself as a distinct red marker.
+   * @param {Array<{ lat, lng, label }>} entities
+   */
+  renderStationEntities(entities) {
+    if (!this._map) return;
+
+    if (this._entityMarkers) {
+      this._entityMarkers.forEach(m => m.setMap(null));
+    }
+    this._entityMarkers = [];
+
+    const infoWindow = new google.maps.InfoWindow();
+
+    // 1. Draw verified STATION_ANCHOR marker
+    if (STATION_ANCHOR && typeof STATION_ANCHOR.lat === 'number' && typeof STATION_ANCHOR.lng === 'number') {
+      const anchorMarker = new google.maps.Marker({
+        position: STATION_ANCHOR,
+        map:      this._map,
+        title:    'STATION ANCHOR (Verified)',
+        icon: {
+          url: this._buildAnchorIcon(),
+          scaledSize: new google.maps.Size(20, 20),
+          anchor:     new google.maps.Point(10, 10),
+        },
+        zIndex: 20,
+      });
+
+      anchorMarker.addListener('click', () => {
+        infoWindow.setContent(`<div style="color:#dc2626;font-family:sans-serif;font-size:13px;font-weight:700;padding:2px 4px;">STATION ANCHOR (Verified)</div>`);
+        infoWindow.open(this._map, anchorMarker);
+      });
+
+      this._entityMarkers.push(anchorMarker);
+    }
+
+    // 2. Draw other entities
+    if (entities?.length) {
+      const iconUrl = this._buildEntityIcon();
+      entities.forEach(ent => {
+        if (typeof ent.lat !== 'number' || typeof ent.lng !== 'number') return;
+        const marker = new google.maps.Marker({
+          position: { lat: ent.lat, lng: ent.lng },
+          map:      this._map,
+          title:    ent.label,
+          icon: {
+            url: iconUrl,
+            scaledSize: new google.maps.Size(14, 14),
+            anchor:     new google.maps.Point(7, 7),
+          },
+          zIndex: 5,
+        });
+
+        marker.addListener('click', () => {
+          infoWindow.setContent(`<div style="color:#0f1318;font-family:sans-serif;font-size:13px;font-weight:600;padding:2px 4px;">${ent.label}</div>`);
+          infoWindow.open(this._map, marker);
+        });
+
+        this._entityMarkers.push(marker);
+      });
+    }
+  }
+
+  /** Build a 14px neutral dot SVG for entity markers */
+  _buildEntityIcon() {
+    const svg = `
+<svg width="14" height="14" viewBox="0 0 14 14" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="7" cy="7" r="5" fill="#5a6478" stroke="#fff" stroke-width="1.5"/>
+</svg>`.trim();
+    return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg);
+  }
+
+  /** Build a 20px red dot SVG for the verified station anchor */
+  _buildAnchorIcon() {
+    const svg = `
+<svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="10" cy="10" r="7" fill="#dc2626" stroke="#fff" stroke-width="2"/>
+  <circle cx="10" cy="10" r="3" fill="#fff"/>
+</svg>`.trim();
+    return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg);
   }
 }

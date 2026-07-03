@@ -201,6 +201,50 @@ export default class NavigationEngine {
     }
   }
 
+  /**
+   * Start a simulated indoor navigation using a pre-computed lat/lng polyline.
+   * Skips the network call to fetchRoute() entirely.
+   *
+   * @param {Array<{lat,lng}>} polyline  — densified indoor path
+   * @param {{ lat, lng, label }} destination
+   */
+  async startSimulatedNavigation(polyline, destination) {
+    this._destination = destination;
+    this._stepIndex   = 0;
+    this._arrived     = false;
+    this._announced.clear();
+
+    // Compute total distance along the polyline
+    let totalDist = 0;
+    for (let i = 0; i < polyline.length - 1; i++) {
+      totalDist += haversineDistance(polyline[i], polyline[i + 1]);
+    }
+
+    const syntheticStep = {
+      instruction:   `Follow the path to ${destination.label}`,
+      distance:      totalDist,
+      duration:      totalDist / CFG.WALK_SPEED_MPS,
+      startLocation: polyline[0],
+      endLocation:   destination,
+      polyline,
+      maneuver:      'straight',
+    };
+
+    this._route = {
+      polyline,
+      steps:     [syntheticStep],
+      totalDist,
+      totalTime: totalDist / CFG.WALK_SPEED_MPS,
+      summary:   'Indoor route',
+      source:    'indoor',
+    };
+    this._polyline = polyline;
+
+    this._cb.onReroute(this._route);
+    this._cb.onStepChange(syntheticStep, 0, 1);
+  }
+
+
   // ── Getters ──────────────────────────────────────────────────────────────
   get currentStep()    { return this._route?.steps[this._stepIndex]; }
   get stepIndex()      { return this._stepIndex; }

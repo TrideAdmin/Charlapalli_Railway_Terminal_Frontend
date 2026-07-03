@@ -185,3 +185,33 @@ export function decodePolyline(encoded) {
   }
   return coords;
 }
+
+/**
+ * Densify an array of {lat,lng} waypoints so consecutive points are no more
+ * than `stepMeters` metres apart.  Dense paths = smooth animation when the
+ * GPS simulator fires once per tick.
+ *
+ * @param {Array<{lat,lng}>} points
+ * @param {number} [stepMeters=2]
+ * @returns {Array<{lat,lng}>}
+ */
+export function densifyLatLngPath(points, stepMeters = 2) {
+  if (!points || points.length < 2) return points ?? [];
+  const out = [];
+  for (let i = 0; i < points.length - 1; i++) {
+    const a = points[i];
+    const b = points[i + 1];
+    out.push({ lat: a.lat, lng: a.lng });
+    const segLen = haversineDistance(a, b);
+    const steps  = Math.floor(segLen / stepMeters);
+    for (let s = 1; s < steps; s++) {
+      const t = s / steps;
+      out.push({
+        lat: a.lat + t * (b.lat - a.lat),
+        lng: a.lng + t * (b.lng - a.lng),
+      });
+    }
+  }
+  out.push({ lat: points[points.length - 1].lat, lng: points[points.length - 1].lng });
+  return out;
+}

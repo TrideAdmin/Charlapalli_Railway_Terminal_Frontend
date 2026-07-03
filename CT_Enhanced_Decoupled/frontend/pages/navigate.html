@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,171 +15,944 @@
     :root {
       --bg: #ffffff;
       --white: #ffffff;
-      --border: rgba(0,0,0,0.08);
-      --border2: rgba(160,120,40,0.22);
+      --border: rgba(0, 0, 0, 0.08);
+      --border2: rgba(160, 120, 40, 0.22);
       --txt: #0f1318;
       --txt2: #3a4455;
       --txt3: #7a8496;
       --blue: #a07828;
-      --blue-lt: rgba(160,120,40,0.10);
+      --blue-lt: rgba(160, 120, 40, 0.10);
       --cyan: #5a6478;
       --safe: #059669;
-      --safe-lt: rgba(5,150,105,0.06);
+      --safe-lt: rgba(5, 150, 105, 0.06);
       --mod: #d97706;
-      --mod-lt: rgba(217,119,6,0.06);
+      --mod-lt: rgba(217, 119, 6, 0.06);
       --crowd: #ea580c;
-      --crowd-lt: rgba(234,88,12,0.06);
+      --crowd-lt: rgba(234, 88, 12, 0.06);
       --crit: #dc2626;
-      --crit-lt: rgba(220,38,38,0.06);
-      --fob-bg: rgba(160,120,40,0.10);
-      --fob-b: rgba(160,120,40,0.25);
+      --crit-lt: rgba(220, 38, 38, 0.06);
+      --fob-bg: rgba(160, 120, 40, 0.10);
+      --fob-b: rgba(160, 120, 40, 0.25);
       --nav: #e85d26;
-      --nav-glow: rgba(232,93,38,0.15);
-      --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
-      --shadow: 0 4px 24px rgba(0,0,0,0.10);
-      --shadow-lg: 0 12px 48px rgba(0,0,0,0.14);
+      --nav-glow: rgba(232, 93, 38, 0.15);
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+      --shadow: 0 4px 24px rgba(0, 0, 0, 0.10);
+      --shadow-lg: 0 12px 48px rgba(0, 0, 0, 0.14);
       --r: 8px;
       --r2: 12px;
       --font: 'Space Grotesk', sans-serif;
       --display: 'Space Grotesk', sans-serif;
       --mono: 'JetBrains Mono', monospace;
-      --border-soothing: rgba(15,23,42,0.08);
+      --border-soothing: rgba(15, 23, 42, 0.08);
       --gold: #a07828;
-      --gold-glow: rgba(160,120,40,0.10);
-      --border-gold: rgba(160,120,40,0.25);
+      --gold-glow: rgba(160, 120, 40, 0.10);
+      --border-gold: rgba(160, 120, 40, 0.25);
     }
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:var(--font);background:var(--bg);color:var(--txt);min-height:100vh;font-size:14.5px;-webkit-font-smoothing:antialiased}
 
-    .layout{display:flex;height:calc(100vh - 118px);overflow:hidden;position:relative}
-    .site-footer{display:none!important}
-    select option{background:#ffffff;color:#0f1318}
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--txt);
+      min-height: 100vh;
+      font-size: 14.5px;
+      -webkit-font-smoothing: antialiased
+    }
+
+    .layout {
+      display: flex;
+      height: calc(100vh - 118px);
+      overflow: hidden;
+      position: relative
+    }
+
+    .site-footer {
+      display: none !important
+    }
+
+    select option {
+      background: #ffffff;
+      color: #0f1318
+    }
 
     /* ── SIDEBAR ── */
-    .sidebar{background:var(--white);border-right:1px solid var(--border);width:380px;overflow:hidden;display:flex;flex-direction:column;flex-shrink:0;transition:width .35s cubic-bezier(.4,0,.2,1),opacity .35s ease,border-color .35s ease}
-    .sidebar-inner{width:380px;height:100%;display:flex;flex-direction:column;overflow-y:auto;flex-shrink:0}
-    .layout.collapsed .sidebar{width:0;opacity:0;border-right-color:transparent;pointer-events:none}
-    .sidebar-toggle-handle{position:absolute;left:380px;top:50%;transform:translate(-50%,-50%);width:24px;height:56px;background:var(--white);border:1.5px solid var(--nav);border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:1000;transition:left .35s cubic-bezier(.4,0,.2,1);box-shadow:var(--shadow);color:var(--nav)}
-    .sidebar-toggle-handle:hover{background:var(--nav-glow)}
-    .layout.collapsed .sidebar-toggle-handle{left:0;transform:translate(0,-50%);border-left-color:transparent;border-radius:0 6px 6px 0}
-    .sb-sec{padding:20px;border-bottom:1px solid var(--border)}
-    .sb-head{font-family:var(--display);font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--txt3);margin-bottom:14px;display:flex;align-items:center;gap:8px}
-    .sb-head::after{content:'';flex:1;height:1px;background:var(--border)}
-    .nav-card{background:linear-gradient(135deg,#f8f9fb,#f1f3f7);border:1px solid var(--border-gold);border-radius:var(--r2);padding:16px;color:var(--txt);box-shadow:var(--shadow);margin-bottom:2px}
-    .nc-title{font-family:var(--display);font-size:17px;font-weight:800;letter-spacing:.04em;margin-bottom:8px;color:var(--gold)}
-    .nc-step{display:flex;align-items:flex-start;gap:10px;font-size:13.5px;opacity:.95;margin-top:8px}
-    .nc-num{width:18px;height:18px;background:var(--gold-glow);border:1px solid var(--border-gold);color:var(--gold);border-radius:50%;display:grid;place-items:center;font-size:10px;font-weight:700;flex-shrink:0;margin-top:1px}
-    .entry-selector{display:flex;flex-direction:column;gap:8px}
-    .entry-label{font-size:13px;font-weight:600;color:var(--txt2);display:flex;align-items:center;gap:6px}
-    .entry-dot{width:8px;height:8px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 2px var(--gold-glow)}
-    select{appearance:none;background:var(--bg);border:1px solid var(--border);border-radius:var(--r);color:var(--txt);padding:10px 32px 10px 14px;font-size:14px;font-family:var(--font);width:100%;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23a07828' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;transition:all .15s}
-    select:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-glow)}
-    .hint-text{font-size:12px;color:var(--txt3);display:flex;align-items:center;gap:6px;padding:10px 12px;background:var(--bg);border-radius:var(--r);border:1px dashed var(--border)}
-    .route-result{display:none;flex-direction:column;gap:10px}
-    .route-result.show{display:flex}
-    .rr-header{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:var(--r);border:1px solid var(--border);background:var(--bg)}
-    .rr-icon{width:32px;height:32px;border-radius:var(--r);display:grid;place-items:center;flex-shrink:0}
-    .rr-title{font-size:15px;font-weight:700;color:var(--txt)}
-    .rr-sub{font-size:12.5px;color:var(--txt2);margin-top:2px}
-    .rr-steps{display:flex;flex-direction:column;gap:6px}
-    .rs{display:flex;align-items:flex-start;gap:10px;font-size:14px;padding:10px 12px;background:var(--bg);border-radius:var(--r);border-left:3px solid var(--nav)}
-    .rs-num{width:20px;height:20px;background:var(--nav);color:#fff;border-radius:50%;display:grid;place-items:center;font-size:10px;font-weight:700;flex-shrink:0;margin-top:1px}
-    .rs-txt{color:var(--txt2);line-height:1.5}
-    .rs-txt strong{color:var(--txt)}
-    .pf-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-    .pf-chip{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:var(--r);border:1px solid var(--border);background:var(--white);cursor:pointer;transition:all .15s;font-size:13.5px;font-weight:600;color:var(--txt2)}
-    .pf-chip:hover{border-color:var(--gold);color:var(--txt);background:var(--gold-glow)}
-    .pf-chip.sel{border-color:var(--gold);background:var(--gold-glow);color:var(--gold)}
-    .btn-clear{display:flex;align-items:center;justify-content:center;gap:8px;padding:10px;background:transparent;border:1px solid var(--border);border-radius:var(--r);font-family:var(--font);font-size:13.5px;font-weight:600;color:var(--txt2);cursor:pointer;transition:all .15s;width:100%;margin-top:8px}
-    .btn-clear:hover{border-color:var(--crit);color:var(--crit);background:rgba(220,38,38,.06)}
+    .sidebar {
+      background: var(--white);
+      border-right: 1px solid var(--border);
+      width: 380px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      transition: width .35s cubic-bezier(.4, 0, .2, 1), opacity .35s ease, border-color .35s ease
+    }
+
+    .sidebar-inner {
+      width: 380px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      flex-shrink: 0
+    }
+
+    .layout.collapsed .sidebar {
+      width: 0;
+      opacity: 0;
+      border-right-color: transparent;
+      pointer-events: none
+    }
+
+    .sidebar-toggle-handle {
+      position: absolute;
+      left: 380px;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 24px;
+      height: 56px;
+      background: var(--white);
+      border: 1.5px solid var(--nav);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 1000;
+      transition: left .35s cubic-bezier(.4, 0, .2, 1);
+      box-shadow: var(--shadow);
+      color: var(--nav)
+    }
+
+    .sidebar-toggle-handle:hover {
+      background: var(--nav-glow)
+    }
+
+    .layout.collapsed .sidebar-toggle-handle {
+      left: 0;
+      transform: translate(0, -50%);
+      border-left-color: transparent;
+      border-radius: 0 6px 6px 0
+    }
+
+    .sb-sec {
+      padding: 20px;
+      border-bottom: 1px solid var(--border)
+    }
+
+    .sb-head {
+      font-family: var(--display);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--txt3);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px
+    }
+
+    .sb-head::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border)
+    }
+
+    .nav-card {
+      background: linear-gradient(135deg, #f8f9fb, #f1f3f7);
+      border: 1px solid var(--border-gold);
+      border-radius: var(--r2);
+      padding: 16px;
+      color: var(--txt);
+      box-shadow: var(--shadow);
+      margin-bottom: 2px
+    }
+
+    .nc-title {
+      font-family: var(--display);
+      font-size: 17px;
+      font-weight: 800;
+      letter-spacing: .04em;
+      margin-bottom: 8px;
+      color: var(--gold)
+    }
+
+    .nc-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 13.5px;
+      opacity: .95;
+      margin-top: 8px
+    }
+
+    .nc-num {
+      width: 18px;
+      height: 18px;
+      background: var(--gold-glow);
+      border: 1px solid var(--border-gold);
+      color: var(--gold);
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: 10px;
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 1px
+    }
+
+    .entry-selector {
+      display: flex;
+      flex-direction: column;
+      gap: 8px
+    }
+
+    .entry-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--txt2);
+      display: flex;
+      align-items: center;
+      gap: 6px
+    }
+
+    .entry-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--gold);
+      box-shadow: 0 0 0 2px var(--gold-glow)
+    }
+
+    select {
+      appearance: none;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      color: var(--txt);
+      padding: 10px 32px 10px 14px;
+      font-size: 14px;
+      font-family: var(--font);
+      width: 100%;
+      cursor: pointer;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23a07828' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      transition: all .15s
+    }
+
+    select:focus {
+      outline: none;
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px var(--gold-glow)
+    }
+
+    .hint-text {
+      font-size: 12px;
+      color: var(--txt3);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 12px;
+      background: var(--bg);
+      border-radius: var(--r);
+      border: 1px dashed var(--border)
+    }
+
+    .route-result {
+      display: none;
+      flex-direction: column;
+      gap: 10px
+    }
+
+    .route-result.show {
+      display: flex
+    }
+
+    .rr-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: var(--r);
+      border: 1px solid var(--border);
+      background: var(--bg)
+    }
+
+    .rr-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--r);
+      display: grid;
+      place-items: center;
+      flex-shrink: 0
+    }
+
+    .rr-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--txt)
+    }
+
+    .rr-sub {
+      font-size: 12.5px;
+      color: var(--txt2);
+      margin-top: 2px
+    }
+
+    .rr-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 6px
+    }
+
+    .rs {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 14px;
+      padding: 10px 12px;
+      background: var(--bg);
+      border-radius: var(--r);
+      border-left: 3px solid var(--nav)
+    }
+
+    .rs-num {
+      width: 20px;
+      height: 20px;
+      background: var(--nav);
+      color: #fff;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: 10px;
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 1px
+    }
+
+    .rs-txt {
+      color: var(--txt2);
+      line-height: 1.5
+    }
+
+    .rs-txt strong {
+      color: var(--txt)
+    }
+
+    .pf-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px
+    }
+
+    .pf-chip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      border-radius: var(--r);
+      border: 1px solid var(--border);
+      background: var(--white);
+      cursor: pointer;
+      transition: all .15s;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--txt2)
+    }
+
+    .pf-chip:hover {
+      border-color: var(--gold);
+      color: var(--txt);
+      background: var(--gold-glow)
+    }
+
+    .pf-chip.sel {
+      border-color: var(--gold);
+      background: var(--gold-glow);
+      color: var(--gold)
+    }
+
+    .btn-clear {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      font-family: var(--font);
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--txt2);
+      cursor: pointer;
+      transition: all .15s;
+      width: 100%;
+      margin-top: 8px
+    }
+
+    .btn-clear:hover {
+      border-color: var(--crit);
+      color: var(--crit);
+      background: rgba(220, 38, 38, .06)
+    }
+
+    .btn-start-nav {
+      display:flex; align-items:center; justify-content:center; gap:8px;
+      padding:11px; background: var(--orange, #e85d26); color:#fff;
+      border:none; border-radius: var(--r); font-family: var(--font);
+      font-size:13.5px; font-weight:700; cursor:pointer; width:100%;
+      box-shadow: 0 0 16px rgba(232,93,38,0.3);
+      transition: all .15s;
+    }
+    .btn-start-nav:hover { background:#f06a30; box-shadow: 0 0 22px rgba(232,93,38,0.45); }
+    .btn-start-nav:disabled { opacity:.45; cursor:not-allowed; box-shadow:none; }
 
     /* ── MAP PANEL ── */
-    .map-panel{display:flex;flex-direction:column;overflow:hidden;background:var(--bg);flex:1;min-width:0;position:relative}
-    .map-head{background:var(--white);border-bottom:1px solid var(--border);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;box-shadow:var(--shadow-sm)}
-    .mh-title{font-family:var(--display);font-size:20px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--txt)}
-    .mh-sub{font-size:12.5px;color:var(--txt3);margin-top:4px}
-    .mh-right{display:flex;align-items:center;gap:16px}
-    .legend{display:flex;align-items:center;gap:14px}
-    .leg{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--txt2)}
+    .map-panel {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: var(--bg);
+      flex: 1;
+      min-width: 0;
+      position: relative
+    }
 
-    .map-canvas{flex:1;overflow:auto;padding:32px 24px;display:flex;justify-content:center;align-items:flex-start}
+    .map-head {
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+      box-shadow: var(--shadow-sm)
+    }
+
+    .mh-title {
+      font-family: var(--display);
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      color: var(--txt)
+    }
+
+    .mh-sub {
+      font-size: 12.5px;
+      color: var(--txt3);
+      margin-top: 4px
+    }
+
+    .mh-right {
+      display: flex;
+      align-items: center;
+      gap: 16px
+    }
+
+    .legend {
+      display: flex;
+      align-items: center;
+      gap: 14px
+    }
+
+    .leg {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12.5px;
+      color: var(--txt2)
+    }
+
+    .map-canvas {
+      flex: 1;
+      overflow: auto;
+      padding: 32px 24px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start
+    }
 
     /* ══ STATION WRAP — fixed size ══ */
-    .station-wrap{background:var(--white);border:1.5px solid var(--border-soothing);border-radius:var(--r2);box-shadow:var(--shadow-lg);position:relative;overflow:hidden;width:1104px;height:936px;flex-shrink:0}
+    .station-wrap {
+      background: var(--white);
+      border: 1.5px solid var(--border-soothing);
+      border-radius: var(--r2);
+      box-shadow: var(--shadow-lg);
+      position: relative;
+      overflow: hidden;
+      width: 1104px;
+      height: 936px;
+      flex-shrink: 0
+    }
 
-    #station-canvas{position:relative;width:920px;height:780px;transform:scale(1.2);transform-origin:top left;background:#eceae4;overflow:hidden}
+    #station-canvas {
+      position: relative;
+      width: 920px;
+      height: 780px;
+      transform: scale(1.2);
+      transform-origin: top left;
+      background: #eceae4;
+      overflow: hidden
+    }
 
-    #nav-svg{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:50}
+    #nav-svg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 50
+    }
 
     /* ── CANVAS ENTITIES (matching reference layout style) ── */
-    .bx{position:absolute;border:.5px solid rgba(0,0,0,.2);border-radius:5px;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;font-size:8.5px;font-weight:500;color:#222;padding:3px;cursor:pointer;line-height:1.2;z-index:10;transition:.15s}
-    .bx:hover{border-color:#a07828;background:#fdf8ec;z-index:30}
-    .bx.constr{background:rgba(217,119,6,.05);border:.5px dashed rgba(217,119,6,.5);color:rgba(120,70,0,.7);cursor:default;font-size:8px}
-    .bx.constr:hover{border-color:rgba(217,119,6,.5);color:rgba(120,70,0,.7);background:rgba(217,119,6,.05)}
-    .bx.terminal{background:#0f2040;border-color:#1a3a6b;color:#fff;border-radius:7px}
-    .bx.terminal:hover{background:#1a3460}
-    .bx.dark{background:#1a2437;border-color:#1a2437;color:#cde}
-    .bx.dark:hover{background:#243050;border-color:#243050}
-    .bx.parking{background:#d8d3c8;border-color:#b0aa9e;color:#444}
-    .bx.rot{writing-mode:vertical-lr;text-orientation:mixed;transform:rotate(180deg)}
-    .bx.gate2a{border:1.5px solid #059669;background:#f0fdf4;color:#15803d}
-    .bx.gate2a:hover{background:#dcfce7}
-    .bx.active-dest{outline:2.5px solid var(--nav)!important;outline-offset:2px;z-index:40}
+    .bx {
+      position: absolute;
+      border: .5px solid rgba(0, 0, 0, .2);
+      border-radius: 5px;
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-size: 8.5px;
+      font-weight: 500;
+      color: #222;
+      padding: 3px;
+      cursor: pointer;
+      line-height: 1.2;
+      z-index: 10;
+      transition: .15s
+    }
+
+    .bx:hover {
+      border-color: #a07828;
+      background: #fdf8ec;
+      z-index: 30
+    }
+
+    .bx.constr {
+      background: rgba(217, 119, 6, .05);
+      border: .5px dashed rgba(217, 119, 6, .5);
+      color: rgba(120, 70, 0, .7);
+      cursor: default;
+      font-size: 8px
+    }
+
+    .bx.constr:hover {
+      border-color: rgba(217, 119, 6, .5);
+      color: rgba(120, 70, 0, .7);
+      background: rgba(217, 119, 6, .05)
+    }
+
+    .bx.terminal {
+      background: #0f2040;
+      border-color: #1a3a6b;
+      color: #fff;
+      border-radius: 7px
+    }
+
+    .bx.terminal:hover {
+      background: #1a3460
+    }
+
+    .bx.dark {
+      background: #1a2437;
+      border-color: #1a2437;
+      color: #cde
+    }
+
+    .bx.dark:hover {
+      background: #243050;
+      border-color: #243050
+    }
+
+    .bx.parking {
+      background: #d8d3c8;
+      border-color: #b0aa9e;
+      color: #444
+    }
+
+    .bx.rot {
+      writing-mode: vertical-lr;
+      text-orientation: mixed;
+      transform: rotate(180deg)
+    }
+
+    .bx.gate2a {
+      border: 1.5px solid #059669;
+      background: #f0fdf4;
+      color: #15803d
+    }
+
+    .bx.gate2a:hover {
+      background: #dcfce7
+    }
+
+    .bx.active-dest {
+      outline: 2.5px solid var(--nav) !important;
+      outline-offset: 2px;
+      z-index: 40
+    }
 
     /* FOB */
-    .fob{position:absolute;border-left:1.5px solid rgba(217,119,6,.5);border-right:1.5px solid rgba(217,119,6,.5);background:rgba(217,119,6,.06);z-index:4;pointer-events:none}
-    .fob-lbl{position:absolute;top:3px;left:50%;transform:translateX(-50%);font-size:7px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(130,80,0,.8);white-space:nowrap}
+    .fob {
+      position: absolute;
+      border-left: 1.5px solid rgba(217, 119, 6, .5);
+      border-right: 1.5px solid rgba(217, 119, 6, .5);
+      background: rgba(217, 119, 6, .06);
+      z-index: 4;
+      pointer-events: none
+    }
+
+    .fob-lbl {
+      position: absolute;
+      top: 3px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 7px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: rgba(130, 80, 0, .8);
+      white-space: nowrap
+    }
 
     /* Platform */
-    .pf-track{position:absolute;border:.5px solid rgba(0,0,0,.18);border-radius:3px;background:#dde3ea;z-index:5;cursor:pointer;transition:.15s}
-    .pf-track::before{content:'';position:absolute;top:50%;left:4px;right:4px;height:1.5px;background:repeating-linear-gradient(90deg,#a0adb8 0,#a0adb8 7px,transparent 7px,transparent 12px);transform:translateY(-50%)}
-    .pf-track:hover{border-color:#a07828}
-    .pf-track.active-dest{outline:2.5px solid var(--nav);outline-offset:2px;z-index:40}
-    .pf-label{position:absolute;font-size:8px;font-weight:700;background:#1a56db;color:#fff;border-radius:3px;padding:2px 4px;z-index:15;pointer-events:none}
+    .pf-track {
+      position: absolute;
+      border: .5px solid rgba(0, 0, 0, .18);
+      border-radius: 3px;
+      background: #dde3ea;
+      z-index: 5;
+      cursor: pointer;
+      transition: .15s
+    }
+
+    .pf-track::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 4px;
+      right: 4px;
+      height: 1.5px;
+      background: repeating-linear-gradient(90deg, #a0adb8 0, #a0adb8 7px, transparent 7px, transparent 12px);
+      transform: translateY(-50%)
+    }
+
+    .pf-track:hover {
+      border-color: #a07828
+    }
+
+    .pf-track.active-dest {
+      outline: 2.5px solid var(--nav);
+      outline-offset: 2px;
+      z-index: 40
+    }
+
+    .pf-label {
+      position: absolute;
+      font-size: 8px;
+      font-weight: 700;
+      background: #1a56db;
+      color: #fff;
+      border-radius: 3px;
+      padding: 2px 4px;
+      z-index: 15;
+      pointer-events: none
+    }
 
     /* Crowd badge */
-    .cb{position:absolute;display:flex;align-items:center;gap:2px;padding:2px 5px;border-radius:4px;font-size:9px;font-weight:700;border:1px solid;z-index:16;white-space:nowrap}
-    .cb.safe{background:rgba(5,150,105,.08);border-color:rgba(5,150,105,.25);color:#059669}
-    .cb.moderate{background:rgba(217,119,6,.08);border-color:rgba(217,119,6,.25);color:#d97706}
-    .cb.crowded{background:rgba(234,88,12,.08);border-color:rgba(234,88,12,.25);color:#ea580c}
-    .cb.critical{background:rgba(220,38,38,.08);border-color:rgba(220,38,38,.25);color:#dc2626}
+    .cb {
+      position: absolute;
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      padding: 2px 5px;
+      border-radius: 4px;
+      font-size: 9px;
+      font-weight: 700;
+      border: 1px solid;
+      z-index: 16;
+      white-space: nowrap
+    }
+
+    .cb.safe {
+      background: rgba(5, 150, 105, .08);
+      border-color: rgba(5, 150, 105, .25);
+      color: #059669
+    }
+
+    .cb.moderate {
+      background: rgba(217, 119, 6, .08);
+      border-color: rgba(217, 119, 6, .25);
+      color: #d97706
+    }
+
+    .cb.crowded {
+      background: rgba(234, 88, 12, .08);
+      border-color: rgba(234, 88, 12, .25);
+      color: #ea580c
+    }
+
+    .cb.critical {
+      background: rgba(220, 38, 38, .08);
+      border-color: rgba(220, 38, 38, .25);
+      color: #dc2626
+    }
 
     /* Icon strip on platforms */
-    .ic-spread{position:absolute;display:flex;align-items:center;z-index:12;pointer-events:none}
-    .ic{width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:#fff;border:.5px solid rgba(0,0,0,.18);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+    .ic-spread {
+      position: absolute;
+      display: flex;
+      align-items: center;
+      z-index: 12;
+      pointer-events: none
+    }
+
+    .ic {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      background: #fff;
+      border: .5px solid rgba(0, 0, 0, .18);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, .08)
+    }
 
     /* Road / bolguda */
-    .road{position:absolute;background:#ccc9c0;z-index:2}
-    .bolguda-bar{position:absolute;bottom:0;left:0;right:0;height:20px;background:#e8e4dc;border-top:.5px dashed #c0b89a;display:flex;align-items:center;justify-content:center;font-size:8.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#888;z-index:5}
+    .road {
+      position: absolute;
+      background: #ccc9c0;
+      z-index: 2
+    }
+
+    .bolguda-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 20px;
+      background: #e8e4dc;
+      border-top: .5px dashed #c0b89a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 8.5px;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: #888;
+      z-index: 5
+    }
 
     /* Zone label */
-    .zone{position:absolute;left:0;right:0;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(0,0,0,.35);z-index:6;pointer-events:none}
+    .zone {
+      position: absolute;
+      left: 0;
+      right: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 8px;
+      font-weight: 700;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: rgba(0, 0, 0, .35);
+      z-index: 6;
+      pointer-events: none
+    }
 
     /* X/Y markers */
-    .x-marker{position:absolute;width:22px;height:22px;background:#059669;border:3px solid #fff;border-radius:50%;box-shadow:0 0 0 3px rgba(5,150,105,.3),var(--shadow);z-index:60;pointer-events:auto;cursor:grab;user-select:none;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff}
-    .x-marker:active{cursor:grabbing}
-    .y-marker{position:absolute;width:22px;height:22px;background:var(--crit);border:3px solid #fff;border-radius:50%;box-shadow:0 0 0 3px rgba(220,38,38,.25),var(--shadow);z-index:60;pointer-events:auto;cursor:grab;user-select:none;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff}
-    .y-marker:active{cursor:grabbing}
-    .pulse-ring{position:absolute;inset:-6px;border-radius:50%;border:2px solid;opacity:0;animation:ring 1.8s ease-out infinite}
-    .x-marker .pulse-ring{border-color:#059669}
-    .y-marker .pulse-ring{border-color:var(--crit)}
-    @keyframes ring{0%{opacity:.7;transform:scale(.6)}100%{opacity:0;transform:scale(1.8)}}
+    .x-marker {
+      position: absolute;
+      width: 22px;
+      height: 22px;
+      background: #059669;
+      border: 3px solid #fff;
+      border-radius: 50%;
+      box-shadow: 0 0 0 3px rgba(5, 150, 105, .3), var(--shadow);
+      z-index: 60;
+      pointer-events: auto;
+      cursor: grab;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      font-weight: 700;
+      color: #fff
+    }
+
+    .x-marker:active {
+      cursor: grabbing
+    }
+
+    .y-marker {
+      position: absolute;
+      width: 22px;
+      height: 22px;
+      background: var(--crit);
+      border: 3px solid #fff;
+      border-radius: 50%;
+      box-shadow: 0 0 0 3px rgba(220, 38, 38, .25), var(--shadow);
+      z-index: 60;
+      pointer-events: auto;
+      cursor: grab;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      font-weight: 700;
+      color: #fff
+    }
+
+    .y-marker:active {
+      cursor: grabbing
+    }
+
+    .nav-popout {
+      position: absolute;
+      transform: translate(-50%, -100%);
+      margin-top: -14px; /* gap above the marker */
+      display: none;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      background: var(--orange, #e85d26);
+      color: #fff;
+      border: none;
+      border-radius: 999px;
+      font-family: var(--font);
+      font-size: 12.5px;
+      font-weight: 700;
+      white-space: nowrap;
+      cursor: pointer;
+      box-shadow: 0 6px 18px rgba(232,93,38,0.4);
+      z-index: 65; /* above markers (z-index 60) */
+      transition: transform .15s ease, box-shadow .15s ease;
+    }
+    .nav-popout:hover { box-shadow: 0 8px 24px rgba(232,93,38,0.55); }
+    .nav-popout::after {
+      content: '';
+      position: absolute;
+      bottom: -6px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-width: 6px 6px 0 6px;
+      border-style: solid;
+      border-color: var(--orange, #e85d26) transparent transparent transparent;
+    }
+    .nav-popout.show { display: flex; }
+
+    .pulse-ring {
+      position: absolute;
+      inset: -6px;
+      border-radius: 50%;
+      border: 2px solid;
+      opacity: 0;
+      animation: ring 1.8s ease-out infinite
+    }
+
+    .x-marker .pulse-ring {
+      border-color: #059669
+    }
+
+    .y-marker .pulse-ring {
+      border-color: var(--crit)
+    }
+
+    @keyframes ring {
+      0% {
+        opacity: .7;
+        transform: scale(.6)
+      }
+
+      100% {
+        opacity: 0;
+        transform: scale(1.8)
+      }
+    }
 
     /* Nav path */
-    .nav-path{stroke:var(--nav);stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:8 4;animation:dash 1s linear infinite}
-    .nav-path-bg{stroke:rgba(232,93,38,.12);stroke-width:7;fill:none;stroke-linecap:round;stroke-linejoin:round}
-    @keyframes dash{to{stroke-dashoffset:-24}}
+    .nav-path {
+      stroke: var(--nav);
+      stroke-width: 3;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-dasharray: 8 4;
+      animation: dash 1s linear infinite
+    }
+
+    .nav-path-bg {
+      stroke: rgba(232, 93, 38, .12);
+      stroke-width: 7;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round
+    }
+
+    @keyframes dash {
+      to {
+        stroke-dashoffset: -24
+      }
+    }
 
     /* Tooltip */
-    .map-tt{position:absolute;background:#fff;border:.5px solid rgba(0,0,0,.2);border-radius:8px;padding:9px 12px;font-size:11.5px;box-shadow:0 6px 20px rgba(0,0,0,.15);z-index:200;pointer-events:none;max-width:220px;line-height:1.55;display:none;color:#222}
-    .map-tt.show{display:block}
-    .map-tt-n{font-weight:600;font-size:12px;margin-bottom:4px;color:#111}
-    .map-tt-row{font-size:10.5px;color:#555;margin-bottom:2px}
+    .map-tt {
+      position: absolute;
+      background: #fff;
+      border: .5px solid rgba(0, 0, 0, .2);
+      border-radius: 8px;
+      padding: 9px 12px;
+      font-size: 11.5px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, .15);
+      z-index: 200;
+      pointer-events: none;
+      max-width: 220px;
+      line-height: 1.55;
+      display: none;
+      color: #222
+    }
+
+    .map-tt.show {
+      display: block
+    }
+
+    .map-tt-n {
+      font-weight: 600;
+      font-size: 12px;
+      margin-bottom: 4px;
+      color: #111
+    }
+
+    .map-tt-row {
+      font-size: 10.5px;
+      color: #555;
+      margin-bottom: 2px
+    }
 
     /* Fullscreen Button */
     .map-fs-btn {
       position: absolute;
-      top: 92px;
+      top: 155px;
       right: 24px;
       width: 44px;
       height: 44px;
@@ -194,34 +968,126 @@
       z-index: 100;
       transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
+
     .map-fs-btn:hover {
       background: var(--gold-glow);
       color: var(--gold);
       border-color: var(--border-gold);
       transform: scale(1.08);
     }
+
     .map-fs-btn:active {
       transform: scale(0.95);
+    }
+
+    .map-view-toggle-btn {
+      position: absolute;
+      top: 100px;
+      right: 24px;
+      width: 44px;
+      height: 44px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--txt2);
+      cursor: pointer;
+      z-index: 100;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .map-view-toggle-btn:hover {
+      background: var(--gold-glow);
+      color: var(--gold);
+      border-color: var(--border-gold);
+      transform: scale(1.08);
+    }
+
+    .map-view-toggle-btn:active {
+      transform: scale(0.95);
+    }
+
+    .map-view-toggle-btn .icon-station {
+      display: block
+    }
+
+    .map-view-toggle-btn .icon-livemap {
+      display: none
+    }
+
+    [data-map-view="outdoor"] .map-view-toggle-btn .icon-station {
+      display: none
+    }
+
+    [data-map-view="outdoor"] .map-view-toggle-btn .icon-livemap {
+      display: block
     }
   </style>
 
   <!-- Google Maps JS SDK (key injected by serve.js from .env) -->
-  <script src="https://maps.googleapis.com/maps/api/js?key=PLACEHOLDER&libraries=places&callback=Function.prototype" async defer></script>
+  <script src="https://maps.googleapis.com/maps/api/js?key=PLACEHOLDER&libraries=places&callback=Function.prototype"
+    async defer></script>
 </head>
 
 <!-- SVG icon defs (hidden) -->
 <svg style="display:none" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <symbol id="ic-chair" viewBox="0 0 16 16"><rect x="3" y="3" width="10" height="6" rx="1.5" stroke="currentColor" stroke-width="1.2" fill="none"/><rect x="3" y="9" width="10" height="1.5" rx=".5" fill="currentColor"/><line x1="4" y1="10.5" x2="4" y2="13.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="12" y1="10.5" x2="12" y2="13.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></symbol>
-    <symbol id="ic-toilet" viewBox="0 0 16 16"><circle cx="8" cy="4" r="2" stroke="currentColor" stroke-width="1.2" fill="none"/><path d="M5 7h6l-1 6H6z" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linejoin="round"/></symbol>
-    <symbol id="ic-atvm" viewBox="0 0 16 16"><rect x="2" y="4" width="12" height="8" rx="1.5" stroke="currentColor" stroke-width="1.2" fill="none"/><line x1="2" y1="7.5" x2="14" y2="7.5" stroke="currentColor" stroke-width="1"/><line x1="5" y1="10" x2="8" y2="10" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></symbol>
-    <symbol id="ic-escalator" viewBox="0 0 16 16"><line x1="3" y1="13" x2="13" y2="3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><circle cx="11.5" cy="4.5" r="1.5" stroke="currentColor" stroke-width="1.1" fill="none"/><line x1="3" y1="13" x2="6" y2="13" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><line x1="10" y1="3" x2="13" y2="3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></symbol>
-    <symbol id="ic-lift" viewBox="0 0 16 16"><rect x="3" y="2" width="10" height="12" rx="1.5" stroke="currentColor" stroke-width="1.2" fill="none"/><path d="M6 7l2-2 2 2" stroke="currentColor" stroke-width="1.1" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 9l2 2 2-2" stroke="currentColor" stroke-width="1.1" fill="none" stroke-linecap="round" stroke-linejoin="round"/></symbol>
-    <symbol id="ic-water" viewBox="0 0 16 16"><path d="M8 2C8 2 3.5 7.5 3.5 10.5a4.5 4.5 0 009 0C12.5 7.5 8 2 8 2z" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linejoin="round"/></symbol>
-    <symbol id="ic-food" viewBox="0 0 16 16"><line x1="5" y1="3" x2="5" y2="13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M3.5 3v3.5a1.5 1.5 0 003 0V3" stroke="currentColor" stroke-width="1.1" fill="none" stroke-linecap="round"/><line x1="11" y1="3" x2="11" y2="13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M9 3h4v4a2 2 0 01-4 0V3z" stroke="currentColor" stroke-width="1.1" fill="none" stroke-linejoin="round"/></symbol>
-    <symbol id="ic-stair" viewBox="0 0 16 16"><path d="M3 13h3v-3h3V7h4V3" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></symbol>
-    <symbol id="ic-sleep" viewBox="0 0 16 16"><rect x="2" y="7" width="12" height="5" rx="1" stroke="currentColor" stroke-width="1.2" fill="none"/><circle cx="5" cy="6" r="1.5" stroke="currentColor" stroke-width="1.1" fill="none"/><line x1="2" y1="12" x2="2" y2="14" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="14" y1="12" x2="14" y2="14" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></symbol>
-    <symbol id="ic-charge" viewBox="0 0 16 16"><path d="M9 2L5 9h5l-3 5 7-8H9l3-4z" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linejoin="round" stroke-linecap="round"/></symbol>
+    <symbol id="ic-chair" viewBox="0 0 16 16">
+      <rect x="3" y="3" width="10" height="6" rx="1.5" stroke="currentColor" stroke-width="1.2" fill="none" />
+      <rect x="3" y="9" width="10" height="1.5" rx=".5" fill="currentColor" />
+      <line x1="4" y1="10.5" x2="4" y2="13.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+      <line x1="12" y1="10.5" x2="12" y2="13.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+    </symbol>
+    <symbol id="ic-toilet" viewBox="0 0 16 16">
+      <circle cx="8" cy="4" r="2" stroke="currentColor" stroke-width="1.2" fill="none" />
+      <path d="M5 7h6l-1 6H6z" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linejoin="round" />
+    </symbol>
+    <symbol id="ic-atvm" viewBox="0 0 16 16">
+      <rect x="2" y="4" width="12" height="8" rx="1.5" stroke="currentColor" stroke-width="1.2" fill="none" />
+      <line x1="2" y1="7.5" x2="14" y2="7.5" stroke="currentColor" stroke-width="1" />
+      <line x1="5" y1="10" x2="8" y2="10" stroke="currentColor" stroke-width="1" stroke-linecap="round" />
+    </symbol>
+    <symbol id="ic-escalator" viewBox="0 0 16 16">
+      <line x1="3" y1="13" x2="13" y2="3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
+      <circle cx="11.5" cy="4.5" r="1.5" stroke="currentColor" stroke-width="1.1" fill="none" />
+      <line x1="3" y1="13" x2="6" y2="13" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
+      <line x1="10" y1="3" x2="13" y2="3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
+    </symbol>
+    <symbol id="ic-lift" viewBox="0 0 16 16">
+      <rect x="3" y="2" width="10" height="12" rx="1.5" stroke="currentColor" stroke-width="1.2" fill="none" />
+      <path d="M6 7l2-2 2 2" stroke="currentColor" stroke-width="1.1" fill="none" stroke-linecap="round"
+        stroke-linejoin="round" />
+      <path d="M6 9l2 2 2-2" stroke="currentColor" stroke-width="1.1" fill="none" stroke-linecap="round"
+        stroke-linejoin="round" />
+    </symbol>
+    <symbol id="ic-water" viewBox="0 0 16 16">
+      <path d="M8 2C8 2 3.5 7.5 3.5 10.5a4.5 4.5 0 009 0C12.5 7.5 8 2 8 2z" stroke="currentColor" stroke-width="1.2"
+        fill="none" stroke-linejoin="round" />
+    </symbol>
+    <symbol id="ic-food" viewBox="0 0 16 16">
+      <line x1="5" y1="3" x2="5" y2="13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+      <path d="M3.5 3v3.5a1.5 1.5 0 003 0V3" stroke="currentColor" stroke-width="1.1" fill="none"
+        stroke-linecap="round" />
+      <line x1="11" y1="3" x2="11" y2="13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+      <path d="M9 3h4v4a2 2 0 01-4 0V3z" stroke="currentColor" stroke-width="1.1" fill="none" stroke-linejoin="round" />
+    </symbol>
+    <symbol id="ic-stair" viewBox="0 0 16 16">
+      <path d="M3 13h3v-3h3V7h4V3" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round"
+        stroke-linejoin="round" />
+    </symbol>
+    <symbol id="ic-sleep" viewBox="0 0 16 16">
+      <rect x="2" y="7" width="12" height="5" rx="1" stroke="currentColor" stroke-width="1.2" fill="none" />
+      <circle cx="5" cy="6" r="1.5" stroke="currentColor" stroke-width="1.1" fill="none" />
+      <line x1="2" y1="12" x2="2" y2="14" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+      <line x1="14" y1="12" x2="14" y2="14" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+    </symbol>
+    <symbol id="ic-charge" viewBox="0 0 16 16">
+      <path d="M9 2L5 9h5l-3 5 7-8H9l3-4z" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linejoin="round"
+        stroke-linecap="round" />
+    </symbol>
   </defs>
 </svg>
 
@@ -262,8 +1128,12 @@
               <option value="bolguda">Bolguda — PF10 Entry / Exit (South)</option>
             </select>
             <div class="hint-text">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-              Drag the green X marker to adjust your exact position
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+              Drag the green S marker to adjust your exact position
             </div>
           </div>
         </div>
@@ -273,18 +1143,36 @@
           <div class="route-result" id="route-result">
             <div class="rr-header" id="rr-header"></div>
             <div class="rr-steps" id="rr-steps"></div>
+            <button class="btn-start-nav" id="sidebar-start-nav-btn" disabled
+                    onclick="window._lnc && window._lnc.startNavigation()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="5 3 19 12 5 21 5 3"/>
+              </svg>
+              Start Navigation
+            </button>
             <div style="display:flex;gap:6px;margin-top:8px">
               <button class="btn-clear" onclick="clearRoute()" style="flex:1">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
                 Clear
               </button>
-              <button class="btn-clear" id="share-route-btn" onclick="shareRoute()" style="flex:1;border-color:var(--blue);color:var(--blue)" title="Copy shareable link">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+              <button class="btn-clear" id="share-route-btn" onclick="shareRoute()"
+                style="flex:1;border-color:var(--blue);color:var(--blue)" title="Copy shareable link">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="18" cy="5" r="3" />
+                  <circle cx="6" cy="12" r="3" />
+                  <circle cx="18" cy="19" r="3" />
+                  <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+                  <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+                </svg>
                 Share Link
               </button>
             </div>
           </div>
-          <div id="route-empty" style="font-size:12px;color:var(--txt3);text-align:center;padding:12px 0">Click any platform or facility to get directions</div>
+          <div id="route-empty" style="font-size:12px;color:var(--txt3);text-align:center;padding:12px 0">Click any
+            platform or facility to get directions</div>
         </div>
 
         <div class="sb-sec">
@@ -295,7 +1183,8 @@
     </aside>
 
     <button id="sidebar-toggle-handle" class="sidebar-toggle-handle" onclick="toggleSidebar()" title="Collapse Sidebar">
-      <svg id="sidebar-toggle-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+      <svg id="sidebar-toggle-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
         <polyline points="15 18 9 12 15 6"></polyline>
       </svg>
     </button>
@@ -305,13 +1194,19 @@
       <div class="map-head">
         <div>
           <div class="mh-title">Charlapalli Terminal</div>
-          <div class="mh-sub">Click any entity to navigate · Drag X/Y markers to adjust</div>
+          <div class="mh-sub">Click any entity to navigate · Drag S/D markers to adjust</div>
         </div>
         <div class="mh-right">
           <div class="legend">
-            <div class="leg"><span style="display:inline-block;width:14px;height:7px;border-radius:2px;background:rgba(217,119,6,.1);border:1px solid rgba(217,119,6,.35)"></span>FOB Bridge</div>
-            <div class="leg"><span style="width:10px;height:10px;border-radius:50%;background:#059669;display:inline-block"></span>Pick-up (X)</div>
-            <div class="leg"><span style="width:10px;height:10px;border-radius:50%;background:#dc2626;display:inline-block"></span>Drop (Y)</div>
+            <div class="leg"><span
+                style="display:inline-block;width:14px;height:7px;border-radius:2px;background:rgba(217,119,6,.1);border:1px solid rgba(217,119,6,.35)"></span>FOB
+              Bridge</div>
+            <div class="leg"><span
+                style="width:10px;height:10px;border-radius:50%;background:#059669;display:inline-block"></span>Pick-up
+              (S)</div>
+            <div class="leg"><span
+                style="width:10px;height:10px;border-radius:50%;background:#dc2626;display:inline-block"></span>Drop (D)
+            </div>
           </div>
         </div>
       </div>
@@ -324,10 +1219,32 @@
           </div>
         </div>
       </div>
+      <!-- Map View Toggle Button -->
+      <button id="map-view-toggle-btn" class="map-view-toggle-btn" onclick="window._lnc && window._lnc.toggleMapView()"
+        title="Switch to Live Location Map">
+        <svg class="icon-station" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <!-- simple building/station icon -->
+          <rect x="4" y="3" width="16" height="18" rx="1" />
+          <line x1="9" y1="8" x2="9" y2="8" />
+          <line x1="15" y1="8" x2="15" y2="8" />
+          <line x1="9" y1="13" x2="9" y2="13" />
+          <line x1="15" y1="13" x2="15" y2="13" />
+          <line x1="9" y1="21" x2="9" y2="17" />
+          <line x1="15" y1="21" x2="15" y2="17" />
+        </svg>
+        <svg class="icon-livemap" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <!-- map-pin icon -->
+          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+          <circle cx="12" cy="10" r="3" />
+        </svg>
+      </button>
       <!-- Fullscreen Button -->
       <button id="map-fullscreen-btn" class="map-fs-btn" onclick="toggleMapFullscreen()" title="Fullscreen Map">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
         </svg>
       </button>
     </main>
@@ -338,15 +1255,15 @@
        PLATFORM DATA
     ════════════════════════════ */
     const PF = [
-      {num:1},
-      {num:2},
-      {num:3},
-      {num:4},
-      {num:5},
-      {num:6},
-      {num:7},
-      {num:8},
-      {num:9},
+      { num: 1 },
+      { num: 2 },
+      { num: 3 },
+      { num: 4 },
+      { num: 5 },
+      { num: 6 },
+      { num: 7 },
+      { num: 8 },
+      { num: 9 },
     ];
 
     /* ════════════════════════════
@@ -356,57 +1273,58 @@
     const CANVAS_H = 780;
 
     // Platform Y centers — grouped: (PF1) | (PF2,PF3) | (PF4,PF5) | (PF6,PF7) | (PF8,PF9)
-    const PF_Y = {1:150, 2:206, 3:248, 4:304, 5:346, 6:402, 7:444, 8:500, 9:542};
+    const PF_Y = { 1: 150, 2: 206, 3: 248, 4: 304, 5: 346, 6: 402, 7: 444, 8: 500, 9: 542 };
     const TRACK_LEFT = 178;
     const TRACK_RIGHT = 898; // 178+720
     const TRACK_H = 38;
 
     // FOB X positions — matching reference file exactly
     const FOB_DEFS = [
-      {key:'FOB-Terminal', x:388, label:'FOB Terminal'},
-      {key:'KZJ-2',        x:596, label:'KZJ 2'},
+      { key: 'FOB-Terminal', x: 388, label: 'FOB Terminal' },
+      { key: 'KZJ-2', x: 596, label: 'KZJ 2' },
     ];
     // Entry point coordinates (on 920×780 canvas)
     const ENTRY_POINTS = {
-      gate1:   {x:471, y:88,  label:'Gate 1',   desc:'Main Booking Counter'},
-      bolguda: {x:460, y:760, label:'Bolguda',  desc:'PF10 Entry / Exit'},
+      gate1: { x: 471, y: 88, label: 'Gate 1', desc: 'Main Booking Counter' },
+      bolguda: { x: 460, y: 760, label: 'Bolguda', desc: 'PF10 Entry / Exit' },
     };
     const ORIGINAL_ENTRY_POINTS = JSON.parse(JSON.stringify(ENTRY_POINTS));
 
     const DESTINATIONS = {};
+    window.DESTINATIONS = DESTINATIONS;
     let activeEntry = 'gate1';
-    let activeDest  = null;
+    let activeDest = null;
 
     /* ════════════════════════════
        ICON SYSTEM
     ════════════════════════════ */
     const ICONS = {
-      chair:    {stroke:'#d97706', sym:'ic-chair'},
-      toilet:   {stroke:'#0284c7', sym:'ic-toilet'},
-      atvm:     {stroke:'#059669', sym:'ic-atvm'},
-      escalator:{stroke:'#8b5cf6', sym:'ic-escalator'},
-      lift:     {stroke:'#3b82f6', sym:'ic-lift'},
-      water:    {stroke:'#16a34a', sym:'ic-water'},
-      food:     {stroke:'#ea580c', sym:'ic-food'},
-      stair:    {stroke:'#78716c', sym:'ic-stair'},
-      sleep:    {stroke:'#0ea5e9', sym:'ic-sleep'},
-      charge:   {stroke:'#f59e0b', sym:'ic-charge'},
+      chair: { stroke: '#d97706', sym: 'ic-chair' },
+      toilet: { stroke: '#0284c7', sym: 'ic-toilet' },
+      atvm: { stroke: '#059669', sym: 'ic-atvm' },
+      escalator: { stroke: '#8b5cf6', sym: 'ic-escalator' },
+      lift: { stroke: '#3b82f6', sym: 'ic-lift' },
+      water: { stroke: '#16a34a', sym: 'ic-water' },
+      food: { stroke: '#ea580c', sym: 'ic-food' },
+      stair: { stroke: '#78716c', sym: 'ic-stair' },
+      sleep: { stroke: '#0ea5e9', sym: 'ic-sleep' },
+      charge: { stroke: '#f59e0b', sym: 'ic-charge' },
     };
     const PF_ICONS = {
-      1:['chair','toilet','atvm','escalator','lift','water','food','stair'],
-      2:['escalator','lift','water','food','stair'],
-      3:['escalator','lift','water','stair'],
-      4:['escalator','lift','water','food','stair'],
-      5:['escalator','lift','water','stair'],
-      6:['escalator','lift','water','food','stair'],
-      7:['escalator','lift','water','stair'],
-      8:['escalator','lift','water','stair','food'],
-      9:['escalator','lift','water','stair','atvm'],
+      1: ['chair', 'toilet', 'atvm', 'escalator', 'lift', 'water', 'food', 'stair'],
+      2: ['escalator', 'lift', 'water', 'food', 'stair'],
+      3: ['escalator', 'lift', 'water', 'stair'],
+      4: ['escalator', 'lift', 'water', 'food', 'stair'],
+      5: ['escalator', 'lift', 'water', 'stair'],
+      6: ['escalator', 'lift', 'water', 'food', 'stair'],
+      7: ['escalator', 'lift', 'water', 'stair'],
+      8: ['escalator', 'lift', 'water', 'stair', 'food'],
+      9: ['escalator', 'lift', 'water', 'stair', 'atvm'],
     };
     const IC_LABELS = {
-      chair:'AC Waiting Hall', toilet:'Pay & Use Toilet', atvm:'ATVM',
-      escalator:'Escalator', lift:'Lift / Elevator', water:'RO Water',
-      food:'Catering Stall', stair:'Staircase', sleep:'Sleeping Pods', charge:'Charging Points',
+      chair: 'AC Waiting Hall', toilet: 'Pay & Use Toilet', atvm: 'ATVM',
+      escalator: 'Escalator', lift: 'Lift / Elevator', water: 'RO Water',
+      food: 'Catering Stall', stair: 'Staircase', sleep: 'Sleeping Pods', charge: 'Charging Points',
     };
 
     function makeIcon(key) {
@@ -449,6 +1367,7 @@
       buildPlatforms(c);
       buildTerminalBuilding(c);
       buildSouthZone(c);
+      buildRandomAmenities(c);
       buildMarkers(c);
       buildPfChips();
 
@@ -459,8 +1378,8 @@
           e.target.classList.contains('pf-track') || e.target.closest('.pf-track')
         )) return;
         const rect = c.getBoundingClientRect();
-        const sx = 920/rect.width, sy = 780/rect.height;
-        const cx = (e.clientX - rect.left)*sx, cy = (e.clientY - rect.top)*sy;
+        const sx = 920 / rect.width, sy = 780 / rect.height;
+        const cx = (e.clientX - rect.left) * sx, cy = (e.clientY - rect.top) * sy;
         setDest('custom_point', cx, cy, `Position (${Math.round(cx)},${Math.round(cy)})`, null);
       });
     }
@@ -479,9 +1398,9 @@
     /* ── North booking zone ── */
     function buildNorthZone(c) {
       // West items — horizontal row (clear of FOB Terminal at x:388)
-      addBx(c,'busbay',    182, 48, 60, 40, 'Bus Bay',              'new', 'Bus stop · west end');
-      addBx(c,'divyang_w', 246, 48, 70, 40, 'Divyangjan\nParking W','new', 'Accessible parking west');
-      addBx(c,'booking_w', 320, 48, 66, 40, 'Booking\nCounters',    'new', '2 Unified + 3 UTS counters');
+      addBx(c, 'busbay', 182, 48, 60, 40, 'Bus Bay', 'new', 'Bus stop · west end');
+      addBx(c, 'divyang_w', 246, 48, 70, 40, 'Divyangjan\nParking W', 'new', 'Accessible parking west');
+      addBx(c, 'booking_w', 320, 48, 66, 40, 'Booking\nCounters', 'new', '2 Unified + 3 UTS counters');
 
       // Gate 1 — Main Booking Counter
       const g1 = document.createElement('div');
@@ -490,27 +1409,27 @@
       g1.innerHTML = `<span style="font-size:9px;font-weight:600;color:#059669">Gate 1</span><span style="font-size:7.5px;color:#059669">Booking Counter · Main</span>`;
       g1.dataset.n = 'Gate 1 — Main Booking Counter';
       g1.dataset.d = 'Primary entry X point · Help Desk nearby · 2 Unified + 3 UTS counters · 5 ATVMs';
-      g1.onclick = (e) => { setDest('gate1crowd', 416+55, 48+20, 'Gate 1 Booking Counter', g1); showTip(e, g1); };
-      DESTINATIONS['gate1crowd'] = {x:416+55, y:48+20, label:'Gate 1 Booking Counter', el:g1};
+      g1.onclick = (e) => { setDest('gate1crowd', 416 + 55, 48 + 20, 'Gate 1 Booking Counter', g1); showTip(e, g1); };
+      DESTINATIONS['gate1crowd'] = { x: 416 + 55, y: 48 + 20, label: 'Gate 1 Booking Counter', el: g1 };
       c.appendChild(g1);
 
-      addBx(c,'parking',    686, 48, 106, 28, 'Parking 2/4W + Cabs', 'parking', 'Large vehicle parking zone east-center');
-      addBx(c,'parcel',     796, 48,  60, 40, 'Parcel\nOffice',       '', 'East end of station');
-      addBx(c,'divyang_e',  796, 92,  60, 26, 'Divyangjan\nParking E','new', 'Accessible parking east');
-      addBx(c,'terminal_e', 858, 48,  56, 40, 'Terminal\nEntrance',   'new', 'Formal entrance east end');
+      addBx(c, 'parking', 686, 48, 106, 28, 'Parking 2/4W + Cabs', 'parking', 'Large vehicle parking zone east-center');
+      addBx(c, 'parcel', 796, 48, 60, 40, 'Parcel\nOffice', '', 'East end of station');
+      addBx(c, 'divyang_e', 796, 92, 60, 26, 'Divyangjan\nParking E', 'new', 'Accessible parking east');
+      addBx(c, 'terminal_e', 858, 48, 56, 40, 'Terminal\nEntrance', 'new', 'Formal entrance east end');
     }
 
     /* ── Platforms ── */
     function buildPlatforms(c) {
       PF.forEach(p => {
         const cy = PF_Y[p.num];
-        const ty = cy - TRACK_H/2;
+        const ty = cy - TRACK_H / 2;
 
         // Track
         const track = document.createElement('div');
         track.className = 'pf-track';
         track.id = 'pf-track-' + p.num;
-        track.style.cssText = `left:${TRACK_LEFT}px;top:${ty}px;width:${TRACK_RIGHT-TRACK_LEFT}px;height:${TRACK_H}px`;
+        track.style.cssText = `left:${TRACK_LEFT}px;top:${ty}px;width:${TRACK_RIGHT - TRACK_LEFT}px;height:${TRACK_H}px`;
         track.title = `Platform ${p.num}`;
         track.dataset.n = `Platform ${p.num}`;
         track.dataset.d = PF_ICONS[p.num].map(k => IC_LABELS[k]).join(' · ');
@@ -521,18 +1440,18 @@
           const clickX = Math.round((e.clientX - rect.left) * (920 / rect.width));
           const clampedX = Math.max(TRACK_LEFT + 2, Math.min(TRACK_RIGHT - 2, clickX));
           // Update destination X to where the user actually clicked on the platform
-          DESTINATIONS['pf'+p.num].x = clampedX;
-          setDest('pf'+p.num, clampedX, cy, `Platform ${p.num}`, track);
+          DESTINATIONS['pf' + p.num].x = clampedX;
+          setDest('pf' + p.num, clampedX, cy, `Platform ${p.num}`, track);
           showTip(e, track);
         };
-        DESTINATIONS['pf'+p.num] = {x:TRACK_LEFT+100, y:cy, label:`Platform ${p.num}`, pfNum:p.num, el:track};
+        DESTINATIONS['pf' + p.num] = { x: TRACK_LEFT + 100, y: cy, label: `Platform ${p.num}`, pfNum: p.num, el: track };
         c.appendChild(track);
 
         // PF label
         const lbl = document.createElement('div');
         lbl.className = 'pf-label';
         lbl.id = 'pf-lbl-' + p.num;
-        lbl.style.cssText = `left:${TRACK_LEFT-40}px;top:${cy-9}px`;
+        lbl.style.cssText = `left:${TRACK_LEFT - 40}px;top:${cy - 9}px`;
         lbl.textContent = 'PF ' + p.num;
         c.appendChild(lbl);
 
@@ -540,8 +1459,8 @@
         const strip = document.createElement('div');
         strip.className = 'ic-spread';
         strip.id = 'pf' + p.num + '-icons';
-        strip.style.cssText = `left:${TRACK_LEFT+10}px;top:${ty+11}px;width:${TRACK_RIGHT-TRACK_LEFT-20}px;justify-content:space-around`;
-        PF_ICONS[p.num].forEach(key => { const ic = makeIcon(key); if(ic) strip.appendChild(ic); });
+        strip.style.cssText = `left:${TRACK_LEFT + 10}px;top:${ty + 11}px;width:${TRACK_RIGHT - TRACK_LEFT - 20}px;justify-content:space-around`;
+        PF_ICONS[p.num].forEach(key => { const ic = makeIcon(key); if (ic) strip.appendChild(ic); });
         c.appendChild(strip);
       });
     }
@@ -557,14 +1476,14 @@
       // Icon strip inside terminal
       const iconRow = document.createElement('div');
       iconRow.style.cssText = 'display:flex;align-items:center;justify-content:space-around;width:170px;margin-top:3px;pointer-events:none;position:relative';
-      ['chair','food','sleep','toilet','charge'].forEach(key => {
-        const ic = makeIcon(key); if(ic){ ic.style.background='rgba(255,255,255,.15)'; ic.style.borderColor='rgba(255,255,255,.2)'; iconRow.appendChild(ic); }
+      ['chair', 'food', 'sleep', 'toilet', 'charge'].forEach(key => {
+        const ic = makeIcon(key); if (ic) { ic.style.background = 'rgba(255,255,255,.15)'; ic.style.borderColor = 'rgba(255,255,255,.2)'; iconRow.appendChild(ic); }
       });
 
       el.innerHTML = `Terminal Building<span style="font-size:8px;opacity:.7;font-weight:400;display:block">New building concourse</span>`;
       el.appendChild(iconRow);
-      el.onclick = (e) => { setDest('terminal', 354+95, 576+28, 'Terminal Building', el); showTip(e, el); };
-      DESTINATIONS['terminal'] = {x:354+95, y:576+28, label:'Terminal Building', el};
+      el.onclick = (e) => { setDest('terminal', 354 + 95, 576 + 28, 'Terminal Building', el); showTip(e, el); };
+      DESTINATIONS['terminal'] = { x: 354 + 95, y: 576 + 28, label: 'Terminal Building', el };
       c.appendChild(el);
     }
 
@@ -572,10 +1491,72 @@
     function buildSouthZone(c) {
       c.insertAdjacentHTML('beforeend', `<div class="zone" style="top:568px;height:16px;font-size:7px">South concourse</div>`);
 
-      addBx(c,'bldg_entrance', 178,638,120,44,'Gate 2\n+ Baggage Scanner','new','Main south entry · baggage scanner at entry');
-      addBx(c,'exit_gate',     302,638, 68,44,'Exit Gate','new','Separate public exit from terminal');
-      addBx(c,'southblock', 564,638,120,44,'South Block\n(Under Construction)','constr');
-      addBx(c,'circulating', 788,638, 94,44,'Circulating\n/ Holding Area','new','Pick-up · Drop · east side');
+      addBx(c, 'bldg_entrance', 178, 638, 120, 44, 'Gate 2\n+ Baggage Scanner', 'new', 'Main south entry · baggage scanner at entry');
+      addBx(c, 'exit_gate', 302, 638, 68, 44, 'Exit Gate', 'new', 'Separate public exit from terminal');
+      addBx(c, 'southblock', 564, 638, 120, 44, 'South Block\n(Under Construction)', 'constr');
+      addBx(c, 'circulating', 788, 638, 94, 44, 'Circulating\n/ Holding Area', 'new', 'Pick-up · Drop · east side');
+    }
+
+    /* ════════════════════════════
+       RANDOMIZED AMENITY MARKERS
+       ─────────────────────────────────────────────────────────────
+       These are generic station facilities (food, toilets, AC halls,
+       water, charging points, sleeping pods) that don't correspond to
+       one specific surveyed real-world spot — so both their facility
+       TYPE and their canvas position are randomly assigned each time
+       this runs. Because they're still registered in DESTINATIONS,
+       they automatically get a real-world lat/lng from the (now
+       corrected) canvasToLatLng() rotation — which is exactly the
+       "scatter their GPS position" behaviour we want when we don't
+       have a survey point for them.
+       Uses a seeded RNG so layout is stable across reloads; change
+       AMENITY_SEED to reshuffle.
+    ════════════════════════════ */
+    const AMENITY_SEED = 20260702;
+    function mulberry32(seed) {
+      let a = seed;
+      return function () {
+        a |= 0; a = (a + 0x6D2B79F5) | 0;
+        let t = Math.imul(a ^ (a >>> 15), 1 | a);
+        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      };
+    }
+    function shuffle(arr, rnd) {
+      const a = arr.slice();
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(rnd() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+    function buildRandomAmenities(c) {
+      const rnd = mulberry32(AMENITY_SEED);
+      const types = shuffle(['food', 'toilet', 'chair', 'water', 'charge', 'sleep'], rnd);
+      // Open, non-overlapping concourse zones to scatter markers in.
+      const zones = [
+        { x: [566, 872], y: [584, 622] },  // annex east of the Terminal Building
+        { x: [206, 862], y: [98, 122] },   // walkway between North Zone and PF1
+      ];
+      types.forEach((key, i) => {
+        const zone = zones[i % zones.length];
+        const x = Math.round(zone.x[0] + rnd() * (zone.x[1] - zone.x[0]));
+        const y = Math.round(zone.y[0] + rnd() * (zone.y[1] - zone.y[0]));
+        const id = 'amenity_' + key;
+        const label = IC_LABELS[key] || key;
+
+        const el = document.createElement('div');
+        el.className = 'bx new';
+        el.style.cssText = `left:${x - 12}px;top:${y - 12}px;width:24px;height:24px;border-radius:50%;padding:0;display:flex;align-items:center;justify-content:center`;
+        const ic = makeIcon(key);
+        if (ic) { ic.style.pointerEvents = 'none'; el.appendChild(ic); }
+        el.dataset.n = label;
+        el.dataset.d = 'Amenity · randomly placed (no surveyed position)';
+        el.title = label;
+        el.onclick = (e) => { setDest(id, x, y, label, el); showTip(e, el); };
+        DESTINATIONS[id] = { x, y, label, el };
+        c.appendChild(el);
+      });
     }
 
     /* ════════════════════════════
@@ -586,17 +1567,17 @@
         const el = document.createElement('div');
         el.className = 'bx constr';
         el.style.cssText = `left:${x}px;top:${y}px;width:${w}px;height:${h}px`;
-        el.textContent = label.replace('\n',' ');
+        el.textContent = label.replace('\n', ' ');
         c.appendChild(el); return;
       }
       const el = document.createElement('div');
       el.className = 'bx' + (type === 'parking' ? ' parking' : type === 'new' ? ' new' : type === 'small' ? '' : '');
       el.style.cssText = `left:${x}px;top:${y}px;width:${w}px;height:${h}px`;
       const lines = label.split('\n');
-      el.innerHTML = lines.map((l,i)=>`<span style="font-size:${i?7.5:8.5}px;font-weight:${i?400:600}">${l}</span>`).join('');
+      el.innerHTML = lines.map((l, i) => `<span style="font-size:${i ? 7.5 : 8.5}px;font-weight:${i ? 400 : 600}">${l}</span>`).join('');
       if (desc) { el.dataset.n = lines[0]; el.dataset.d = desc; }
-      el.onclick = (e) => { setDest(id, x+w/2, y+h/2, label.replace('\n',' '), el); if(desc) showTip(e,el); };
-      DESTINATIONS[id] = {x:x+w/2, y:y+h/2, label:label.replace('\n',' '), el};
+      el.onclick = (e) => { setDest(id, x + w / 2, y + h / 2, label.replace('\n', ' '), el); if (desc) showTip(e, el); };
+      DESTINATIONS[id] = { x: x + w / 2, y: y + h / 2, label: label.replace('\n', ' '), el };
       c.appendChild(el);
     }
 
@@ -606,8 +1587,8 @@
       el.style.cssText = `left:${x}px;top:${y}px;width:${w}px;height:${h}px;cursor:pointer`;
       el.textContent = label;
       if (desc) { el.dataset.n = label; el.dataset.d = desc; }
-      el.onclick = (e) => { setDest(id, x+w/2, y+h/2, label, el); if(desc) showTip(e,el); };
-      DESTINATIONS[id] = {x:x+w/2, y:y+h/2, label, el};
+      el.onclick = (e) => { setDest(id, x + w / 2, y + h / 2, label, el); if (desc) showTip(e, el); };
+      DESTINATIONS[id] = { x: x + w / 2, y: y + h / 2, label, el };
       c.appendChild(el);
     }
 
@@ -617,83 +1598,98 @@
     function buildMarkers(c) {
       const xm = document.createElement('div');
       xm.id = 'x-marker'; xm.className = 'x-marker';
-      xm.innerHTML = `X<div class="pulse-ring"></div>`;
+      xm.innerHTML = `S<div class="pulse-ring"></div>`;
       xm.style.display = 'none';
       c.appendChild(xm);
 
       const ym = document.createElement('div');
       ym.id = 'y-marker'; ym.className = 'y-marker';
-      ym.innerHTML = `Y<div class="pulse-ring"></div>`;
+      ym.innerHTML = `D<div class="pulse-ring"></div>`;
       ym.style.display = 'none';
       c.appendChild(ym);
+
+      const popout = document.createElement('button');
+      popout.id = 'nav-start-popout';
+      popout.className = 'nav-popout';
+      popout.innerHTML = `
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+          <polygon points="5 3 19 12 5 21 5 3"/>
+        </svg>
+        Start Nav
+      `;
+      popout.onclick = (e) => {
+        e.stopPropagation();
+        window._lnc && window._lnc.startNavigation();
+      };
+      c.appendChild(popout);
 
       makeDraggable(xm, true, c);
       makeDraggable(ym, false, c);
     }
 
     function makeDraggable(markerEl, isX, canvas) {
-      let dragging=false, startX, startY, startMX, startMY;
-      markerEl.addEventListener('click', e=>e.stopPropagation());
+      let dragging = false, startX, startY, startMX, startMY;
+      markerEl.addEventListener('click', e => e.stopPropagation());
       markerEl.addEventListener('mousedown', start);
-      markerEl.addEventListener('touchstart', start, {passive:false});
+      markerEl.addEventListener('touchstart', start, { passive: false });
 
       function start(e) {
-        e.preventDefault(); e.stopPropagation(); dragging=true;
-        startMX = parseFloat(markerEl.style.left||0)+11;
-        startMY = parseFloat(markerEl.style.top||0)+11;
-        const cx = e.type.startsWith('touch')?e.touches[0].clientX:e.clientX;
-        const cy = e.type.startsWith('touch')?e.touches[0].clientY:e.clientY;
-        startX=cx; startY=cy;
+        e.preventDefault(); e.stopPropagation(); dragging = true;
+        startMX = parseFloat(markerEl.style.left || 0) + 11;
+        startMY = parseFloat(markerEl.style.top || 0) + 11;
+        const cx = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
+        const cy = e.type.startsWith('touch') ? e.touches[0].clientY : e.clientY;
+        startX = cx; startY = cy;
         document.addEventListener('mousemove', drag);
-        document.addEventListener('touchmove', drag, {passive:false});
+        document.addEventListener('touchmove', drag, { passive: false });
         document.addEventListener('mouseup', stop);
         document.addEventListener('touchend', stop);
       }
       function drag(e) {
-        if(!dragging) return;
-        if(e.type.startsWith('touch')) e.preventDefault();
-        const cx = e.type.startsWith('touch')?e.touches[0].clientX:e.clientX;
-        const cy = e.type.startsWith('touch')?e.touches[0].clientY:e.clientY;
+        if (!dragging) return;
+        if (e.type.startsWith('touch')) e.preventDefault();
+        const cx = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
+        const cy = e.type.startsWith('touch') ? e.touches[0].clientY : e.clientY;
         const rect = canvas.getBoundingClientRect();
-        const sx=920/rect.width, sy=780/rect.height;
-        let nx = startMX+(cx-startX)*sx, ny = startMY+(cy-startY)*sy;
-        nx = Math.max(11,Math.min(909,nx)); ny = Math.max(11,Math.min(769,ny));
-        markerEl.style.left=(nx-11)+'px'; markerEl.style.top=(ny-11)+'px';
-        if(isX){
-          ENTRY_POINTS[activeEntry].x=nx; ENTRY_POINTS[activeEntry].y=ny;
-          if(activeDest){ drawRoute(); updateSidebarRoute(activeDest.label, activeDest.id); }
+        const sx = 920 / rect.width, sy = 780 / rect.height;
+        let nx = startMX + (cx - startX) * sx, ny = startMY + (cy - startY) * sy;
+        nx = Math.max(11, Math.min(909, nx)); ny = Math.max(11, Math.min(769, ny));
+        markerEl.style.left = (nx - 11) + 'px'; markerEl.style.top = (ny - 11) + 'px';
+        if (isX) {
+          ENTRY_POINTS[activeEntry].x = nx; ENTRY_POINTS[activeEntry].y = ny;
+          if (activeDest) { drawRoute(); updateSidebarRoute(activeDest.label, activeDest.id); }
         } else {
-          if(!activeDest) activeDest={id:'custom_point',label:'Custom Point'};
-          activeDest.x=nx; activeDest.y=ny; activeDest.id='custom_point';
-          activeDest.label=`Custom Position (${Math.round(nx)},${Math.round(ny)})`;
-          document.querySelectorAll('.bx.active-dest,.pf-track.active-dest').forEach(el=>el.classList.remove('active-dest'));
-          document.querySelectorAll('.pf-chip').forEach(c=>c.classList.remove('sel'));
+          if (!activeDest) activeDest = { id: 'custom_point', label: 'Custom Point' };
+          activeDest.x = nx; activeDest.y = ny; activeDest.id = 'custom_point';
+          activeDest.label = `Custom Position (${Math.round(nx)},${Math.round(ny)})`;
+          document.querySelectorAll('.bx.active-dest,.pf-track.active-dest').forEach(el => el.classList.remove('active-dest'));
+          document.querySelectorAll('.pf-chip').forEach(c => c.classList.remove('sel'));
           drawRoute(); updateSidebarRoute(activeDest.label, activeDest.id);
         }
       }
-      function stop(){ dragging=false; document.removeEventListener('mousemove',drag); document.removeEventListener('touchmove',drag); document.removeEventListener('mouseup',stop); document.removeEventListener('touchend',stop); }
+      function stop() { dragging = false; document.removeEventListener('mousemove', drag); document.removeEventListener('touchmove', drag); document.removeEventListener('mouseup', stop); document.removeEventListener('touchend', stop); }
     }
 
     /* ════════════════════════════
        TOOLTIP
     ════════════════════════════ */
     function showTip(e, el) {
-      const n=el.dataset.n, d=el.dataset.d;
-      if(!n) return;
+      const n = el.dataset.n, d = el.dataset.d;
+      if (!n) return;
       const tt = document.getElementById('map-tt');
       let html = `<div class="map-tt-n">${n}</div>`;
-      if(d) d.split('·').forEach(s=>{ const t=s.trim(); if(t) html+=`<div class="map-tt-row">• ${t}</div>`; });
+      if (d) d.split('·').forEach(s => { const t = s.trim(); if (t) html += `<div class="map-tt-row">• ${t}</div>`; });
       tt.innerHTML = html;
       const canvas = document.getElementById('station-canvas');
       const r = canvas.getBoundingClientRect();
-      const ex = (e.clientX-r.left)*(920/r.width);
-      const ey = (e.clientY-r.top)*(780/r.height);
-      tt.style.left = Math.min(ex+12, 680)+'px';
-      tt.style.top  = Math.max(ey-80, 32)+'px';
+      const ex = (e.clientX - r.left) * (920 / r.width);
+      const ey = (e.clientY - r.top) * (780 / r.height);
+      tt.style.left = Math.min(ex + 12, 680) + 'px';
+      tt.style.top = Math.max(ey - 80, 32) + 'px';
       tt.classList.add('show');
-      setTimeout(()=>tt.classList.remove('show'), 3000);
+      setTimeout(() => tt.classList.remove('show'), 3000);
     }
-    document.addEventListener('click', ()=>{ const tt=document.getElementById('map-tt'); if(tt) tt.classList.remove('show'); });
+    document.addEventListener('click', () => { const tt = document.getElementById('map-tt'); if (tt) tt.classList.remove('show'); });
 
     /* ════════════════════════════
        ENTRY CHANGE
@@ -705,49 +1701,72 @@
       ENTRY_POINTS[activeEntry].y = orig.y;
       const ep = ENTRY_POINTS[activeEntry];
       const xm = document.getElementById('x-marker');
-      xm.style.left=(ep.x-11)+'px'; xm.style.top=(ep.y-11)+'px'; xm.style.display='grid';
-      if(activeDest) drawRoute();
+      xm.style.left = (ep.x - 11) + 'px'; xm.style.top = (ep.y - 11) + 'px'; xm.style.display = 'grid';
+      if (activeDest) drawRoute();
     }
 
     /* ════════════════════════════
        SET DESTINATION
     ════════════════════════════ */
     function setDest(id, x, y, label, el) {
-      document.querySelectorAll('.bx.active-dest,.pf-track.active-dest').forEach(e=>e.classList.remove('active-dest'));
-      if(el) el.classList.add('active-dest');
-      activeDest = {id, x, y, label, el};
+      document.querySelectorAll('.bx.active-dest,.pf-track.active-dest').forEach(e => e.classList.remove('active-dest'));
+      if (el) el.classList.add('active-dest');
+      activeDest = { id, x, y, label, el };
+      window.activeDest = activeDest; // expose for BLOCK 3 module-scope access
       const ym = document.getElementById('y-marker');
-      ym.style.left=(x-11)+'px'; ym.style.top=(y-11)+'px'; ym.style.display='grid';
+      ym.style.left = (x - 11) + 'px'; ym.style.top = (y - 11) + 'px'; ym.style.display = 'grid';
       const ep = ENTRY_POINTS[activeEntry];
       const xm = document.getElementById('x-marker');
-      xm.style.left=(ep.x-11)+'px'; xm.style.top=(ep.y-11)+'px'; xm.style.display='grid';
+      xm.style.left = (ep.x - 11) + 'px'; xm.style.top = (ep.y - 11) + 'px'; xm.style.display = 'grid';
       drawRoute(); updateSidebarRoute(label, id);
-      document.querySelectorAll('.pf-chip').forEach(c=>c.classList.remove('sel'));
+      document.querySelectorAll('.pf-chip').forEach(c => c.classList.remove('sel'));
       const dd = DESTINATIONS[id];
-      if(dd?.pfNum) document.getElementById('chip-pf-'+dd.pfNum)?.classList.add('sel');
+      if (dd?.pfNum) document.getElementById('chip-pf-' + dd.pfNum)?.classList.add('sel');
+
+      // ── Sync outdoor GPS nav controller ───────────────────────────────────
+      // Run in a setTimeout so drawRoute() has finished writing _lastIndoorPath
+      // before we read it. window._syncNavDestination is set by BLOCK 3 module.
+      setTimeout(() => {
+        if (typeof window._syncNavDestination === 'function') {
+          window._syncNavDestination();
+        }
+      }, 0);
     }
+    window.setDest = setDest; // expose so BLOCK 3 can still reference it if needed
+
 
     /* ════════════════════════════
        PATHFINDING  (FOB-aware)
     ════════════════════════════ */
+    function updateStartNavPopout(x, y) {
+      const popout = document.getElementById('nav-start-popout');
+      if (!popout) return;
+      popout.style.left = x + 'px';
+      popout.style.top  = y + 'px';
+      popout.classList.add('show');
+    }
+
     function drawRoute() {
       const ep = ENTRY_POINTS[activeEntry];
       const dp = activeDest;
-      if(!ep||!dp) return;
+      if (!ep || !dp) return;
+
+      updateStartNavPopout(dp.x, dp.y);
       const svg = document.getElementById('nav-svg');
       const path = buildPath(ep.x, ep.y, dp.x, dp.y, dp.id);
-      svg.innerHTML='';
-      const bg = document.createElementNS('http://www.w3.org/2000/svg','polyline');
-      bg.setAttribute('points', path.map(p=>`${p.x},${p.y}`).join(' '));
-      bg.setAttribute('class','nav-path-bg'); svg.appendChild(bg);
-      const line = document.createElementNS('http://www.w3.org/2000/svg','polyline');
-      line.setAttribute('points', path.map(p=>`${p.x},${p.y}`).join(' '));
-      line.setAttribute('class','nav-path'); svg.appendChild(line);
-      path.slice(1,-1).forEach(pt => {
-        if(pt.waypoint){
-          const ci = document.createElementNS('http://www.w3.org/2000/svg','circle');
-          ci.setAttribute('cx',pt.x); ci.setAttribute('cy',pt.y); ci.setAttribute('r',5);
-          ci.setAttribute('fill','#1a56db'); ci.setAttribute('stroke','#fff'); ci.setAttribute('stroke-width',2);
+      window._lastIndoorPath = path;  // expose for GPS simulation bridge
+      svg.innerHTML = '';
+      const bg = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+      bg.setAttribute('points', path.map(p => `${p.x},${p.y}`).join(' '));
+      bg.setAttribute('class', 'nav-path-bg'); svg.appendChild(bg);
+      const line = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+      line.setAttribute('points', path.map(p => `${p.x},${p.y}`).join(' '));
+      line.setAttribute('class', 'nav-path'); svg.appendChild(line);
+      path.slice(1, -1).forEach(pt => {
+        if (pt.waypoint) {
+          const ci = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          ci.setAttribute('cx', pt.x); ci.setAttribute('cy', pt.y); ci.setAttribute('r', 5);
+          ci.setAttribute('fill', '#1a56db'); ci.setAttribute('stroke', '#fff'); ci.setAttribute('stroke-width', 2);
           svg.appendChild(ci);
         }
       });
@@ -758,21 +1777,21 @@
     ════════════════════════════ */
 
     // Platform barrier: can't cross horizontally between these Y values without FOB
-    const PLATFORM_TOP    = 130;   // just above PF1 track
+    const PLATFORM_TOP = 130;   // just above PF1 track
     const PLATFORM_BOTTOM = 570;   // just below PF9 track
 
     function inPlatformZone(y) { return y > PLATFORM_TOP && y < PLATFORM_BOTTOM; }
-    function inNorthZone(y)    { return y <= PLATFORM_TOP; }
-    function inSouthZone(y)    { return y >= PLATFORM_BOTTOM; }
+    function inNorthZone(y) { return y <= PLATFORM_TOP; }
+    function inSouthZone(y) { return y >= PLATFORM_BOTTOM; }
 
     function buildPath(sx, sy, dx, dy, destId) {
-      const pts = [{x:sx, y:sy}];
+      const pts = [{ x: sx, y: sy }];
       const destData = DESTINATIONS[destId];
       const pfNum = destData?.pfNum;
 
       // ALWAYS use the FOB nearest to the ENTRY point (X)
       const nearFob = getNearestFob(sx);
-      const fobX    = nearFob.x + 20; // center of 40px FOB
+      const fobX = nearFob.x + 20; // center of 40px FOB
 
       if (pfNum) {
         // ── Destination is a platform ──
@@ -780,40 +1799,40 @@
 
         if (inNorthZone(sy)) {
           // North entry: walk to FOB, descend to platform level, walk along track
-          pts.push({x: fobX, y: sy});                    // walk to FOB column
-          pts.push({x: fobX, y: pfY, waypoint: true});   // descend through FOB
-          pts.push({x: dx,   y: pfY});                   // along platform
+          pts.push({ x: fobX, y: sy });                                              // walk to FOB column
+          pts.push({ x: fobX, y: pfY, waypoint: true, fobKey: nearFob.key });       // descend through FOB
+          pts.push({ x: dx, y: pfY });                                              // along platform
         } else if (inSouthZone(sy)) {
           // South entry: walk to FOB, ascend to platform level, walk along track
-          pts.push({x: fobX, y: sy});                    // walk to FOB column
-          pts.push({x: fobX, y: pfY, waypoint: true});   // ascend through FOB
-          pts.push({x: dx,   y: pfY});                   // along platform
+          pts.push({ x: fobX, y: sy });                                              // walk to FOB column
+          pts.push({ x: fobX, y: pfY, waypoint: true, fobKey: nearFob.key });       // ascend through FOB
+          pts.push({ x: dx, y: pfY });                                              // along platform
         } else {
           // Already in platform zone (dragging X marker onto track area)
-          pts.push({x: fobX, y: sy});                    // go to FOB first
-          pts.push({x: fobX, y: pfY, waypoint: true});   // move to correct platform
-          pts.push({x: dx,   y: pfY});
+          pts.push({ x: fobX, y: sy });                                              // go to FOB first
+          pts.push({ x: fobX, y: pfY, waypoint: true, fobKey: nearFob.key });       // move to correct platform
+          pts.push({ x: dx, y: pfY });
         }
 
       } else {
         // ── Destination is a facility (not a platform) ──
         const needsCross = (inNorthZone(sy) && !inNorthZone(dy)) ||
-                           (inSouthZone(sy) && !inSouthZone(dy)) ||
-                           (inPlatformZone(sy) && !inPlatformZone(dy));
+          (inSouthZone(sy) && !inSouthZone(dy)) ||
+          (inPlatformZone(sy) && !inPlatformZone(dy));
 
         if (needsCross) {
           // Must pass through FOB vertical corridor to cross platform zone
-          pts.push({x: fobX, y: sy});                     // walk to FOB column
-          pts.push({x: fobX, y: dy, waypoint: true});     // traverse FOB vertically
-          pts.push({x: dx,   y: dy});                     // walk to destination
+          pts.push({ x: fobX, y: sy });                                            // walk to FOB column
+          pts.push({ x: fobX, y: dy, waypoint: true, fobKey: nearFob.key });      // traverse FOB vertically
+          pts.push({ x: dx, y: dy });                                             // walk to destination
         } else {
           // Same zone — simple L-shaped path
-          pts.push({x: sx, y: dy});
-          pts.push({x: dx, y: dy});
+          pts.push({ x: sx, y: dy });
+          pts.push({ x: dx, y: dy });
         }
       }
 
-      pts.push({x: dx, y: dy});
+      pts.push({ x: dx, y: dy });
       return pts;
     }
 
@@ -832,9 +1851,9 @@
     function updateSidebarRoute(label, destId) {
       const ep = ENTRY_POINTS[activeEntry];
       const result = document.getElementById('route-result');
-      const empty  = document.getElementById('route-empty');
+      const empty = document.getElementById('route-empty');
       const header = document.getElementById('rr-header');
-      const steps  = document.getElementById('rr-steps');
+      const steps = document.getElementById('rr-steps');
       const dd = DESTINATIONS[destId];
       const pfNum = dd?.pfNum;
       const color = '#e85d26';
@@ -845,32 +1864,32 @@
         </div>
         <div>
           <div class="rr-title">${ep.label} → ${label}</div>
-          <div class="rr-sub" style="color:${color}">${pfNum?'Platform Destination':destId==='custom_point'?'Custom Destination':'Facility'}</div>
+          <div class="rr-sub" style="color:${color}">${pfNum ? 'Platform Destination' : destId === 'custom_point' ? 'Custom Destination' : 'Facility'}</div>
         </div>`;
 
       // FOB based on ENTRY point — consistent with route drawn on map
       const entryFob = getNearestFob(ep.x);
-      const nearFob  = entryFob;
+      const nearFob = entryFob;
       const stepsArr = buildSteps(ep, label, nearFob, pfNum);
-      steps.innerHTML = stepsArr.map((s,i)=>`
+      steps.innerHTML = stepsArr.map((s, i) => `
         <div class="rs">
-          <div class="rs-num">${i+1}</div>
+          <div class="rs-num">${i + 1}</div>
           <div class="rs-txt">${s}</div>
         </div>`).join('');
 
       // Icon strip for platform destinations
-      if(pfNum && PF_ICONS[pfNum]) {
+      if (pfNum && PF_ICONS[pfNum]) {
         const iconRow = document.createElement('div');
-        iconRow.style.cssText='display:flex;gap:6px;flex-wrap:wrap;padding:8px 12px;background:var(--bg);border-radius:var(--r);border:1px solid var(--border)';
-        PF_ICONS[pfNum].forEach(key=>{
-          const ic=makeIcon(key);
-          if(ic){
-            ic.style.width='20px'; ic.style.height='20px';
-            const wrap=document.createElement('div');
-            wrap.style.cssText='display:flex;flex-direction:column;align-items:center;gap:3px';
-            const lbl=document.createElement('span');
-            lbl.style.cssText='font-size:9px;color:var(--txt3);white-space:nowrap';
-            lbl.textContent=IC_LABELS[key]||key;
+        iconRow.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap;padding:8px 12px;background:var(--bg);border-radius:var(--r);border:1px solid var(--border)';
+        PF_ICONS[pfNum].forEach(key => {
+          const ic = makeIcon(key);
+          if (ic) {
+            ic.style.width = '20px'; ic.style.height = '20px';
+            const wrap = document.createElement('div');
+            wrap.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:3px';
+            const lbl = document.createElement('span');
+            lbl.style.cssText = 'font-size:9px;color:var(--txt3);white-space:nowrap';
+            lbl.textContent = IC_LABELS[key] || key;
             wrap.appendChild(ic); wrap.appendChild(lbl);
             iconRow.appendChild(wrap);
           }
@@ -879,7 +1898,7 @@
       }
 
       result.classList.add('show');
-      empty.style.display='none';
+      empty.style.display = 'none';
     }
 
     function buildSteps(ep, destLabel, nearFob, pfNum) {
@@ -902,18 +1921,18 @@
     ════════════════════════════ */
     function buildPfChips() {
       const grid = document.getElementById('pf-chips');
-      PF.forEach(p=>{
-        const el=document.createElement('div');
-        el.className='pf-chip'; el.id='chip-pf-'+p.num;
-        el.innerHTML=`<span>Pf ${p.num}</span>`;
-        el.onclick=()=>setDest('pf'+p.num, TRACK_LEFT+100, PF_Y[p.num], `Platform ${p.num}`, document.getElementById('pf-track-'+p.num));
+      PF.forEach(p => {
+        const el = document.createElement('div');
+        el.className = 'pf-chip'; el.id = 'chip-pf-' + p.num;
+        el.innerHTML = `<span>Pf ${p.num}</span>`;
+        el.onclick = () => setDest('pf' + p.num, TRACK_LEFT + 100, PF_Y[p.num], `Platform ${p.num}`, document.getElementById('pf-track-' + p.num));
         grid.appendChild(el);
       });
     }
 
     function toggleSidebar() {
       const layout = document.querySelector('.layout');
-      const icon   = document.getElementById('sidebar-toggle-icon');
+      const icon = document.getElementById('sidebar-toggle-icon');
       const isCollapsed = layout.classList.toggle('collapsed');
       icon.innerHTML = isCollapsed
         ? `<polyline points="9 18 15 12 9 6"></polyline>`
@@ -922,13 +1941,16 @@
     }
 
     function clearRoute() {
-      document.getElementById('nav-svg').innerHTML='';
-      document.getElementById('y-marker').style.display='none';
-      document.querySelectorAll('.bx.active-dest,.pf-track.active-dest').forEach(e=>e.classList.remove('active-dest'));
-      document.querySelectorAll('.pf-chip').forEach(c=>c.classList.remove('sel'));
+      document.getElementById('nav-svg').innerHTML = '';
+      document.getElementById('y-marker').style.display = 'none';
+      document.querySelectorAll('.bx.active-dest,.pf-track.active-dest').forEach(e => e.classList.remove('active-dest'));
+      document.querySelectorAll('.pf-chip').forEach(c => c.classList.remove('sel'));
       document.getElementById('route-result').classList.remove('show');
-      document.getElementById('route-empty').style.display='block';
-      activeDest=null;
+      document.getElementById('route-empty').style.display = 'block';
+      activeDest = null;
+      const sideBtn = document.getElementById('sidebar-start-nav-btn');
+      if (sideBtn) sideBtn.disabled = true;
+      document.getElementById('nav-start-popout')?.classList.remove('show');
     }
 
     /* Fullscreen Toggle Logic */
@@ -1031,83 +2053,48 @@
        sets the outdoor GPS destination in liveNavController.
        Update ENTITY_GPS_COORDS with surveyed GPS points for accuracy.
   ═══════════════════════════════════════════════════════════════════ -->
-  <script>
-  (function () {
+  <script type="module">
+    import { canvasToLatLng, FOB_GPS_OVERRIDES } from '/js/nav/stationGeo.js';
+    import { densifyLatLngPath } from '/js/nav/geoUtils.js';
+
+    // Expose canvasToLatLng on window for any callers that need it.
+    window.canvasToLatLng = canvasToLatLng;
+
     /**
-     * ENTITY_GPS_COORDS
-     * Keys must match the entity IDs used in DESTINATIONS (set by addBx /
-     * the platform onclick handlers), e.g. 'pf1' … 'pf9', 'gate1crowd',
-     * 'terminal', 'bldg_entrance', 'exit_gate', etc.
-     *
-     * Values are anchored to the real geocoded station centre from Google Maps
-     * Geocoding API: 17.459046, 78.604332 (Cherlapalli Railway Station).
-     * Platform spacing: ~13 m N-S (0.000117° lat). North/South zones use
-     * realistic metric offsets from the platform block centre.
+     * window._syncNavDestination() is called by setDest() (inline script)
+     * via setTimeout(0) after drawRoute() has written _lastIndoorPath.
+     * It syncs both the outdoor GPS destination and the FOB-aware simulation
+     * route into liveNavController — guaranteed to fire on every click,
+     * including custom points and drag-repositioned markers.
      */
-    const ENTITY_GPS_COORDS = {
-      // ── Platforms ──────────────────────────────────────────────────────────
-      // Geocoded centre of station: 17.459046, 78.604332
-      // Platforms spread N-S at 13 m (0.000117°) intervals, pf5 = station centre
-      pf1:           { lat: 17.459514, lng: 78.604332, label: 'Platform 1' },
-      pf2:           { lat: 17.459397, lng: 78.604332, label: 'Platform 2' },
-      pf3:           { lat: 17.459280, lng: 78.604332, label: 'Platform 3' },
-      pf4:           { lat: 17.459163, lng: 78.604332, label: 'Platform 4' },
-      pf5:           { lat: 17.459046, lng: 78.604332, label: 'Platform 5' },
-      pf6:           { lat: 17.458929, lng: 78.604332, label: 'Platform 6' },
-      pf7:           { lat: 17.458812, lng: 78.604332, label: 'Platform 7' },
-      pf8:           { lat: 17.458695, lng: 78.604332, label: 'Platform 8' },
-      pf9:           { lat: 17.458578, lng: 78.604332, label: 'Platform 9' },
+    window._syncNavDestination = function () {
+      if (!window._lnc) return;
 
-      // ── Terminal building (station main structure, north of platforms) ───
-      terminal:      { lat: 17.459746, lng: 78.604332, label: 'Terminal Building' },
+      // 1. Sync outdoor GPS destination from the current activeDest canvas pos.
+      const dest = window.activeDest;
+      if (dest && typeof window._lnc.setDestination === 'function') {
+        const gps = canvasToLatLng(dest.x, dest.y);
+        window._lnc.setDestination(gps.lat, gps.lng, dest.label);
+      }
 
-      // ── North zone — main gate / booking / parking (NW quadrant) ────────
-      gate1crowd:    { lat: 17.460046, lng: 78.603932, label: 'Gate 1 — Main Booking Counter' },
-      busbay:        { lat: 17.460146, lng: 78.603732, label: 'Bus Bay' },
-      divyang_w:     { lat: 17.460046, lng: 78.603832, label: 'Divyangjan Parking West' },
-      booking_w:     { lat: 17.460046, lng: 78.603932, label: 'Booking Counters' },
-      parking:       { lat: 17.460046, lng: 78.604532, label: 'Parking 2/4W + Cabs' },
-      parcel:        { lat: 17.460046, lng: 78.604732, label: 'Parcel Office' },
-      divyang_e:     { lat: 17.460046, lng: 78.604832, label: 'Divyangjan Parking East' },
-      terminal_e:    { lat: 17.459746, lng: 78.605032, label: 'Terminal Entrance East' },
-
-      // ── South zone — Gate 2 / exit / holding area ────────────────────────
-      bldg_entrance: { lat: 17.458378, lng: 78.603932, label: 'Gate 2 + Baggage Scanner' },
-      exit_gate:     { lat: 17.458378, lng: 78.604132, label: 'Exit Gate' },
-      southblock:    { lat: 17.458378, lng: 78.604332, label: 'South Block' },
-      circulating:   { lat: 17.458378, lng: 78.604732, label: 'Circulating / Holding Area' },
+      // 2. Build the FOB-aware densified simulation route from _lastIndoorPath.
+      const rawPath = window._lastIndoorPath;
+      if (Array.isArray(rawPath) && rawPath.length >= 2
+          && typeof window._lnc.setSimulationRoute === 'function') {
+        const latlngPath = rawPath.map(pt => {
+          if (pt.fobKey) {
+            const override = FOB_GPS_OVERRIDES[pt.fobKey];
+            if (override && (override.lat !== 0 || override.lng !== 0)) {
+              return override;
+            }
+          }
+          return canvasToLatLng(pt.x, pt.y);
+        });
+        const densified = densifyLatLngPath(latlngPath, 2);
+        window._lnc.setSimulationRoute(densified);
+      }
     };
-
-
-    /**
-     * Patch the page-level setDest() so every indoor canvas interaction
-     * also updates the live GPS controller destination.
-     */
-    function patchSetDest() {
-      const origSetDest = window.setDest;
-      if (typeof origSetDest !== 'function') return; // not ready yet
-
-      window.setDest = function (id, x, y, label, el) {
-        // Call the original indoor routing logic unchanged
-        origSetDest.call(this, id, x, y, label, el);
-
-        // Bridge to outdoor GPS if we have coords for this entity
-        const gps = ENTITY_GPS_COORDS[id];
-        if (gps && window._lnc && typeof window._lnc.setDestination === 'function') {
-          window._lnc.setDestination(gps.lat, gps.lng, gps.label || label);
-        }
-      };
-    }
-
-    // setDest is defined inside an inline <script> that runs before this
-    // block, so it should already be available. Guard with a tiny retry
-    // just in case the DOM parse order changes.
-    if (typeof window.setDest === 'function') {
-      patchSetDest();
-    } else {
-      document.addEventListener('DOMContentLoaded', patchSetDest);
-    }
-  })();
   </script>
 </body>
+
 </html>
