@@ -23,8 +23,6 @@ export default class GPSTracker {
    * @param {number}   [opts.smoothingAlpha=0.3]  - EMA alpha (0–1)
    * @param {number}   [opts.minDistanceM=1.5]    - ignore updates < this many metres
    * @param {number}   [opts.maxAccuracyM=50]     - ignore fixes worse than this
-   * @param {number}   [opts.simulationMode=false] - use simulated walk for testing
-   * @param {object}   [opts.simulationRoute]      - array of {lat,lng} for sim
    */
   constructor(opts = {}) {
     this._onUpdate       = opts.onUpdate || (() => {});
@@ -32,15 +30,11 @@ export default class GPSTracker {
     this._alpha          = opts.smoothingAlpha ?? 0.3;
     this._minDist        = opts.minDistanceM   ?? 1.5;
     this._maxAccuracy    = opts.maxAccuracyM   ?? 50;
-    this._simMode        = opts.simulationMode ?? false;
-    this._simRoute       = opts.simulationRoute ?? [];
 
     this._watchId        = null;
     this._smoothed       = null; // {lat, lng}
     this._lastEmitted    = null;
     this._prevBearing    = null;
-    this._simIdx         = 0;
-    this._simTimer       = null;
     this._started        = false;
   }
 
@@ -50,11 +44,6 @@ export default class GPSTracker {
   start() {
     if (this._started) return;
     this._started = true;
-
-    if (this._simMode) {
-      this._startSimulation();
-      return;
-    }
 
     if (!navigator.geolocation) {
       this._onError(new Error('Geolocation is not supported by this browser.'));
@@ -80,10 +69,6 @@ export default class GPSTracker {
     if (this._watchId !== null) {
       navigator.geolocation.clearWatch(this._watchId);
       this._watchId = null;
-    }
-    if (this._simTimer) {
-      clearInterval(this._simTimer);
-      this._simTimer = null;
     }
   }
 
@@ -147,28 +132,6 @@ export default class GPSTracker {
       3: 'Location request timed out.',
     };
     this._onError(new Error(msgs[err.code] || err.message));
-  }
-
-  /**
-   * @private
-   * Walk along a preset route for local testing.
-   */
-  _startSimulation() {
-    if (!this._simRoute.length) {
-      this._onError(new Error('Simulation mode: no route provided.'));
-      return;
-    }
-    this._simIdx = 0;
-    this._simTimer = setInterval(() => {
-      if (this._simIdx >= this._simRoute.length) {
-        clearInterval(this._simTimer);
-        return;
-      }
-      const p = this._simRoute[this._simIdx++];
-      this._handleRaw({
-        coords: { latitude: p.lat, longitude: p.lng, accuracy: 8 },
-      });
-    }, 1500);
   }
 
   /** Expose the latest smoothed position */

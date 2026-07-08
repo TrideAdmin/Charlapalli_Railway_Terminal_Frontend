@@ -1095,100 +1095,6 @@
   <script src="/js/layout.js"></script>
 
   <div class="layout">
-    <!-- SIDEBAR -->
-    <aside class="sidebar">
-      <div class="sidebar-inner">
-        <div class="sb-sec">
-          <div class="nav-card">
-            <div class="nc-title">🗺 Navigate Station</div>
-            <div class="nc-step">
-              <div class="nc-num">1</div>
-              <span>Choose your entry point below</span>
-            </div>
-            <div class="nc-step">
-              <div class="nc-num">2</div>
-              <span>Click any platform, facility or entity on the map</span>
-            </div>
-            <div class="nc-step">
-              <div class="nc-num">3</div>
-              <span>Follow the highlighted route · Use GPS for outdoor nav</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Entry Point Selector -->
-        <div class="sb-sec">
-          <div class="sb-head">Entry Point (You Are Here)</div>
-          <div class="entry-selector">
-            <label class="entry-label" for="entry-select">
-              <span class="entry-dot"></span> Starting Gate
-            </label>
-            <select id="entry-select" onchange="onEntryChange()">
-              <option value="gate1">Gate 1 — Main Booking Counter (North)</option>
-              <option value="bolguda">Bolguda — PF10 Entry / Exit (South)</option>
-            </select>
-            <div class="hint-text">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10" />
-                <line x1="12" y1="8" x2="12" y2="12" />
-                <line x1="12" y1="16" x2="12.01" y2="16" />
-              </svg>
-              Drag the green S marker to adjust your exact position
-            </div>
-          </div>
-        </div>
-
-        <div class="sb-sec">
-          <div class="sb-head">Route</div>
-          <div class="route-result" id="route-result">
-            <div class="rr-header" id="rr-header"></div>
-            <div class="rr-steps" id="rr-steps"></div>
-            <button class="btn-start-nav" id="sidebar-start-nav-btn" disabled
-                    onclick="window._lnc && window._lnc.startNavigation()">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                <polygon points="5 3 19 12 5 21 5 3"/>
-              </svg>
-              Start Navigation
-            </button>
-            <div style="display:flex;gap:6px;margin-top:8px">
-              <button class="btn-clear" onclick="clearRoute()" style="flex:1">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <line x1="18" y1="6" x2="6" y2="18" />
-                  <line x1="6" y1="6" x2="18" y2="18" />
-                </svg>
-                Clear
-              </button>
-              <button class="btn-clear" id="share-route-btn" onclick="shareRoute()"
-                style="flex:1;border-color:var(--blue);color:var(--blue)" title="Copy shareable link">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <circle cx="18" cy="5" r="3" />
-                  <circle cx="6" cy="12" r="3" />
-                  <circle cx="18" cy="19" r="3" />
-                  <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
-                  <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
-                </svg>
-                Share Link
-              </button>
-            </div>
-          </div>
-          <div id="route-empty" style="font-size:12px;color:var(--txt3);text-align:center;padding:12px 0">Click any
-            platform or facility to get directions</div>
-        </div>
-
-        <div class="sb-sec">
-          <div class="sb-head">Platforms</div>
-          <div class="pf-grid" id="pf-chips"></div>
-        </div>
-      </div>
-    </aside>
-
-    <button id="sidebar-toggle-handle" class="sidebar-toggle-handle" onclick="toggleSidebar()" title="Collapse Sidebar">
-      <svg id="sidebar-toggle-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-        stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-        <polyline points="15 18 9 12 15 6"></polyline>
-      </svg>
-    </button>
-
     <!-- MAP PANEL -->
     <main class="map-panel">
       <div class="map-head">
@@ -1691,24 +1597,16 @@
     }
     document.addEventListener('click', () => { const tt = document.getElementById('map-tt'); if (tt) tt.classList.remove('show'); });
 
-    /* ════════════════════════════
-       ENTRY CHANGE
-    ════════════════════════════ */
-    function onEntryChange() {
-      activeEntry = document.getElementById('entry-select').value;
-      const orig = ORIGINAL_ENTRY_POINTS[activeEntry];
-      ENTRY_POINTS[activeEntry].x = orig.x;
-      ENTRY_POINTS[activeEntry].y = orig.y;
-      const ep = ENTRY_POINTS[activeEntry];
-      const xm = document.getElementById('x-marker');
-      xm.style.left = (ep.x - 11) + 'px'; xm.style.top = (ep.y - 11) + 'px'; xm.style.display = 'grid';
-      if (activeDest) drawRoute();
-    }
+
 
     /* ════════════════════════════
        SET DESTINATION
     ════════════════════════════ */
     function setDest(id, x, y, label, el) {
+      // Auto-stop current navigation when a new destination is clicked.
+      if (window._lnc && window._lnc.isNavigating) {
+        window._lnc.stopNavigation();
+      }
       document.querySelectorAll('.bx.active-dest,.pf-track.active-dest').forEach(e => e.classList.remove('active-dest'));
       if (el) el.classList.add('active-dest');
       activeDest = { id, x, y, label, el };
@@ -1846,59 +1744,10 @@
     function getFobCenter(fob) { return fob.x + 20; }
 
     /* ════════════════════════════
-       SIDEBAR ROUTE UPDATE
+       SIDEBAR ROUTE UPDATE (no-op — sidebar removed)
     ════════════════════════════ */
     function updateSidebarRoute(label, destId) {
-      const ep = ENTRY_POINTS[activeEntry];
-      const result = document.getElementById('route-result');
-      const empty = document.getElementById('route-empty');
-      const header = document.getElementById('rr-header');
-      const steps = document.getElementById('rr-steps');
-      const dd = DESTINATIONS[destId];
-      const pfNum = dd?.pfNum;
-      const color = '#e85d26';
-
-      header.innerHTML = `
-        <div class="rr-icon" style="background:${color}18;border:1px solid ${color}30">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 8 16 12 12 16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-        </div>
-        <div>
-          <div class="rr-title">${ep.label} → ${label}</div>
-          <div class="rr-sub" style="color:${color}">${pfNum ? 'Platform Destination' : destId === 'custom_point' ? 'Custom Destination' : 'Facility'}</div>
-        </div>`;
-
-      // FOB based on ENTRY point — consistent with route drawn on map
-      const entryFob = getNearestFob(ep.x);
-      const nearFob = entryFob;
-      const stepsArr = buildSteps(ep, label, nearFob, pfNum);
-      steps.innerHTML = stepsArr.map((s, i) => `
-        <div class="rs">
-          <div class="rs-num">${i + 1}</div>
-          <div class="rs-txt">${s}</div>
-        </div>`).join('');
-
-      // Icon strip for platform destinations
-      if (pfNum && PF_ICONS[pfNum]) {
-        const iconRow = document.createElement('div');
-        iconRow.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap;padding:8px 12px;background:var(--bg);border-radius:var(--r);border:1px solid var(--border)';
-        PF_ICONS[pfNum].forEach(key => {
-          const ic = makeIcon(key);
-          if (ic) {
-            ic.style.width = '20px'; ic.style.height = '20px';
-            const wrap = document.createElement('div');
-            wrap.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:3px';
-            const lbl = document.createElement('span');
-            lbl.style.cssText = 'font-size:9px;color:var(--txt3);white-space:nowrap';
-            lbl.textContent = IC_LABELS[key] || key;
-            wrap.appendChild(ic); wrap.appendChild(lbl);
-            iconRow.appendChild(wrap);
-          }
-        });
-        steps.appendChild(iconRow);
-      }
-
-      result.classList.add('show');
-      empty.style.display = 'none';
+      // Sidebar removed — function kept as no-op so call sites in drawRoute/setDest don’t throw.
     }
 
     function buildSteps(ep, destLabel, nearFob, pfNum) {
@@ -1917,39 +1766,17 @@
     }
 
     /* ════════════════════════════
-       SIDEBAR CHIPS & TOGGLE
+       SIDEBAR CHIPS (no-op — sidebar removed)
     ════════════════════════════ */
     function buildPfChips() {
-      const grid = document.getElementById('pf-chips');
-      PF.forEach(p => {
-        const el = document.createElement('div');
-        el.className = 'pf-chip'; el.id = 'chip-pf-' + p.num;
-        el.innerHTML = `<span>Pf ${p.num}</span>`;
-        el.onclick = () => setDest('pf' + p.num, TRACK_LEFT + 100, PF_Y[p.num], `Platform ${p.num}`, document.getElementById('pf-track-' + p.num));
-        grid.appendChild(el);
-      });
-    }
-
-    function toggleSidebar() {
-      const layout = document.querySelector('.layout');
-      const icon = document.getElementById('sidebar-toggle-icon');
-      const isCollapsed = layout.classList.toggle('collapsed');
-      icon.innerHTML = isCollapsed
-        ? `<polyline points="9 18 15 12 9 6"></polyline>`
-        : `<polyline points="15 18 9 12 15 6"></polyline>`;
-      document.getElementById('sidebar-toggle-handle').title = isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar';
+      // Sidebar removed — no pf-chips grid to populate.
     }
 
     function clearRoute() {
       document.getElementById('nav-svg').innerHTML = '';
       document.getElementById('y-marker').style.display = 'none';
       document.querySelectorAll('.bx.active-dest,.pf-track.active-dest').forEach(e => e.classList.remove('active-dest'));
-      document.querySelectorAll('.pf-chip').forEach(c => c.classList.remove('sel'));
-      document.getElementById('route-result').classList.remove('show');
-      document.getElementById('route-empty').style.display = 'block';
       activeDest = null;
-      const sideBtn = document.getElementById('sidebar-start-nav-btn');
-      if (sideBtn) sideBtn.disabled = true;
       document.getElementById('nav-start-popout')?.classList.remove('show');
     }
 
@@ -2008,15 +1835,23 @@
       const destId = params.get('dest');
       const entryId = params.get('entry');
 
-      // Set entry point if provided
+      // Set entry point if provided via URL
       if (entryId && ENTRY_POINTS[entryId]) {
         activeEntry = entryId;
-        const sel = document.getElementById('entry-select');
-        if (sel) sel.value = entryId;
+        // Reset to original canvas position for the chosen entry
+        const orig = ORIGINAL_ENTRY_POINTS[activeEntry];
+        ENTRY_POINTS[activeEntry].x = orig.x;
+        ENTRY_POINTS[activeEntry].y = orig.y;
       }
 
-      // Apply entry change to place X marker
-      onEntryChange();
+      // Place X marker at the active entry
+      const ep = ENTRY_POINTS[activeEntry];
+      const xm = document.getElementById('x-marker');
+      if (xm) {
+        xm.style.left = (ep.x - 11) + 'px';
+        xm.style.top  = (ep.y - 11) + 'px';
+        xm.style.display = 'grid';
+      }
 
       // Set destination if provided and valid
       if (destId && DESTINATIONS[destId]) {
@@ -2054,8 +1889,7 @@
        Update ENTITY_GPS_COORDS with surveyed GPS points for accuracy.
   ═══════════════════════════════════════════════════════════════════ -->
   <script type="module">
-    import { canvasToLatLng, FOB_GPS_OVERRIDES } from '/js/nav/stationGeo.js';
-    import { densifyLatLngPath } from '/js/nav/geoUtils.js';
+    import { canvasToLatLng, resolveEntityLatLng } from '/js/nav/stationGeo.js';
 
     // Expose canvasToLatLng on window for any callers that need it.
     window.canvasToLatLng = canvasToLatLng;
@@ -2063,35 +1897,16 @@
     /**
      * window._syncNavDestination() is called by setDest() (inline script)
      * via setTimeout(0) after drawRoute() has written _lastIndoorPath.
-     * It syncs both the outdoor GPS destination and the FOB-aware simulation
-     * route into liveNavController — guaranteed to fire on every click,
-     * including custom points and drag-repositioned markers.
+     * It syncs the outdoor GPS destination into liveNavController.
      */
     window._syncNavDestination = function () {
       if (!window._lnc) return;
 
-      // 1. Sync outdoor GPS destination from the current activeDest canvas pos.
+      // Sync outdoor GPS destination from the current activeDest canvas pos.
       const dest = window.activeDest;
       if (dest && typeof window._lnc.setDestination === 'function') {
-        const gps = canvasToLatLng(dest.x, dest.y);
+        const gps = resolveEntityLatLng(dest.id, dest.x, dest.y);
         window._lnc.setDestination(gps.lat, gps.lng, dest.label);
-      }
-
-      // 2. Build the FOB-aware densified simulation route from _lastIndoorPath.
-      const rawPath = window._lastIndoorPath;
-      if (Array.isArray(rawPath) && rawPath.length >= 2
-          && typeof window._lnc.setSimulationRoute === 'function') {
-        const latlngPath = rawPath.map(pt => {
-          if (pt.fobKey) {
-            const override = FOB_GPS_OVERRIDES[pt.fobKey];
-            if (override && (override.lat !== 0 || override.lng !== 0)) {
-              return override;
-            }
-          }
-          return canvasToLatLng(pt.x, pt.y);
-        });
-        const densified = densifyLatLngPath(latlngPath, 2);
-        window._lnc.setSimulationRoute(densified);
       }
     };
   </script>

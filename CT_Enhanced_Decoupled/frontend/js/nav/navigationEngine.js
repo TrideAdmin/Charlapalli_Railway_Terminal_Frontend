@@ -62,6 +62,7 @@ export default class NavigationEngine {
     this._rerouting      = false;
     this._lastRerouteAt  = 0;
     this._announced      = new Set(); // step indices already announced
+    this._stopped        = false;  // true after stop() — guards stale in-flight fetches
 
     // Exposed so GPSTracker can call this
     this.onGPSUpdate = this.onGPSUpdate.bind(this);
@@ -75,6 +76,7 @@ export default class NavigationEngine {
    * @param {{ lat: number, lng: number, label: string }} destination
    */
   async startNavigation(currentPos, destination) {
+    this._stopped     = false; // reset in case this instance is being reused
     this._destination = destination;
     this._stepIndex   = 0;
     this._arrived     = false;
@@ -177,6 +179,7 @@ export default class NavigationEngine {
    * Stop navigation cleanly.
    */
   stop() {
+    this._stopped     = true;  // signal any in-flight fetch to discard its result
     this._route       = null;
     this._polyline    = [];
     this._destination = null;
@@ -187,6 +190,7 @@ export default class NavigationEngine {
   async _fetchAndApplyRoute(origin, destination) {
     try {
       const route = await fetchRoute(origin, destination);
+      if (this._stopped) return; // engine was stopped/replaced while fetch was in flight — discard stale result
       this._route     = route;
       this._polyline  = route.polyline;
       this._stepIndex = 0;
@@ -197,53 +201,10 @@ export default class NavigationEngine {
         this._cb.onStepChange(route.steps[0], 0, route.steps.length);
       }
     } catch (err) {
+      if (this._stopped) return; // don't surface errors from a discarded session
       this._cb.onError(err);
     }
   }
-
-  /**
-   * Start a simulated indoor navigation using a pre-computed lat/lng polyline.
-   * Skips the network call to fetchRoute() entirely.
-   *
-   * @param {Array<{lat,lng}>} polyline  — densified indoor path
-   * @param {{ lat, lng, label }} destination
-   */
-  async startSimulatedNavigation(polyline, destination) {
-    this._destination = destination;
-    this._stepIndex   = 0;
-    this._arrived     = false;
-    this._announced.clear();
-
-    // Compute total distance along the polyline
-    let totalDist = 0;
-    for (let i = 0; i < polyline.length - 1; i++) {
-      totalDist += haversineDistance(polyline[i], polyline[i + 1]);
-    }
-
-    const syntheticStep = {
-      instruction:   `Follow the path to ${destination.label}`,
-      distance:      totalDist,
-      duration:      totalDist / CFG.WALK_SPEED_MPS,
-      startLocation: polyline[0],
-      endLocation:   destination,
-      polyline,
-      maneuver:      'straight',
-    };
-
-    this._route = {
-      polyline,
-      steps:     [syntheticStep],
-      totalDist,
-      totalTime: totalDist / CFG.WALK_SPEED_MPS,
-      summary:   'Indoor route',
-      source:    'indoor',
-    };
-    this._polyline = polyline;
-
-    this._cb.onReroute(this._route);
-    this._cb.onStepChange(syntheticStep, 0, 1);
-  }
-
 
   // ── Getters ──────────────────────────────────────────────────────────────
   get currentStep()    { return this._route?.steps[this._stepIndex]; }

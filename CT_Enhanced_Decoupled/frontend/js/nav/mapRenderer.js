@@ -109,15 +109,15 @@ export default class MapRenderer {
     this._routePoly?.setMap(null);
     this._walkedPoly?.setMap(null);
 
-    // Full route (orange dashed)
+    // Full route (blue dashed)
     this._routePoly = new google.maps.Polyline({
       path:          polyline,
       geodesic:      true,
-      strokeColor:   '#E85D26',
+      strokeColor:   '#1a73e8',
       strokeOpacity: 0,
       strokeWeight:  6,
       icons: [{
-        icon:   { path: 'M 0,-1 0,1', strokeOpacity: 1, scale: 4, strokeColor: '#E85D26' },
+        icon:   { path: 'M 0,-1 0,1', strokeOpacity: 1, scale: 4, strokeColor: '#1a73e8' },
         offset: '0',
         repeat: '20px',
       }],
@@ -276,9 +276,9 @@ export default class MapRenderer {
   </defs>
   <g transform="rotate(${r},20,20)" filter="url(#s)">
     <!-- Accuracy circle glow -->
-    <circle cx="20" cy="20" r="18" fill="rgba(255,193,7,0.15)" stroke="rgba(255,193,7,0.3)" stroke-width="1"/>
+    <circle cx="20" cy="20" r="18" fill="rgba(26,115,232,0.15)" stroke="rgba(26,115,232,0.3)" stroke-width="1"/>
     <!-- Body circle -->
-    <circle cx="20" cy="20" r="10" fill="#FFC107" stroke="#fff" stroke-width="2.5"/>
+    <circle cx="20" cy="20" r="10" fill="#1a73e8" stroke="#fff" stroke-width="2.5"/>
     <!-- Direction arrow -->
     <polygon points="20,4 15,18 20,15 25,18" fill="#fff" opacity="0.95"/>
   </g>
@@ -294,9 +294,9 @@ export default class MapRenderer {
     <filter id="s2"><feDropShadow dx="0" dy="3" stdDeviation="3" flood-opacity="0.4"/></filter>
   </defs>
   <g filter="url(#s2)">
-    <path d="M18 2C10.3 2 4 8.3 4 16c0 9.6 14 30 14 30S32 25.6 32 16C32 8.3 25.7 2 18 2z" fill="#E85D26"/>
+    <path d="M18 2C10.3 2 4 8.3 4 16c0 9.6 14 30 14 30S32 25.6 32 16C32 8.3 25.7 2 18 2z" fill="#1a73e8"/>
     <circle cx="18" cy="16" r="7" fill="#fff"/>
-    <circle cx="18" cy="16" r="4" fill="#E85D26"/>
+    <circle cx="18" cy="16" r="4" fill="#1a73e8"/>
   </g>
 </svg>`.trim();
     return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg);

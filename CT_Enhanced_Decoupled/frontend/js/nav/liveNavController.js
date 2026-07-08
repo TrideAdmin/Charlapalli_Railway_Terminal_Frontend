@@ -45,8 +45,8 @@ class LiveNavController {
     this._mode = 'indoor'; // 'indoor' | 'outdoor'
     this._dest = null;     // {lat, lng, label}
     this._active = false;
-    this._simRoute = null;       // densified {lat,lng}[] from indoor path, or null
     this._arrivalTimer = null;   // auto-stop timer set by _onArrival()
+    this._initialRouteDone = false; // suppresses spurious 'Route updated' on first load
 
     // DOM refs (created by _buildUI)
     this._panel = null;
@@ -74,8 +74,6 @@ class LiveNavController {
    */
   setDestination(lat, lng, label = 'Destination') {
     this._dest = { lat, lng, label };
-    // NOTE: do NOT reset _simRoute here — setSimulationRoute() is called
-    // immediately after by the BLOCK 3 bridge, and we must not wipe it.
     if (this._destLabelEl) this._destLabelEl.textContent = label;
     if (this._startBtn) {
       this._startBtn.disabled = false;
@@ -87,48 +85,64 @@ class LiveNavController {
   }
 
   /**
-   * Supply a densified indoor lat/lng polyline so that startNavigation()
-   * runs a simulated walk instead of waiting for real device GPS.
-   * Called from BLOCK 3 in navigate.html after the user picks S → D.
-   * @param {Array<{lat,lng}>} latlngArray
-   */
-  setSimulationRoute(latlngArray) {
-    this._simRoute = Array.isArray(latlngArray) && latlngArray.length > 1
-      ? latlngArray
-      : null;
-    if (this._simRoute && this._startBtn) {
-      this._startBtn.title = 'Preview walking route (indoor simulation)';
-    }
-  }
-
-  /**
    * Begin live GPS navigation.
    */
-  startNavigation() {
-    if (this._active) return;
+  async startNavigation() {
     if (!this._dest) { alert('Please select a destination first.'); return; }
 
-    const usingSimulation = Array.isArray(this._simRoute) && this._simRoute.length > 1;
+    // ── If already navigating, tear down cleanly then restart ────────────
+    if (this._active) {
+      clearTimeout(this._arrivalTimer);
+      this._tracker?.stop();
+      this._engine?.stop();
+      this._renderer?.clear();
+      this._active = false;
+    }
 
     this._active = true;
+    this._initialRouteDone = false; // reset so first _onReroute is silent
 
     // ── Switch to outdoor map IMMEDIATELY so Google Maps measures the
-    //    correct (full-panel) container size when _initMap() is called
-    //    later in the GPS/simulation onUpdate callback. ──────────────
+    //    correct (full-panel) container size when _initMap() is called. ──
     this._showOutdoorMap();
 
-    this._startBtn.style.display = 'none';
+    // ── Start button stays visible so the user can restart; show Stop too
     this._stopBtn.style.display = 'flex';
     const sideBtn = document.getElementById('sidebar-start-nav-btn');
     if (sideBtn) { sideBtn.disabled = true; sideBtn.textContent = 'Navigating…'; }
-    this._announcer.announce(
-      usingSimulation
-        ? 'Previewing indoor walking route…'
-        : 'Navigation started. Acquiring GPS signal…',
-      'info'
-    );
+    this._announcer.announce('Navigation started. Acquiring GPS signal…', 'info');
 
-    // Initialise engine
+    // ── Resolve origin ────────────────────────────────────────────────────
+    // DEV: ?mockOrigin=lat,lng  →  use that coordinate without a real GPS call.
+    // PROD: try getCurrentPosition() with a 6-second timeout; fall back to the
+    //       station anchor so the UI isn't blocked when GPS is slow/denied.
+    const _mockParam = new URLSearchParams(location.search).get('mockOrigin');
+    let origin = STATION;
+
+    if (_mockParam) {
+      const [mlat, mlng] = _mockParam.split(',').map(Number);
+      if (!isNaN(mlat) && !isNaN(mlng)) {
+        origin = { lat: mlat, lng: mlng };
+        console.info(`[LNC] 🟡 DEV mockOrigin active → ${mlat}, ${mlng}`);
+        this._announcer.announce(`DEV: origin overridden to ${mlat.toFixed(5)}, ${mlng.toFixed(5)}`, 'warn');
+      }
+    } else if (navigator.geolocation) {
+      try {
+        const pos = await new Promise((resolve, reject) =>
+          navigator.geolocation.getCurrentPosition(resolve, reject, {
+            timeout:     6000,
+            maximumAge:  5000,
+            enableHighAccuracy: true,
+          })
+        );
+        origin = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        console.info(`[LNC] GPS origin acquired: ${origin.lat.toFixed(6)}, ${origin.lng.toFixed(6)}`);
+      } catch (e) {
+        console.warn('[LNC] getCurrentPosition failed — using STATION fallback.', e.message);
+      }
+    }
+
+    // ── Initialise engine ─────────────────────────────────────────────────
     this._engine = new NavigationEngine({
       onStepChange: (step, idx, total) => this._onStepChange(step, idx, total),
       onReroute: (route) => this._onReroute(route),
@@ -138,37 +152,26 @@ class LiveNavController {
       onError: (err) => this._announcer.announce(err.message, 'warn'),
     });
 
-    // Keep a local snapshot of _simRoute so the async closure captures it
-    const simRoute = usingSimulation ? this._simRoute.slice() : [];
+    // ── Show map centred on resolved origin then fetch first route ────────
+    this._initMap(origin);
+    await this._engine.startNavigation(origin, this._dest);
 
-    // Initialise GPS tracker
+    // ── Initialise GPS tracker ────────────────────────────────────────────
+    // The initial route is already drawn above; tracker only drives live
+    // position updates and off-route reroutes from here on.
     this._tracker = new GPSTracker({
       onUpdate: async gps => {
-        // First fix → init engine + map
-        if (!this._renderer && window.google?.maps) {
-          this._initMap({ lat: gps.lat, lng: gps.lng });
-          if (usingSimulation) {
-            await this._engine.startSimulatedNavigation(simRoute, this._dest);
-          } else {
-            await this._engine.startNavigation(
-              { lat: gps.lat, lng: gps.lng },
-              this._dest,
-            );
-          }
-        } else if (this._renderer) {
-          this._renderer.updateUserPosition({ lat: gps.lat, lng: gps.lng }, gps.bearing);
-          this._engine.onGPSUpdate(gps);
-        }
+        this._renderer.updateUserPosition({ lat: gps.lat, lng: gps.lng }, gps.bearing);
+        this._engine.onGPSUpdate(gps);
       },
       onError: err => {
         this._announcer.announce(err.message, 'warn');
         this._setStep('⚠ ' + err.message);
       },
       smoothingAlpha: 0.3,
-      minDistanceM: usingSimulation ? 0.5 : 2,
+      minDistanceM: 2,
       maxAccuracyM: 60,
-      simulationMode: usingSimulation,
-      simulationRoute: simRoute,
+      simulationMode: false,
     });
 
     this._tracker.start();
@@ -180,7 +183,6 @@ class LiveNavController {
   stopNavigation() {
     clearTimeout(this._arrivalTimer); // prevent stale timer firing after manual stop
     this._active = false;
-    this._simRoute = null; // clear indoor simulation
     this._tracker?.stop();
     this._engine?.stop();
     this._renderer?.clear();
@@ -206,7 +208,15 @@ class LiveNavController {
     if (!step) return;
     const icon = this._maneuverIcon(step.maneuver);
     this._setStep(`${icon} ${step.instruction}`);
-    this._announcer.announce(step.instruction, 'info');
+
+    // Delay the very first step's voice announcement so it doesn't visually
+    // collide with the "Navigation started" toast (both would fire simultaneously
+    // on the initial route load, producing a blank-blurred overlap effect).
+    if (idx === 0 && !this._initialRouteDone) {
+      setTimeout(() => this._announcer.announce(step.instruction, 'info'), 600);
+    } else {
+      this._announcer.announce(step.instruction, 'info');
+    }
 
     // Step progress bar
     if (this._stepBar) {
@@ -218,7 +228,14 @@ class LiveNavController {
   }
 
   _onReroute(route) {
-    this._announcer.announce('Route updated.', 'info');
+    // Suppress 'Route updated.' on the very first route load — it would fire
+    // simultaneously with 'Navigation started' and the first step toast,
+    // creating three overlapping toasts and a blank-blurred visual artifact.
+    if (this._initialRouteDone) {
+      this._announcer.announce('Route updated.', 'info');
+    }
+    this._initialRouteDone = true;
+
     if (this._renderer) {
       this._renderer.drawRoute(route.polyline, 0);
       this._renderer.setDestinationMarker(this._dest, this._dest.label);
@@ -479,6 +496,11 @@ class LiveNavController {
     };
     return map[maneuver] || '↑';
   }
+
+  // ── Public getters ────────────────────────────────────────────────────────
+
+  /** True while a navigation session is active (between Start and Stop). */
+  get isNavigating() { return this._active; }
 
   // ── Styles ────────────────────────────────────────────────────────────────
 

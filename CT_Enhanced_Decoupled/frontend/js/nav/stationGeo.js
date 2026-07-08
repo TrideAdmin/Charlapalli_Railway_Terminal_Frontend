@@ -40,8 +40,8 @@ export const STATION_BEARING_DEG = 78.3; // TODO: verify
 //   3. Right-click its mid-point → the popup shows the coordinates.
 //   4. Paste lat/lng here, replacing the 0 placeholders.
 export const FOB_GPS_OVERRIDES = {
-  'FOB-Terminal': { lat: 0, lng: 0 }, // TODO: verify — bridge near Gate 1 / west end
-  'KZJ-2':        { lat: 0, lng: 0 }, // TODO: verify — bridge near KZJ end (east)
+  'FOB-Terminal': { lat: 17.458614, lng: 78.606785 },
+  'KZJ-2':        { lat: 17.457687, lng: 78.604884 },
 };
 
 /**
@@ -103,6 +103,53 @@ export function canvasToLatLng(x, y) {
     lat: STATION_ANCHOR.lat + dLat,
     lng: STATION_ANCHOR.lng + dLng
   };
+}
+
+/**
+ * Surveyed real-world GPS coordinates for named canvas entities.
+ * Entities NOT listed here fall back to the computed canvasToLatLng() projection.
+ */
+export const ENTITY_GPS_OVERRIDES = {
+  'busbay':        { lat: 17.455678, lng: 78.605289 }, // Bus Bay
+  'divyang_w':     { lat: 17.457538, lng: 78.608394 }, // Divyangjan Parking W (surveyed)
+  'booking_w':     { lat: 17.457083, lng: 78.607636 }, // Booking Counters
+  'gate1crowd':    { lat: 17.457083, lng: 78.607636 }, // Gate 1 Booking Counter
+  'parking':       { lat: 17.457826, lng: 78.609082 }, // Parking 2/4W + Cabs
+  'parcel':        { lat: 17.456253, lng: 78.605045 }, // Parcel Office
+  'terminal_e':    { lat: 17.456767, lng: 78.607521 }, // Terminal Entrance
+  'pf1':           { lat: 17.456611, lng: 78.605567 },
+  'pf2':           { lat: 17.456795, lng: 78.605712 },
+  'pf3':           { lat: 17.457521, lng: 78.607033 },
+  'pf4':           { lat: 17.457258, lng: 78.606245 },
+  'pf5':           { lat: 17.457420, lng: 78.606384 },
+  'pf6':           { lat: 17.457386, lng: 78.605680 },
+  'pf7':           { lat: 17.457887, lng: 78.606407 },
+  'pf8':           { lat: 17.457575, lng: 78.605270 },
+  'pf9':           { lat: 17.457756, lng: 78.605102 },
+  'terminal':      { lat: 17.458350, lng: 78.606263 }, // Terminal Building
+  'bldg_entrance': { lat: 17.458716, lng: 78.607096 }, // Gate 2 + Baggage Scanner
+  'exit_gate':     { lat: 17.458726, lng: 78.607124 },
+  'southblock':    { lat: 17.457598, lng: 78.604606 }, // South Block
+  'circulating':   { lat: 17.457349, lng: 78.604133 }, // Circulating / Holding Area
+};
+
+/**
+ * Resolve the real-world lat/lng for a canvas entity.
+ * Prefers a surveyed ENTITY_GPS_OVERRIDES entry; falls back to the
+ * computed canvasToLatLng() projection for anything not listed
+ * (e.g. amenity_*, custom_point, divyang_e).
+ *
+ * @param {string} id  – entity id as used in DESTINATIONS
+ * @param {number} x   – canvas x coordinate
+ * @param {number} y   – canvas y coordinate
+ * @returns {{ lat: number, lng: number }}
+ */
+export function resolveEntityLatLng(id, x, y) {
+  const override = ENTITY_GPS_OVERRIDES[id];
+  if (override && (override.lat !== 0 || override.lng !== 0)) {
+    return override;
+  }
+  return canvasToLatLng(x, y);
 }
 
 /**
