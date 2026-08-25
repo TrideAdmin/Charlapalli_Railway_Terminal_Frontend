@@ -62,8 +62,9 @@ class LiveNavController {
     this._injectStyles();
     this._buildUI();
 
-    const savedMode = localStorage.getItem('ct-map-view') || 'indoor';
-    this.setMapViewMode(savedMode);
+    // Always start on the indoor station map — don't carry the outdoor/Google
+    // Maps toggle across reloads, since a fresh load has no active navigation.
+    this.setMapViewMode('indoor');
   }
 
   // ── PUBLIC API ────────────────────────────────────────────────────────────
@@ -372,7 +373,6 @@ class LiveNavController {
    */
   _showOutdoorMap() {
     document.documentElement.setAttribute('data-map-view', 'outdoor');
-    localStorage.setItem('ct-map-view', 'outdoor');
     const btn = document.getElementById('map-view-toggle-btn');
     if (btn) btn.title = 'Switch to Station Map';
     const mapCanvas = document.querySelector('.map-canvas');
@@ -393,7 +393,6 @@ class LiveNavController {
    */
   _showIndoorMap() {
     document.documentElement.setAttribute('data-map-view', 'indoor');
-    localStorage.setItem('ct-map-view', 'indoor');
     const btn = document.getElementById('map-view-toggle-btn');
     if (btn) btn.title = 'Switch to Live Location Map';
     const mapCanvas = document.querySelector('.map-canvas');

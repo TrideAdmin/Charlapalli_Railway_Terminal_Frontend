@@ -62,6 +62,7 @@ export default class MapRenderer {
       streetViewControl: false,
       fullscreenControl: false,
       zoomControl:       false,
+      rotateControl:     false,
       gestureHandling:  'greedy',
       clickableIcons:   false,
       styles: this._getMapStyles(),

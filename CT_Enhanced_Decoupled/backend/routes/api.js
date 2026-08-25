@@ -399,7 +399,7 @@ router.get('/trains/live/:number', async (req, res) => {
 
 const SARVAM_API_KEY = process.env.SARVAM_API_KEY;
 const SARVAM_ENDPOINT = 'https://api.sarvam.ai/v1/chat/completions';
-const MODEL = 'sarvam-30b';
+const MODEL = 'sarvam-105b-conversations';
 
 router.post('/chat', async (req, res) => {
   try {

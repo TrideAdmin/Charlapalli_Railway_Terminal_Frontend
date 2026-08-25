@@ -938,7 +938,8 @@
       `;
       try {
         const json = await api.trains({ type: currentType, q, station: 'CHZ' });
-        renderTrains(json.data, json.updatedAt, json.source, json.station);
+        const trainsList = Array.isArray(json) ? json : (json.data || []);
+        renderTrains(trainsList, json.updatedAt, json.source, json.station);
       } catch { renderError('trainResults', 'Could not load live train data. Check connection.'); }
     };
 

@@ -833,22 +833,10 @@
       margin-top: -14px; /* gap above the marker */
       display: none;
       align-items: center;
-      gap: 6px;
-      padding: 8px 14px;
-      background: var(--orange, #e85d26);
-      color: #fff;
-      border: none;
-      border-radius: 999px;
-      font-family: var(--font);
-      font-size: 12.5px;
-      font-weight: 700;
-      white-space: nowrap;
-      cursor: pointer;
-      box-shadow: 0 6px 18px rgba(232,93,38,0.4);
+      gap: 8px;
       z-index: 65; /* above markers (z-index 60) */
-      transition: transform .15s ease, box-shadow .15s ease;
     }
-    .nav-popout:hover { box-shadow: 0 8px 24px rgba(232,93,38,0.55); }
+    .nav-popout.show { display: flex; }
     .nav-popout::after {
       content: '';
       position: absolute;
@@ -859,7 +847,52 @@
       border-style: solid;
       border-color: var(--orange, #e85d26) transparent transparent transparent;
     }
-    .nav-popout.show { display: flex; }
+
+    .nav-popout-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      color: #fff;
+      border: none;
+      border-radius: 999px;
+      font-family: var(--font);
+      font-size: 12.5px;
+      font-weight: 700;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: transform .15s ease, box-shadow .15s ease;
+    }
+    .nav-popout-btn:hover { transform: translateY(-1px); }
+
+    .nav-popout-btn--start {
+      background: var(--orange, #e85d26);
+      box-shadow: 0 6px 18px rgba(232,93,38,0.4);
+    }
+    .nav-popout-btn--start:hover { box-shadow: 0 8px 24px rgba(232,93,38,0.55); }
+
+    .nav-popout-btn--sim {
+      background: #2563eb;
+      box-shadow: 0 6px 18px rgba(37,99,235,0.4);
+    }
+    .nav-popout-btn--sim:hover { box-shadow: 0 8px 24px rgba(37,99,235,0.55); }
+    .nav-popout-btn--sim.simulating {
+      background: #475569;
+      box-shadow: 0 6px 18px rgba(71,85,105,0.4);
+    }
+
+    .sim-walker {
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      background: #2563eb;
+      border: 3px solid #fff;
+      border-radius: 50%;
+      box-shadow: 0 0 0 4px rgba(37,99,235,.3), var(--shadow);
+      z-index: 62; /* above the route line, below markers/popout */
+      display: none;
+      pointer-events: none;
+    }
 
     .pulse-ring {
       position: absolute;
@@ -1024,6 +1057,12 @@
 
     [data-map-view="outdoor"] .map-view-toggle-btn .icon-livemap {
       display: block
+    }
+
+    /* Hide the ARIA chat launcher while the live Google Maps view is open —
+       it overlaps the map's zoom/rotate controls in that corner. */
+    [data-map-view="outdoor"] #ct-chatbot-root {
+      display: none;
     }
   </style>
 
@@ -1499,6 +1538,92 @@
     }
 
     /* ════════════════════════════
+       ROUTE SIMULATION
+       Animates a walker dot along the FOB-aware indoor path (window._lastIndoorPath)
+       so users can preview the route without starting real GPS navigation.
+    ════════════════════════════ */
+    const SIM_TICK_MS = 2000;   // one fragment step every 2s
+    const SIM_MIN_FRAGMENTS = 15; // subdivide the path into at least this many evenly-spaced points
+
+    /**
+     * Resample a polyline into `minPoints` (or more) evenly-spaced points along
+     * its total length, so short raw paths (e.g. 4-5 waypoints) still animate
+     * in fine-grained steps instead of jumping straight between waypoints.
+     */
+    function subdividePath(path, minPoints) {
+      const segLens = [];
+      let total = 0;
+      for (let i = 1; i < path.length; i++) {
+        const d = Math.hypot(path[i].x - path[i - 1].x, path[i].y - path[i - 1].y);
+        segLens.push(d);
+        total += d;
+      }
+      if (total === 0) return path.slice();
+
+      const steps = Math.max(minPoints - 1, path.length - 1);
+      const points = [];
+      for (let s = 0; s <= steps; s++) {
+        const distAlong = (s / steps) * total;
+        let acc = 0, segIdx = 0;
+        while (segIdx < segLens.length - 1 && acc + segLens[segIdx] < distAlong) {
+          acc += segLens[segIdx];
+          segIdx++;
+        }
+        const segLen = segLens[segIdx];
+        const segT = segLen > 0 ? (distAlong - acc) / segLen : 0;
+        const p0 = path[segIdx], p1 = path[segIdx + 1];
+        points.push({ x: p0.x + (p1.x - p0.x) * segT, y: p0.y + (p1.y - p0.y) * segT });
+      }
+      return points;
+    }
+    const SIM_BTN_IDLE_HTML = `
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="9"/>
+        <polygon points="10 8 16 12 10 16" fill="currentColor" stroke="none"/>
+      </svg>
+      Simulate
+    `;
+    const SIM_BTN_ACTIVE_HTML = `
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12"/></svg>
+      Stop
+    `;
+    let simTimer = null;
+
+    function stopSimulation() {
+      if (simTimer) { clearInterval(simTimer); simTimer = null; }
+      const walker = document.getElementById('sim-walker');
+      if (walker) walker.style.display = 'none';
+      const btn = document.getElementById('nav-simulate-btn');
+      if (btn) { btn.classList.remove('simulating'); btn.innerHTML = SIM_BTN_IDLE_HTML; }
+    }
+
+    function simulateRoute() {
+      const path = window._lastIndoorPath;
+      const walker = document.getElementById('sim-walker');
+      const btn = document.getElementById('nav-simulate-btn');
+      if (!path || path.length < 2 || !walker || !btn) return;
+
+      const points = subdividePath(path, SIM_MIN_FRAGMENTS);
+      if (points.length < 2) return;
+
+      btn.classList.add('simulating');
+      btn.innerHTML = SIM_BTN_ACTIVE_HTML;
+      const place = (x, y) => { walker.style.left = (x - 8) + 'px'; walker.style.top = (y - 8) + 'px'; };
+      walker.style.display = 'block';
+
+      // Step through the subdivided fragments one at a time, one per tick,
+      // wrapping back to the start so the preview loops continuously.
+      let idx = 0;
+      place(points[idx].x, points[idx].y);
+
+      function tick() {
+        idx = (idx + 1) % points.length;
+        place(points[idx].x, points[idx].y);
+      }
+      simTimer = setInterval(tick, SIM_TICK_MS);
+    }
+
+    /* ════════════════════════════
        MARKERS
     ════════════════════════════ */
     function buildMarkers(c) {
@@ -1514,20 +1639,41 @@
       ym.style.display = 'none';
       c.appendChild(ym);
 
-      const popout = document.createElement('button');
+      const popout = document.createElement('div');
       popout.id = 'nav-start-popout';
       popout.className = 'nav-popout';
-      popout.innerHTML = `
+
+      const startBtn = document.createElement('button');
+      startBtn.className = 'nav-popout-btn nav-popout-btn--start';
+      startBtn.innerHTML = `
         <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
           <polygon points="5 3 19 12 5 21 5 3"/>
         </svg>
         Start Nav
       `;
-      popout.onclick = (e) => {
+      startBtn.onclick = (e) => {
         e.stopPropagation();
+        stopSimulation();
         window._lnc && window._lnc.startNavigation();
       };
+
+      const simBtn = document.createElement('button');
+      simBtn.id = 'nav-simulate-btn';
+      simBtn.className = 'nav-popout-btn nav-popout-btn--sim';
+      simBtn.innerHTML = SIM_BTN_IDLE_HTML;
+      simBtn.onclick = (e) => {
+        e.stopPropagation();
+        simTimer ? stopSimulation() : simulateRoute();
+      };
+
+      popout.appendChild(startBtn);
+      popout.appendChild(simBtn);
       c.appendChild(popout);
+
+      const walker = document.createElement('div');
+      walker.id = 'sim-walker';
+      walker.className = 'sim-walker';
+      c.appendChild(walker);
 
       makeDraggable(xm, true, c);
       makeDraggable(ym, false, c);
@@ -1649,6 +1795,7 @@
       const dp = activeDest;
       if (!ep || !dp) return;
 
+      stopSimulation(); // route is changing — any running preview is now stale
       updateStartNavPopout(dp.x, dp.y);
       const svg = document.getElementById('nav-svg');
       const path = buildPath(ep.x, ep.y, dp.x, dp.y, dp.id);
@@ -1773,6 +1920,7 @@
     }
 
     function clearRoute() {
+      stopSimulation();
       document.getElementById('nav-svg').innerHTML = '';
       document.getElementById('y-marker').style.display = 'none';
       document.querySelectorAll('.bx.active-dest,.pf-track.active-dest').forEach(e => e.classList.remove('active-dest'));
